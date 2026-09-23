@@ -1,0 +1,171 @@
+# demo_role: support
+import mediacloud;
+
+func section(title: str) {
+  print("\n=== " + title + " ===");
+}
+
+func skip(reason: str) {
+  print("SKIPPED: " + reason);
+}
+
+func skip_blocked_environment(label: str, e) -> bool {
+  let message = str(e.message ?? e).lower();
+  let blocked = message.contains("operation not permitted")
+    || message.contains("socket blocked")
+    || message.contains("environment permissions")
+    || message.contains("network is unreachable");
+  if (!blocked) {
+    return false;
+  }
+  print("\n[" + label + "]");
+  skip("network-dependent operation skipped in this environment: " + str(e.message ?? e));
+  return true;
+}
+
+func show_pretty(label: str, value) {
+  print(label + ":");
+  print(value);
+}
+
+func show_exception(label: str, e) {
+  print("\n[" + label + "]");
+  print("exception_type=" + str(e.type ?? "RuntimeException"));
+  print("message=" + str(e.message ?? e));
+  if (e.line != null) {
+    print("line=" + str(e.line) + " column=" + str(e.column ?? ""));
+  }
+  if (e.source_line != null && str(e.source_line).trim() != "") {
+    print("source=" + str(e.source_line));
+  }
+}
+
+func show_provider_status(provider: str, config) {
+  print("\n[" + provider + " status]");
+  if (config == null) {
+    print("provided=false");
+    return {
+      provider: provider,
+      provided: false,
+      ready: false
+    };
+  }
+
+  let status = mediacloud.status(config);
+  let providerStatus = status.providers[provider] ?? {};
+  print("provided=true");
+  print("ready=" + str(providerStatus.ready ?? false));
+  if (provider == "cloudinary" && providerStatus.folder != null && str(providerStatus.folder).trim() != "") {
+    print("folder=" + providerStatus.folder);
+  }
+  return {
+    provider: provider,
+    provided: true,
+    defaultProvider: status.defaultProvider,
+    status: providerStatus
+  };
+}
+
+func show_result(label: str, result) {
+  print("\n[" + label + "]");
+  print("ok=" + str(result.ok ?? false) + " provider=" + str(result.provider ?? "") + " status=" + str(result.statusCode ?? result.status ?? ""));
+  if (result.filename != null && str(result.filename).trim() != "") {
+    print("filename=" + result.filename);
+  }
+  if (result.mimeType != null && str(result.mimeType).trim() != "") {
+    print("mimeType=" + result.mimeType);
+  }
+  if (result.resourceType != null && str(result.resourceType).trim() != "") {
+    print("resourceType=" + result.resourceType);
+  }
+  if (result.storageBucket != null && str(result.storageBucket).trim() != "") {
+    print("storageBucket=" + result.storageBucket);
+  }
+  if (result.storagePath != null && str(result.storagePath).trim() != "") {
+    print("storagePath=" + result.storagePath);
+  }
+  if (result.prefix != null && str(result.prefix).trim() != "") {
+    print("prefix=" + result.prefix);
+  }
+  if (result.deletePrefix != null && str(result.deletePrefix).trim() != "") {
+    print("deletePrefix=" + result.deletePrefix);
+  }
+  if (result.count != null) {
+    print("count=" + str(result.count));
+  }
+  if (result.providerAssetId != null && str(result.providerAssetId).trim() != "") {
+    print("providerAssetId=" + result.providerAssetId);
+  }
+  if (result.sizeBytes != null) {
+    print("sizeBytes=" + str(result.sizeBytes));
+  }
+  if (result.publicUrl != null && str(result.publicUrl).trim() != "") {
+    print("publicUrl=" + result.publicUrl);
+  }
+  if (result.secureUrl != null && str(result.secureUrl).trim() != "") {
+    print("secureUrl=" + result.secureUrl);
+  }
+  if (result.error != null && str(result.error).trim() != "") {
+    print("error=" + result.error);
+  }
+  if (!(result.ok == true) && result.providerResponse != null) {
+    show_pretty("providerResponse", result.providerResponse);
+  }
+  if (!(result.ok == true) && result.raw != null) {
+    show_pretty("raw", result.raw);
+  }
+}
+
+func assert_ok(label: str, result) {
+  print("\n[" + label + "]");
+  print("ok=" + str(result.ok ?? false) + " provider=" + str(result.provider ?? "") + " status=" + str(result.statusCode ?? result.status ?? ""));
+  if (result.filename != null && str(result.filename).trim() != "") {
+    print("filename=" + result.filename);
+  }
+  if (result.mimeType != null && str(result.mimeType).trim() != "") {
+    print("mimeType=" + result.mimeType);
+  }
+  if (result.resourceType != null && str(result.resourceType).trim() != "") {
+    print("resourceType=" + result.resourceType);
+  }
+  if (result.storageBucket != null && str(result.storageBucket).trim() != "") {
+    print("storageBucket=" + result.storageBucket);
+  }
+  if (result.storagePath != null && str(result.storagePath).trim() != "") {
+    print("storagePath=" + result.storagePath);
+  }
+  if (result.prefix != null && str(result.prefix).trim() != "") {
+    print("prefix=" + result.prefix);
+  }
+  if (result.deletePrefix != null && str(result.deletePrefix).trim() != "") {
+    print("deletePrefix=" + result.deletePrefix);
+  }
+  if (result.count != null) {
+    print("count=" + str(result.count));
+  }
+  if (result.providerAssetId != null && str(result.providerAssetId).trim() != "") {
+    print("providerAssetId=" + result.providerAssetId);
+  }
+  if (result.sizeBytes != null) {
+    print("sizeBytes=" + str(result.sizeBytes));
+  }
+  if (result.publicUrl != null && str(result.publicUrl).trim() != "") {
+    print("publicUrl=" + result.publicUrl);
+  }
+  if (result.secureUrl != null && str(result.secureUrl).trim() != "") {
+    print("secureUrl=" + result.secureUrl);
+  }
+  if (result.error != null && str(result.error).trim() != "") {
+    print("error=" + result.error);
+  }
+  if (!(result.ok == true) && result.providerResponse != null) {
+    show_pretty("providerResponse", result.providerResponse);
+  }
+  if (!(result.ok == true) && result.raw != null) {
+    show_pretty("raw", result.raw);
+  }
+  if (!(result.ok == true)) {
+    throw label + " failed: " + str(result.error ?? result.statusCode ?? "unknown error");
+  }
+  return result;
+}

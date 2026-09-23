@@ -1,0 +1,18 @@
+vdb import *;
+
+func show_exception(label: str, e) {
+    print(`\n[${label}]`);
+    print(`type=${e.type}`);
+    print(`base=${e.base_type}`);
+    print(`alias=${e.type_alias}`);
+    print(`message=${e.message}`);
+}
+
+print("=== VDB auth exception demo ===");
+
+try {
+    vdb.auth({user: DEMO_VDB_USER, pass: DEMO_VDB_PASS + "_wrong"});
+    print("unexpected success");
+} catch (e) {
+    show_exception("wrong password", e);
+}

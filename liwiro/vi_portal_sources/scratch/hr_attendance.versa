@@ -1,0 +1,95 @@
+# HR Attendance System - Authenticated CLI
+# Handles registration, check-in/out, and monthly summaries with VDB auth
+
+import vdb;
+import datetime;
+
+# Establish VDB Session using environment credentials
+func authenticate() {
+    let user = env.VDB_USER ?? "zulan";
+    let pass = env.VDB_PASS ?? "VersatilityIsKey0!";
+    
+    # Attempt to authenticate and set the active session
+    let auth_result = vdb.auth({user: user, pass: pass});
+    if (auth_result.status != "success") {
+        print("Authentication failed. Check VDB_USER and VDB_PASS.");
+        return false;
+    }
+    
+    # Ensure we are in the correct domain/db context
+    vdb.use({"domain": "hr", "db": "attendance"});
+    return true;
+}
+
+func register(name) {
+    if (name == "") {
+        print("Error: No username provided.");
+        return "error";
+    }
+    
+    # Check if user already exists to prevent duplicates
+    let existing = vdb.read("users", {"username": name});
+    if (existing.length() > 0) {
+        print(`User {name} is already registered.`);
+        return "exists";
+    }
+
+    vdb.create("users", {"username": name, "created_at": datetime.now()});
+    print(`User {name} registered successfully.`);
+    return "ok";
+}
+
+func log_action(name, action) {
+    let users = vdb.read("users", {"username": name});
+    
+    if (users.length() == 0) {
+        print("User not found. Please register first.");
+        return "error";
+    }
+
+    let now = datetime.now();
+    vdb.create("staff_logs", {
+        "username": name,
+        "action": action,
+        "timestamp": now
+    });
+    print(`{name} {action} successful at {now}`);
+    return "ok";
+}
+
+func show_summary(name) {
+    let logs = vdb.read("staff_logs", {"username": name});
+    
+    print(`--- Attendance Summary for {name} ---`);
+    if (logs.length() == 0) {
+        print("No logs found for this user.");
+    } else {
+        for (entry : logs) {
+            print(`{entry.timestamp}: {entry.action}`);
+        }
+    }
+    print("----------------------------------");
+    return "ok";
+}
+
+# Main Execution Logic
+if (authenticate()) {
+    let cmd = str(params.cmd ?? "").trim();
+    let username = str(params.username ?? "").trim();
+
+    if (cmd == "register") {
+        register(username);
+    } else if (cmd == "checkin") {
+        log_action(username, "IN");
+    } else if (cmd == "checkout") {
+        log_action(username, "OUT");
+    } else if (cmd == "summary") {
+        show_summary(username);
+    } else {
+        print("HR System CLI (Authenticated)");
+        print("Usage: set params.cmd to 'register', 'checkin', 'checkout', or 'summary'");
+        print("Provide params.username for all actions.");
+    }
+} else {
+    print("System halted due to authentication failure.");
+}

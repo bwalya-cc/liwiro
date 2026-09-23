@@ -1,0 +1,18 @@
+http import *;
+
+print("=== http request template demo ===");
+let url = "https://httpbin.org/get";
+let req = {
+  headers: {"User-Agent": "VersaDemo/1.0", Accept: "application/json"},
+  query: {q: "versa"},
+  timeoutMs: 3000
+};
+
+print("Prepared GET options:");
+print(req);
+try {
+  print(`Run: {http.get(url, req)}`);
+} catch (e) {
+  print("Request execution skipped in this environment:");
+  print(e.message);
+}

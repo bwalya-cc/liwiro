@@ -1,0 +1,66 @@
+print("=== Type casting comprehensive ===");
+
+let i1 = int(11 / 2);
+print(i1);
+print(type(i1));
+
+let i2 = int(9.99);
+print(i2);
+print(type(i2));
+
+let i3 = int("42");
+print(i3);
+print(type(i3));
+
+let i4 = int("7.8");
+print(i4);
+print(type(i4));
+
+let i5 = int(true);
+print(i5);
+print(type(i5));
+
+let i0 = int(0.0);
+print(i0);
+print(type(i0));
+
+let f1 = float(7);
+print(f1);
+print(type(f1));
+
+let f2 = float("7.25");
+print(f2);
+print(type(f2));
+
+let s1 = str(123);
+print(s1);
+print(type(s1));
+
+let s2 = str(false);
+print(s2);
+print(type(s2));
+
+let b1 = bool(0);
+print(b1);
+print(type(b1));
+
+let b2 = bool(1);
+print(b2);
+print(type(b2));
+
+let b3 = bool("");
+print(b3);
+print(type(b3));
+
+let b4 = bool("hello");
+print(b4);
+print(type(b4));
+
+print("=== Literal type behavior ===");
+let z_int = 0;
+let z_float = 0.0;
+print(z_int);
+print(type(z_int));
+print(z_float);
+print(type(z_float));
+

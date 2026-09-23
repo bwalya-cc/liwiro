@@ -1,0 +1,506 @@
+[
+  {
+    "slug": "platform-foundations",
+    "title": "Liwiro Platform Foundations",
+    "summary": "The system map for Liwiro, Verun, Verse, VI, generated services, and the data/runtime boundaries between them.",
+    "tags": ["liwiro", "platform", "architecture", "routes", "system-map", "agents"],
+    "subsystem": "platform",
+    "order": 10,
+    "audience": "Verse agents, platform operators, service authors",
+    "agentGoals": [
+      "Identify which surface owns a task before proposing a command or route.",
+      "Understand how Liwiro, Verse, VI, generated services, and VDB interact.",
+      "Avoid mixing control-plane actions with runtime-service actions."
+    ],
+    "prerequisites": [
+      "Liwiro frontend and backend are running.",
+      "VDB transport is configured and reachable.",
+      "The agent knows whether the task is UI, CLI, service-runtime, or VDB-native."
+    ],
+    "requiredWorkflows": [
+      "Start in Liwiro when the task is setup, service generation, service operations, VDB portal work, VI portal work, or Verse chat.",
+      "Use the Service Builder to define LAPIS contracts, then the Service Manager to operate generated services.",
+      "Use VDB Console for direct VQL/VDB operations and Versa Console for Versa source files and REPL work."
+    ],
+    "guardrails": [
+      "Do not treat Liwiro frontend auth as the same thing as VDB authentication.",
+      "Do not assume generated services can use VDB until VDB credentials are configured and authenticated.",
+      "Do not invent routes or subsystems that do not exist in the platform."
+    ],
+    "antiPatterns": [
+      "Sending a user to VDB Console for tasks that belong in Service Builder or Service Manager.",
+      "Treating Verse Chat advice as if it already changed runtime state.",
+      "Confusing VI files with service-inline Versa scripts."
+    ],
+    "examples_good": [
+      "A task to create a new microservice starts with a LAPIS config in Service Builder, not with raw VQL in VDB Console.",
+      "A task to inspect existing data uses VDB Console or a generated service endpoint after VDB auth is confirmed.",
+      "A task to debug script syntax uses Versa validation and VI/Versa runtime guidance before proposing fixes."
+    ],
+    "examples_bad": [
+      "Telling an agent to patch VDB data directly when the user asked for a service contract change.",
+      "Using generated-service runtime docs to answer a Liwiro setup question.",
+      "Assuming a Verse AI action card already executed a backend change."
+    ],
+    "failure_modes": [
+      "Wrong-surface recommendations cause broken instructions and skipped prerequisites.",
+      "Auth-layer confusion causes agents to call VDB or protected services without valid credentials.",
+      "Missing system boundaries leads to incorrect LAPIS, Versa, or VQL advice."
+    ],
+    "cross_links": ["auth-and-access", "lapis-service-lifecycle", "vdb-runtime-reference", "verse-agents-reference"]
+  },
+  {
+    "slug": "auth-and-access",
+    "title": "Authentication and Access Boundaries",
+    "summary": "The required distinctions between Liwiro platform auth, service bearer auth, and VDB runtime authentication.",
+    "tags": ["auth", "security", "rbac", "vdb-auth", "bearer", "setup"],
+    "subsystem": "security",
+    "order": 20,
+    "audience": "Verse agents, platform admins, generated-service authors",
+    "agentGoals": [
+      "Separate platform login, service auth, and VDB auth every time.",
+      "Know which auth prerequisite must be satisfied before each action.",
+      "Avoid unsafe assumptions about inherited or shared sessions."
+    ],
+    "prerequisites": [
+      "The Liwiro platform may have a frontend session.",
+      "Generated services may require bearer tokens that are unrelated to the frontend session.",
+      "VDB operations require successful VDB authentication and active domain/database context."
+    ],
+    "requiredWorkflows": [
+      "Authenticate to VDB before running VDB queries, creating collections, switching domains, or executing VDB-backed Versa code.",
+      "Use bearer auth only for generated-service endpoints that explicitly require it.",
+      "Treat setup/bootstrap credentials as control-plane inputs, not as general runtime credentials."
+    ],
+    "guardrails": [
+      "Never use VDB without authenticating it first.",
+      "Never assume a Liwiro login gives direct VDB data access.",
+      "Never describe a protected service endpoint as public unless LAPIS says `requiresAuth: false`."
+    ],
+    "antiPatterns": [
+      "Calling VDB immediately after startup without verifying credentials or workspace context.",
+      "Reusing bearer tokens as if they are VDB credentials.",
+      "Treating auth service setup keys as long-term operator credentials."
+    ],
+    "examples_good": [
+      "Before a VDB read, verify auth succeeded and the correct domain/database context has been selected.",
+      "Before invoking a protected endpoint, provide an Authorization bearer token and describe its purpose.",
+      "When an auth-dependent service proxies signin, distinguish upstream auth-service behavior from local service behavior."
+    ],
+    "examples_bad": [
+      "Trying to use VDB in Versa without `vdb.auth(...)` and `vdb.set(...)` succeeding first.",
+      "Answering a VDB RBAC question with only frontend login guidance.",
+      "Claiming an endpoint is reachable because the platform UI is open."
+    ],
+    "failure_modes": [
+      "VDB auth failures surface as runtime errors before data access or script execution can proceed.",
+      "Bearer-protected endpoints return 401 when tokens are absent or invalid.",
+      "Auth confusion leads to incorrect troubleshooting and invalid generated code."
+    ],
+    "cross_links": ["platform-foundations", "vdb-runtime-reference", "dry-run-validation", "lapis-service-lifecycle"]
+  },
+  {
+    "slug": "lapis-service-lifecycle",
+    "title": "LAPIS and Generated Service Lifecycle",
+    "summary": "How LAPIS contracts are normalized, validated, generated, operated, and repaired inside Liwiro.",
+    "tags": ["lapis", "service-builder", "service-manager", "generation", "metadata", "endpoints"],
+    "subsystem": "services",
+    "order": 30,
+    "audience": "Verse agents and service authors",
+    "agentGoals": [
+      "Produce valid LAPIS payloads for Service Builder.",
+      "Understand how metadata, auth, models, modules, and endpoints affect runtime generation.",
+      "Use validation output to repair configs instead of guessing."
+    ],
+    "prerequisites": [
+      "A LAPIS config must normalize into metadata, auth, models, sharedModules, modules, and endpoints.",
+      "Every generated service has a VDB domain/workspace expectation and a runtime env shape.",
+      "Validation happens before generation and should be treated as authoritative."
+    ],
+    "requiredWorkflows": [
+      "Normalize the LAPIS contract first, then validate it, then generate the service runtime.",
+      "For CRUD endpoints, require `crudOperation` and `linkedModel`.",
+      "For custom endpoints, require a readable VDB command string in `vqlQuery`.",
+      "For script endpoints, require non-empty `versaScript` and valid runtime assumptions."
+    ],
+    "guardrails": [
+      "Do not propose endpoint shapes that conflict with LAPIS validation rules.",
+      "Do not skip model existence checks for `linkedModel`.",
+      "Do not mark a service as valid until dry-run validation succeeds."
+    ],
+    "antiPatterns": [
+      "Using free-form text where a readable VDB command is required.",
+      "Creating script endpoints with no Versa script body.",
+      "Treating Service Builder validation as optional before generation."
+    ],
+    "examples_good": [
+      "A CRUD read endpoint declares `operationType: crud`, `crudOperation: read`, and a real `linkedModel`.",
+      "A custom VQL endpoint stores a readable VDB command string, in `vqlQuery`.",
+      "A service with script endpoints is repaired based on returned validation errors until dry-run passes."
+    ],
+    "examples_bad": [
+      "A custom endpoint whose `vqlQuery` is a JSON command object instead of readable command text.",
+      "A linked model reference to a model that does not exist in `models`.",
+      "Assuming generation is correct because schema validation passed once."
+    ],
+    "failure_modes": [
+      "Schema and semantic errors block generation immediately.",
+      "Versa parse/runtime issues block script endpoints.",
+      "Dry-run execution failures expose hidden startup, auth, and side-effect problems."
+    ],
+    "cross_links": ["lapis-reference", "dry-run-validation", "vql-reference", "versa-reference"]
+  },
+  {
+    "slug": "lapis-reference",
+    "title": "LAPIS Reference",
+    "summary": "The contract rules for metadata, auth, models, modules, and endpoint definitions used by Liwiro generation.",
+    "tags": ["lapis", "schema", "crud", "custom", "script", "validation"],
+    "subsystem": "services",
+    "order": 40,
+    "audience": "Verse agents writing or repairing LAPIS",
+    "agentGoals": [
+      "Emit valid LAPIS structures without inventing unsupported keys or endpoint modes.",
+      "Choose the correct endpoint type: CRUD, custom VQL, or script.",
+      "Respect docs and auth configuration inside metadata/auth."
+    ],
+    "prerequisites": [
+      "The top-level contract is a JSON object.",
+      "`metadata.apiName`, `metadata.basePath`, and semantic `metadata.version` are required.",
+      "Endpoint methods and paths must be explicit."
+    ],
+    "requiredWorkflows": [
+      "Use `crud` for generated collection-backed behavior.",
+      "Use `custom` only when you need a portal-style flat action VQL object.",
+      "Use `script` only when CRUD/custom cannot express the behavior and the Versa runtime assumptions are known."
+    ],
+    "guardrails": [
+      "Keep `basePath` rooted with `/`.",
+      "Keep `version` semantic, such as `1.0.0`.",
+      "Do not mix VQL text syntax into `vqlQuery`; it must decode to a flat action object."
+    ],
+    "antiPatterns": [
+      "Inventing unsupported `operationType` values.",
+      "Using untyped or incomplete field definitions.",
+      "Assuming route auth rules are implied rather than declared."
+    ],
+    "examples_good": [
+      "A metadata block with `apiName`, `basePath`, `version`, `database`, and optional `documentation` config.",
+      "A model whose fields specify name, type, and required state.",
+      "An auth service definition that clearly separates auth model, endpoints, and password-reset behavior."
+    ],
+    "examples_bad": [
+      "A route with `operationType: versa` instead of the supported `script` alias expected after normalization.",
+      "A model field missing its name or type.",
+      "A version string like `v1` instead of semantic versioning."
+    ],
+    "failure_modes": [
+      "Normalization may coerce aliases, but invalid contracts still fail validation.",
+      "Bad endpoint semantics stop the service before runtime generation.",
+      "Weak docs/auth configuration produces confusing or inaccessible runtime behavior."
+    ],
+    "cross_links": ["lapis-service-lifecycle", "auth-and-access", "dry-run-validation"]
+  },
+  {
+    "slug": "versa-reference",
+    "title": "Versa Runtime Reference",
+    "summary": "Agent-facing guidance for writing flawless Versa code in Liwiro and VI, including imports, runtime objects, and VDB prerequisites.",
+    "tags": ["versa", "vi", "script", "imports", "runtime", "repair"],
+    "subsystem": "versa",
+    "order": 50,
+    "audience": "Verse agents generating Versa or fixing script endpoints",
+    "agentGoals": [
+      "Write valid Versa syntax that matches the VI parser/runtime.",
+      "Import required modules before use and keep imports at the top.",
+      "Handle runtime objects such as `params`, `service`, `auth`, and VDB setup correctly."
+    ],
+    "prerequisites": [
+      "Versa imports must be declared before executable code.",
+      "Generated script routes receive runtime objects such as `params`, `service`, and `auth`.",
+      "VDB access in Versa requires `vdb.auth(...)` to succeed before `vdb.set(...)` and any data operation."
+    ],
+    "requiredWorkflows": [
+      "Declare required imports first, then compute inputs, then perform guarded operations.",
+      "Authenticate VDB and set context before any VDB reads or writes.",
+      "When fixing parser/runtime errors, use the returned error plus the offending construct to repair the script."
+    ],
+    "guardrails": [
+      "Do not use a module namespace without importing it.",
+      "Do not use VDB before authenticating it first.",
+      "Do not assume async/await, decorators, enums, or TypeScript-like constructs exist unless documented."
+    ],
+    "antiPatterns": [
+      "Using `vdb.read(...)` or `vdb.create(...)` before `vdb.auth(...)` and `vdb.set(...)`.",
+      "Placing imports after executable code.",
+      "Treating `params` runtime objects as if they are globally defined outside the script environment."
+    ],
+    "examples_good": [
+      "A script imports `json_xml`, `vdb`, and other required modules before defining logic.",
+      "A route validates input from `params`, authenticates VDB, sets context, and only then performs data operations.",
+      "A repair flow changes the specific undefined module or parser error rather than rewriting unrelated code."
+    ],
+    "examples_bad": [
+      "Calling VDB immediately with no authentication handshake.",
+      "Using `http` or `email` namespaces without imports.",
+      "Returning malformed objects because the script never normalizes input."
+    ],
+    "failure_modes": [
+      "Missing imports trigger runtime namespace errors.",
+      "Bad syntax or unsupported constructs fail parser validation.",
+      "VDB auth/context errors fail script execution before business logic runs."
+    ],
+    "cross_links": ["vi-portal-runtime", "vdb-runtime-reference", "dry-run-validation", "vql-reference"]
+  },
+  {
+    "slug": "vi-portal-runtime",
+    "title": "Versa Console and Versa Execution Runtime",
+    "summary": "How VI files, REPL work, and service-inline Versa execution differ, and what runtime assumptions agents must preserve.",
+    "tags": ["vi", "portal", "repl", "versa", "runtime", "files"],
+    "subsystem": "vi",
+    "order": 60,
+    "audience": "Verse agents and operators working in VI or script-backed services",
+    "agentGoals": [
+      "Know when code runs as a VI file versus as a generated service script.",
+      "Understand the local source workspace and validation path.",
+      "Avoid assuming file-based behavior inside inline service scripts."
+    ],
+    "prerequisites": [
+      "Versa Console works with local `.versa` source files and a terminal/REPL surface.",
+      "Generated service scripts are wrapped with runtime params and VDB context setup.",
+      "Parser validation and runtime execution are related but not identical."
+    ],
+    "requiredWorkflows": [
+      "Use Versa Console for source-file authoring and iterative syntax repair.",
+      "Use service validation for inline LAPIS `versaScript` behavior.",
+      "Treat REPL/file tasks and inline route tasks as different runtime surfaces."
+    ],
+    "guardrails": [
+      "Do not assume a VI file has the same runtime params as a service-inline script.",
+      "Do not mix portal file paths with inline script hints carelessly.",
+      "Do not skip validation just because a script ran in a different context once."
+    ],
+    "antiPatterns": [
+      "Copying a file-oriented Versa example into an inline route without adapting params and service context.",
+      "Treating temporary validation paths as persisted user files.",
+      "Using VI runtime success as proof that service startup will succeed."
+    ],
+    "examples_good": [
+      "Use Versa Console for exploratory coding, then adapt the logic to route-scoped runtime params for LAPIS scripts.",
+      "Treat validation file paths as hints, not production paths.",
+      "Use parser feedback to fix imports and unsupported constructs before runtime testing."
+    ],
+    "examples_bad": [
+      "Assuming `params.service` exists in every standalone file.",
+      "Writing service docs that tell users to run inline route code directly from the filesystem.",
+      "Ignoring different VDB context rules between standalone and generated runtime execution."
+    ],
+    "failure_modes": [
+      "Context mismatch causes scripts to pass parse validation but fail at runtime.",
+      "Wrong file/runtime assumptions produce confusing repair loops.",
+      "Agents recommend commands that belong to the wrong execution surface."
+    ],
+    "cross_links": ["versa-reference", "platform-foundations", "dry-run-validation"]
+  },
+  {
+    "slug": "vdb-runtime-reference",
+    "title": "VDB Runtime Reference",
+    "summary": "The operational model for VDB authentication, sessions, domains, databases, collections, scripts, exports, RBAC, and TUMI.",
+    "tags": ["vdb", "runtime", "auth", "domains", "databases", "rbac", "tumi"],
+    "subsystem": "vdb",
+    "order": 70,
+    "audience": "Verse agents writing VDB or guiding portal operations",
+    "agentGoals": [
+      "Form correct VDB workflows with explicit auth and workspace context.",
+      "Understand the difference between reads, writes, admin actions, scripts, and exports.",
+      "Recognize when a VDB action is risky or permission-sensitive."
+    ],
+    "prerequisites": [
+      "VDB requires valid credentials and an active session.",
+      "Domain and database context matter before most collection operations.",
+      "Administrative actions may need higher privileges than ordinary reads."
+    ],
+    "requiredWorkflows": [
+      "Authenticate first, then select domain, then select database, then operate on collections or scripts.",
+      "Use reads for inspection and writes/admin actions only when the request explicitly requires them.",
+      "Treat exports, TUMI actions, and RBAC changes as high-risk operations."
+    ],
+    "guardrails": [
+      "Never use VDB without authenticating it first.",
+      "Never describe administrative actions as harmless reads.",
+      "Never skip domain/database context selection when a query depends on workspace scope."
+    ],
+    "antiPatterns": [
+      "Querying collections before a domain/database is selected.",
+      "Treating scripts, exports, and TUMI operations as ordinary data reads.",
+      "Assuming super-admin capabilities in examples that should work for ordinary users."
+    ],
+    "examples_good": [
+      "Auth succeeds, context is set, and only then a collection read is attempted.",
+      "A high-risk export is described with permission checks and operator confirmation.",
+      "RBAC/TUMI guidance is separated from normal document CRUD guidance."
+    ],
+    "examples_bad": [
+      "Jumping straight to a `create` or `delete` command with no session or context.",
+      "Using VDB script creation in examples that are supposed to be dry-run safe.",
+      "Writing examples that hide the target domain/database."
+    ],
+    "failure_modes": [
+      "Authentication failures block all downstream operations.",
+      "Wrong workspace context produces missing-collection or wrong-data behavior.",
+      "Admin actions without proper permissions fail and may be unsafe to retry blindly."
+    ],
+    "cross_links": ["auth-and-access", "vql-reference", "versa-reference", "dry-run-validation"]
+  },
+  {
+    "slug": "vql-reference",
+    "title": "VQL Reference",
+    "summary": "The readable command syntax and query semantics used by VDB Console, custom LAPIS endpoints, and VDB-backed runtime work.",
+    "tags": ["vql", "vdb", "query", "json", "custom-endpoints", "commands"],
+    "subsystem": "vql",
+    "order": 80,
+    "audience": "Verse agents generating VQL payloads",
+    "agentGoals": [
+      "Produce portal-ready and LAPIS-ready readable VDB commands.",
+      "Distinguish read, create, update, delete, define, use, list, script, export, index, and domain lifecycle actions.",
+      "Avoid JSON command envelopes."
+    ],
+    "prerequisites": [
+      "VQL payloads used by Liwiro custom endpoints must decode to readable VDB command strings.",
+      "Collection-level operations depend on VDB auth and active workspace context.",
+      "Args, query, and data sections should be explicit when needed.",
+      "Domain lifecycle actions use `domain_status`, `domain_suspend`, or `domain_resume` with an explicit `domain` field."
+    ],
+    "requiredWorkflows": [
+      "Represent VQL as a readable command string, when used in Liwiro.",
+      "Keep query filters and data updates in the correct sections.",
+      "Use the smallest safe action family that matches the task."
+    ],
+    "guardrails": [
+      "Do not place raw command strings into `vqlQuery`.",
+      "Do not mix unrelated action families in one payload unless the runtime explicitly supports it.",
+      "Do not describe destructive commands as examples without a warning.",
+      "Treat suspend and resume as ownership-controlled domain operations; do not omit the domain or imply they are collection commands."
+    ],
+    "antiPatterns": [
+      "Using a shell-like VQL string where JSON is required.",
+      "Putting update data in a find query.",
+      "Leaving the target collection/domain ambiguous."
+    ],
+    "examples_good": [
+      "A read payload uses `action: find`, `collection`, `where`, and optional `limit` fields.",
+      "An update payload uses `action: update`, `collection`, `where`, and `set` fields.",
+      "A custom LAPIS endpoint stores a parsed flat action object in `vqlQuery`.",
+      "A domain status check uses `{action: domain_status, domain: \"example\"}`; suspend/resume use the same flat shape with the corresponding action."
+    ],
+    "examples_bad": [
+      "A custom endpoint with `vqlQuery: \"read users where ...\"`.",
+      "A create payload that omits the target collection.",
+      "A destructive command presented without caution or auth assumptions."
+    ],
+    "failure_modes": [
+      "Malformed objects fail validation or VDB execution.",
+      "Wrong query/data placement causes incorrect runtime semantics.",
+      "Ambiguous workspace assumptions break otherwise valid payloads."
+    ],
+    "cross_links": ["vdb-runtime-reference", "lapis-reference", "dry-run-validation"]
+  },
+  {
+    "slug": "verse-agents-reference",
+    "title": "Verse Agents and Retrieval Reference",
+    "summary": "How Verse routes work, how capability/manual context is selected, and how agents should ground answers in the shared corpus.",
+    "tags": ["verse", "agents", "retrieval", "routing", "skills", "capabilities"],
+    "subsystem": "verse",
+    "order": 90,
+    "audience": "Verse agent maintainers and advanced operators",
+    "agentGoals": [
+      "Route work to the right subsystem guidance before answering.",
+      "Prefer shared-corpus facts over invented behavior.",
+      "Keep capability recommendations aligned with real platform surfaces."
+    ],
+    "prerequisites": [
+      "Verse may combine persona, skills, capability metadata, and docs retrieval.",
+      "Manual links in platform capabilities should resolve to shared-corpus wiki pages.",
+      "Agent responses should expose blockers and prerequisites explicitly."
+    ],
+    "requiredWorkflows": [
+      "When a query mentions LAPIS, VDB, Versa, VQL, or Liwiro operations, retrieve the matching subsystem docs first.",
+      "When a request is risky, mention the guardrail before giving a runnable action.",
+      "When documentation is missing or conflicting, say so instead of inventing unsupported behavior."
+    ],
+    "guardrails": [
+      "Do not use removed canonical-doc routes or outdated corpus fragments.",
+      "Do not claim support for constructs the shared corpus marks as undocumented or unsafe.",
+      "Do not skip auth or dry-run prerequisites in generated guidance."
+    ],
+    "antiPatterns": [
+      "Mixing old `verse-verun-reference` assumptions with new shared-corpus guidance.",
+      "Returning VDB guidance without the authentication prerequisite.",
+      "Answering Versa repair questions without grounding in runtime rules."
+    ],
+    "examples_good": [
+      "A Verse agent answering a VDB question cites auth, workspace selection, and VQL shape in order.",
+      "A Verse agent answering a LAPIS question grounds the answer in endpoint semantics and validation behavior.",
+      "A Verse agent states when a requested construct is undocumented rather than fabricating syntax."
+    ],
+    "examples_bad": [
+      "Linking to removed canonical wiki views.",
+      "Providing a confident answer from stale docs fragments.",
+      "Skipping retrieval and relying on unsupported memory for critical runtime rules."
+    ],
+    "failure_modes": [
+      "Stale docs references lead to wrong or broken agent guidance.",
+      "Missing prerequisites produce unsafe recommendations.",
+      "Capability links drift if they are not kept aligned with shared-corpus slugs."
+    ],
+    "cross_links": ["platform-foundations", "auth-and-access", "dry-run-validation", "versa-reference", "vdb-runtime-reference"]
+  },
+  {
+    "slug": "dry-run-validation",
+    "title": "Dry-Run Validation Contract",
+    "summary": "The required behavior of Liwiro validation when it performs real runtime execution with strict live VDB auth and side-effect suppression.",
+    "tags": ["validation", "dry-run", "vdb-auth", "runtime", "safety", "service-builder"],
+    "subsystem": "validation",
+    "order": 100,
+    "audience": "Verse agents, service authors, and backend maintainers",
+    "agentGoals": [
+      "Understand what validation proves and what it blocks.",
+      "Use returned dry-run errors to repair LAPIS, Versa, and runtime assumptions.",
+      "Explain why a service is invalid when startup, auth, or endpoint execution fails."
+    ],
+    "prerequisites": [
+      "Dry-run validation still authenticates against live VDB.",
+      "Dry-run validation executes the generated runtime in memory or test mode rather than writing deployable artifacts.",
+      "Side effects must be suppressed even though the code path is real."
+    ],
+    "requiredWorkflows": [
+      "Run schema/normalization validation first, then Versa static validation, then dry-run runtime execution.",
+      "Fail validation if live VDB authentication or context setup cannot be established.",
+      "Suppress filesystem writes, outbound HTTP, email sending, and VDB mutations while preserving actionable error reporting."
+    ],
+    "guardrails": [
+      "Dry-run is not a mock-only success path; it must fail on real auth/setup problems.",
+      "Reads may occur only after auth succeeds and only when they do not mutate state.",
+      "Validation output must identify which endpoint or startup phase failed."
+    ],
+    "antiPatterns": [
+      "Marking a service valid after only schema checks.",
+      "Allowing validation to write indexes, documents, scripts, files, or external requests.",
+      "Hiding auth/setup failures behind generic success or warning messages."
+    ],
+    "examples_good": [
+      "Validation reports that VDB auth failed before any route dry-run could execute.",
+      "Validation blocks an outbound HTTP call and returns a dry-run suppression error tied to the endpoint.",
+      "Validation executes a safe script path, returns structured results, and flags skipped writes explicitly."
+    ],
+    "examples_bad": [
+      "Validation passes because the app object was created even though VDB auth was broken.",
+      "Dry-run sends real email or writes real data.",
+      "Returned errors do not identify the failing route or startup step."
+    ],
+    "failure_modes": [
+      "Live VDB auth failure invalidates the service immediately.",
+      "Suppressed side effects surface as dry-run execution errors or notices.",
+      "Endpoint-specific runtime errors drive the repair loop for LAPIS and Versa."
+    ],
+    "cross_links": ["lapis-service-lifecycle", "auth-and-access", "versa-reference", "vdb-runtime-reference", "vql-reference"]
+  }
+]

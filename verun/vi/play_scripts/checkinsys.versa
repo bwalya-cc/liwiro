@@ -1,0 +1,59 @@
+vdb import *;
+
+try {
+    vdb.auth({user: DEMO_VDB_USER, pass: DEMO_VDB_PASS});
+    vdb.define({domain: "checkinsys", db: "operations"});
+    vdb.set({domain: "checkinsys", database: "operations"});
+} catch (e) {
+    print(`Authentication or context error: {e.message}`);
+    exit(0);
+}
+
+vdb.create("achievements", class {
+    schema() {
+        return {
+            username: {type: "string", required: true},
+            status: {type: "string", required: true},
+            when: {type: "date"}
+        };
+    }
+});
+
+vdb.create("checkins");
+
+func showEntry(label: str, res) {
+    print(`\n[{label}] status={res.status} ok={str(res.ok)}`);
+    if (res.data != null) {
+        print(`data=${str(res.data)}`);
+    }
+}
+
+func record(action: str) {
+    let events = vdb.collection("achievements");
+    showEntry(`record ${action}`, events.insert({username: input("worker name: "), status: action, when: text_now("iso")} ));
+}
+
+func menu() {
+    while (true) {
+        print("ci=check-in, co=check-out, ls=list users, e=exit");
+        let choice = input("checkinsys> ").trim().toLowerCase();
+        if (choice == "ci") {
+            record("check-in");
+        } alt (choice == "co") {
+            record("check-out");
+        } alt (choice == "ls") {
+            let events = vdb.collection("achievements");
+            let rows = events.find({}, 20);
+            for (let entry in rows.data ?? []) {
+                print(`{entry.username}: {entry.status} at {entry.when}`);
+            }
+        } else if (choice == "e") {
+            print("Bye");
+            exit(0);
+        } else {
+            print("Unknown command");
+        }
+    }
+}
+
+menu();

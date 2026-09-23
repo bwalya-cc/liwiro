@@ -1,0 +1,9 @@
+print("=== Module imports demo (failure path) ===");
+try {
+    print(json_xml.parse_json("{\"x\":1}"));
+} catch (e) {
+    print(`type={e.type}`);
+    print(`message={e.message}`);
+    print(`line=${e.line}, column=${e.column}`);
+    print(`source=${e.source_line}`);
+}

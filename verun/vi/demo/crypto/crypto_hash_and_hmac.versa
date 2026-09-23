@@ -1,0 +1,8 @@
+crypto import *;
+
+print("=== crypto hash + hmac ===");
+let msg = "versa";
+print(crypto.sha256(msg));
+print(crypto.sha512(msg));
+print(crypto.hmac_sha256("secret", msg));
+print(crypto.hmac_sha512("secret", msg));

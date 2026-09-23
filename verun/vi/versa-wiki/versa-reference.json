@@ -1,0 +1,4517 @@
+{
+  "title": "Versa Reference",
+  "version": "2026-09-09",
+  "schemaVersion": "3.0",
+  "canonicalPath": "verun/vi/versa-wiki/versa-reference.json",
+  "htmlPath": "verun/vi/versa-wiki/index.html",
+  "summary": "Implementation-derived canonical syntax, runtime, module, VDB, repair, and portal-operation reference for Versa as executed by verun/vi and used by Verse agents when generating, repairing, opening, and running VI and VDB work.",
+  "sources": [
+    {
+      "path": "docs/verun/versa/syntax.md",
+      "purpose": "Broad language syntax and parser behavior notes"
+    },
+    {
+      "path": "docs/verun/versa/syntax-rules.md",
+      "purpose": "Short operational rules for statements, casting, strings, modules, and exit behavior"
+    },
+    {
+      "path": "docs/verun/versa/modules.md",
+      "purpose": "Native module families injected into the runtime"
+    },
+    {
+      "path": "docs/verun/versa/runtime-cli-repl.md",
+      "purpose": "CLI, file, REPL, and portal runtime behavior"
+    },
+    {
+      "path": "docs/verun/versa/vdb-module.md",
+      "purpose": "VDB bridge behavior, auth, context, and collection APIs"
+    },
+    {
+      "path": "verun/vi/demo",
+      "purpose": "Bundled parser-validated examples and style patterns"
+    },
+    {
+      "path": "verun/vi/src/main/java/verun/runtime/evaluator/Evaluator.java",
+      "purpose": "Authoritative runtime built-ins and injected module exports"
+    },
+    {
+      "path": "verun/vi/src/main/java/verun/runtime/evaluator/MemberAccessEvaluator.java",
+      "purpose": "Authoritative VDB bridge, collection, class, instance, and native member access behavior"
+    },
+    {
+      "path": "verun/vi/src/main/java/verun/runtime/evaluator/StringEvaluator.java",
+      "purpose": "Authoritative string member-method surface"
+    },
+    {
+      "path": "verun/vi/src/main/java/verun/runtime/modules",
+      "purpose": "Authoritative host-module implementations and helper semantics"
+    }
+  ],
+  "coverage": {
+    "documentedModules": [
+      "vdb",
+      "http",
+      "json_xml",
+      "email",
+      "crypto",
+      "jwt",
+      "time",
+      "datetime",
+      "random",
+      "filer",
+      "mediacloud"
+    ],
+    "runtimeGlobals": [
+      "params",
+      "service",
+      "env",
+      "vdb",
+      "auth",
+      "module_config",
+      "module_meta",
+      "unset"
+    ],
+    "parserVerifiedBehaviors": [
+      "Backtick interpolation accepts both {expr} and ${expr}. Prefer {expr} in new drafts because the bundled demos use it more often.",
+      "Python f-strings are invalid in Versa.",
+      "Both alt and else if parse for chained conditionals. Prefer alt in generated code because it is the house style in the docs.",
+      "Python-like foreach sugar such as for item in list { ... } parses, but braced for (...) { ... } forms remain easier to read and safer to generate.",
+      "Arrow lambdas such as let square = (x) => x * x; parse successfully.",
+      "List and object comprehensions shown in the bundled demos parse successfully."
+    ],
+    "styleGuidance": [
+      "Prefer explicit, parser-safe syntax over clever shorthand.",
+      "Prefer simple braced blocks over indentation-only or colon-based control flow.",
+      "Prefer complete runnable examples over pseudo-code.",
+      "Prefer saveable relative paths such as scratch/<slug>.versa for new drafts.",
+      "Document Versa directly; do not teach it primarily as a comparison against Python or JavaScript."
+    ],
+    "knownHighRiskAreas": [
+      "Python and JavaScript habits often leak into generated Versa: // comments, f-strings, require(), from-import, async/await assumptions, and missing semicolons.",
+      "Module method surfaces can vary by runtime build. When a method is not documented here, do not invent it.",
+      "Service-route globals differ from standalone CLI scripts. params, service.env, env, and authenticated vdb context must be handled deliberately.",
+      "Do not reduce VI/VDB workflows to location-only handoffs when the platform can execute the prepared artifact directly."
+    ]
+  },
+  "agentUsage": {
+    "priorityRules": [
+      "Treat this JSON file as the canonical syntax authority before using legacy Markdown notes.",
+      "Prefer code that is parser-valid in verun/vi over code that merely resembles JavaScript or Python.",
+      "Use a saveable .versa path such as scratch/<slug>.versa when generating a new VI draft.",
+      "Repair parser errors by matching the runtime complaint to the mistakes catalog in this reference, then re-validating.",
+      "If a construct is not documented here, do not guess. Keep to the documented subset and tell the user what is missing.",
+      "Treat the method inventories and runtime-derived sections in this reference as implementation-backed, not merely illustrative.",
+      "When a prepared VI or VDB artifact is executable, prefer direct execution-oriented guidance over workspace-handoff-only guidance."
+    ],
+    "generationChecklist": [
+      "Use # for comments, never //.",
+      "End let/var/const declarations, assignments, expression statements, return, throw, and import statements with semicolons.",
+      "Do not append semicolons to closing braces of if/alt/else, loops, try/catch/else/complete, func blocks, or class blocks.",
+      "Use backticks for interpolation and prefer {expr}; ${expr} also parses when needed. Never use Python f-strings.",
+      "Use braces for block bodies; do not use Python colon blocks or indentation-only control flow.",
+      "Choose the right import form: module import *;, module import { name };, or import module;.",
+      "Use service.env.*, env.*, params, and vdb explicitly when writing Liwiro runtime scripts.",
+      "Run the real VI parser gate before presenting the script as ready.",
+      "Use executeLabel=Run for VI drafts and executeLabel=Run Query for VDB drafts unless the user explicitly asked for a load-only action."
+    ],
+    "sourceConstructionWorkflow": [
+      "Start by identifying every construct used in the requested script: comments, strings/interpolation, declarations, collections, ranges/comprehensions, control flow, functions/lambdas/classes, imports/modules, builtins, runtime globals, and parser-error mappings.",
+      "Read the matching sections in this canonical reference before writing the first draft, not only after an error appears.",
+      "When repairing a failed draft, re-check the whole script against the relevant sections on every pass instead of fixing only the flagged line.",
+      "When the code imports a module or uses a runtime global, verify that the import form and usage context are documented here.",
+      "If the reference does not document a needed construct, module, or pattern, state that clearly to the user instead of inventing syntax."
+    ],
+    "missingInfoPolicy": [
+      "Say explicitly which construct or module is not covered by the canonical Versa reference.",
+      "Do not claim unsupported syntax is valid just because it resembles Python, JavaScript, or another language.",
+      "Fallback to simpler documented patterns when possible and tell the user that you are doing so.",
+      "If no safe documented pattern exists, return a blocked result rather than a guessed script."
+    ]
+  },
+  "retrieval": {
+    "requiredSectionIds": [
+      "quickstart",
+      "mistakes-and-parser-mappings",
+      "validation-and-repair-workflow"
+    ],
+    "defaultSectionIds": [
+      "paths-and-script-shapes",
+      "lexical-comments-and-strings",
+      "statements-and-declarations",
+      "control-flow-and-exceptions",
+      "functions-lambdas-and-classes",
+      "imports-modules-and-builtins",
+      "runtime-surfaces-and-liwiro-context"
+    ],
+    "constructRules": [
+      {
+        "name": "comments-strings-and-interpolation",
+        "matchAny": [
+          "comment",
+          "comments",
+          "string",
+          "strings",
+          "backtick",
+          "template",
+          "interpolation",
+          "f-string",
+          "fstring",
+          "${",
+          "`"
+        ],
+        "sectionIds": [
+          "lexical-comments-and-strings",
+          "interpolation-and-text-construction"
+        ]
+      },
+      {
+        "name": "declarations-and-semicolons",
+        "matchAny": [
+          "let ",
+          "var ",
+          "const ",
+          "assignment",
+          "semicolon",
+          "declaration",
+          "return ",
+          "throw "
+        ],
+        "sectionIds": [
+          "statements-and-declarations",
+          "mistakes-and-parser-mappings"
+        ]
+      },
+      {
+        "name": "collections-and-access",
+        "matchAny": [
+          "list",
+          "object",
+          "array",
+          "map",
+          "dict",
+          "items()",
+          "[",
+          "{"
+        ],
+        "sectionIds": [
+          "values-access-collections-and-types"
+        ]
+      },
+      {
+        "name": "ranges-and-comprehensions",
+        "matchAny": [
+          "range",
+          "..",
+          "comprehension",
+          "for x in",
+          "for (x in",
+          "for item in",
+          "sample"
+        ],
+        "sectionIds": [
+          "ranges-comprehensions-and-iteration"
+        ]
+      },
+      {
+        "name": "operators-and-casts",
+        "matchAny": [
+          "operator",
+          "cast",
+          "type(",
+          "is_type",
+          "??",
+          "?:",
+          "+=",
+          "++",
+          "--"
+        ],
+        "sectionIds": [
+          "operators-and-expression-rules",
+          "builtins-and-type-helpers"
+        ]
+      },
+      {
+        "name": "control-flow",
+        "matchAny": [
+          "if",
+          "alt",
+          "else if",
+          "while",
+          "for",
+          "try",
+          "catch",
+          "complete",
+          "throw",
+          "match",
+          "case"
+        ],
+        "sectionIds": [
+          "control-flow-and-exceptions",
+          "mistakes-and-parser-mappings"
+        ]
+      },
+      {
+        "name": "functions-lambdas-and-classes",
+        "matchAny": [
+          "func",
+          "function",
+          "lambda",
+          "=>",
+          "class",
+          "extends",
+          "static",
+          "<->"
+        ],
+        "sectionIds": [
+          "functions-lambdas-and-classes"
+        ]
+      },
+      {
+        "name": "imports-and-modules",
+        "matchAny": [
+          "import ",
+          "module",
+          "json_xml",
+          "http",
+          "crypto",
+          "jwt",
+          "time",
+          "datetime",
+          "random",
+          "filer",
+          "mediacloud",
+          "vdb"
+        ],
+        "sectionIds": [
+          "imports-modules-and-builtins",
+          "runtime-surfaces-and-liwiro-context"
+        ]
+      },
+      {
+        "name": "save-paths-and-cli-shapes",
+        "matchAny": [
+          ".versa",
+          "scratch/",
+          "save",
+          "run file",
+          "repl",
+          "terminal",
+          "cli"
+        ],
+        "sectionIds": [
+          "paths-and-script-shapes",
+          "validation-and-repair-workflow"
+        ]
+      },
+      {
+        "name": "portal-execution-and-agent-operations",
+        "matchAny": [
+          "vi portal",
+          "vdb portal",
+          "run query",
+          "save and run",
+          "location change",
+          "change location",
+          "verse agent",
+          "run"
+        ],
+        "sectionIds": [
+          "agent-and-portal-operation-reference"
+        ]
+      },
+      {
+        "name": "portal-execution-and-agent-operations",
+        "matchAny": [
+          "vi portal",
+          "vdb portal",
+          "run query",
+          "save and run",
+          "location change",
+          "change location",
+          "verse agent",
+          "run"
+        ],
+        "sectionIds": [
+          "agent-and-portal-operation-reference"
+        ]
+      },
+      {
+        "name": "portal-execution-and-agent-operations",
+        "matchAny": [
+          "vi portal",
+          "vdb portal",
+          "run query",
+          "save and run",
+          "location change",
+          "change location",
+          "verse agent",
+          "run"
+        ],
+        "sectionIds": [
+          "agent-and-portal-operation-reference"
+        ]
+      },
+      {
+        "name": "portal-execution-and-agent-operations",
+        "matchAny": [
+          "vi portal",
+          "vdb portal",
+          "run query",
+          "save and run",
+          "location change",
+          "change location",
+          "verse agent",
+          "run"
+        ],
+        "sectionIds": [
+          "agent-and-portal-operation-reference"
+        ]
+      },
+      {
+        "name": "portal-execution-and-agent-operations",
+        "matchAny": [
+          "vi portal",
+          "vdb portal",
+          "run query",
+          "save and run",
+          "location change",
+          "change location",
+          "verse agent",
+          "run"
+        ],
+        "sectionIds": [
+          "agent-and-portal-operation-reference"
+        ]
+      },
+      {
+        "name": "portal-execution-and-agent-operations",
+        "matchAny": [
+          "vi portal",
+          "vdb portal",
+          "run query",
+          "save and run",
+          "location change",
+          "change location",
+          "verse agent",
+          "run"
+        ],
+        "sectionIds": [
+          "agent-and-portal-operation-reference"
+        ]
+      },
+      {
+        "name": "portal-execution-and-agent-operations",
+        "matchAny": [
+          "vi portal",
+          "vdb portal",
+          "run query",
+          "save and run",
+          "location change",
+          "change location",
+          "verse agent",
+          "run"
+        ],
+        "sectionIds": [
+          "agent-and-portal-operation-reference"
+        ]
+      },
+      {
+        "name": "portal-execution-and-agent-operations",
+        "matchAny": [
+          "vi portal",
+          "vdb portal",
+          "run query",
+          "save and run",
+          "location change",
+          "change location",
+          "verse agent",
+          "run"
+        ],
+        "sectionIds": [
+          "agent-and-portal-operation-reference"
+        ]
+      },
+      {
+        "name": "portal-execution-and-agent-operations",
+        "matchAny": [
+          "vi portal",
+          "vdb portal",
+          "run query",
+          "save and run",
+          "location change",
+          "change location",
+          "verse agent",
+          "run"
+        ],
+        "sectionIds": [
+          "agent-and-portal-operation-reference"
+        ]
+      },
+      {
+        "name": "portal-execution-and-agent-operations",
+        "matchAny": [
+          "vi portal",
+          "vdb portal",
+          "run query",
+          "save and run",
+          "location change",
+          "change location",
+          "verse agent",
+          "run"
+        ],
+        "sectionIds": [
+          "agent-and-portal-operation-reference"
+        ]
+      },
+      {
+        "name": "portal-execution-and-agent-operations",
+        "matchAny": [
+          "vi portal",
+          "vdb portal",
+          "run query",
+          "save and run",
+          "location change",
+          "change location",
+          "verse agent",
+          "run"
+        ],
+        "sectionIds": [
+          "agent-and-portal-operation-reference"
+        ]
+      },
+      {
+        "name": "portal-execution-and-agent-operations",
+        "matchAny": [
+          "vi portal",
+          "vdb portal",
+          "run query",
+          "save and run",
+          "location change",
+          "change location",
+          "verse agent",
+          "run"
+        ],
+        "sectionIds": [
+          "agent-and-portal-operation-reference"
+        ]
+      },
+      {
+        "name": "portal-execution-and-agent-operations",
+        "matchAny": [
+          "vi portal",
+          "vdb portal",
+          "run query",
+          "save and run",
+          "location change",
+          "change location",
+          "verse agent",
+          "run"
+        ],
+        "sectionIds": [
+          "agent-and-portal-operation-reference"
+        ]
+      },
+      {
+        "name": "portal-execution-and-agent-operations",
+        "matchAny": [
+          "vi portal",
+          "vdb portal",
+          "run query",
+          "save and run",
+          "location change",
+          "change location",
+          "verse agent",
+          "run"
+        ],
+        "sectionIds": [
+          "agent-and-portal-operation-reference"
+        ]
+      },
+      {
+        "name": "portal-execution-and-agent-operations",
+        "matchAny": [
+          "vi portal",
+          "vdb portal",
+          "run query",
+          "save and run",
+          "location change",
+          "change location",
+          "verse agent",
+          "run"
+        ],
+        "sectionIds": [
+          "agent-and-portal-operation-reference"
+        ]
+      },
+      {
+        "name": "portal-execution-and-agent-operations",
+        "matchAny": [
+          "vi portal",
+          "vdb portal",
+          "run query",
+          "save and run",
+          "location change",
+          "change location",
+          "verse agent",
+          "run"
+        ],
+        "sectionIds": [
+          "agent-and-portal-operation-reference"
+        ]
+      },
+      {
+        "name": "portal-execution-and-agent-operations",
+        "matchAny": [
+          "vi portal",
+          "vdb portal",
+          "run query",
+          "save and run",
+          "location change",
+          "change location",
+          "verse agent",
+          "run"
+        ],
+        "sectionIds": [
+          "agent-and-portal-operation-reference"
+        ]
+      },
+      {
+        "name": "portal-execution-and-agent-operations",
+        "matchAny": [
+          "vi portal",
+          "vdb portal",
+          "run query",
+          "save and run",
+          "location change",
+          "change location",
+          "verse agent",
+          "run"
+        ],
+        "sectionIds": [
+          "agent-and-portal-operation-reference"
+        ]
+      },
+      {
+        "name": "portal-execution-and-agent-operations",
+        "matchAny": [
+          "vi portal",
+          "vdb portal",
+          "run query",
+          "save and run",
+          "location change",
+          "change location",
+          "verse agent",
+          "run"
+        ],
+        "sectionIds": [
+          "agent-and-portal-operation-reference"
+        ]
+      },
+      {
+        "name": "portal-execution-and-agent-operations",
+        "matchAny": [
+          "vi portal",
+          "vdb portal",
+          "run query",
+          "save and run",
+          "location change",
+          "change location",
+          "verse agent",
+          "run"
+        ],
+        "sectionIds": [
+          "agent-and-portal-operation-reference"
+        ]
+      },
+      {
+        "name": "portal-execution-and-agent-operations",
+        "matchAny": [
+          "vi portal",
+          "vdb portal",
+          "run query",
+          "save and run",
+          "location change",
+          "change location",
+          "verse agent",
+          "run"
+        ],
+        "sectionIds": [
+          "agent-and-portal-operation-reference"
+        ]
+      },
+      {
+        "name": "portal-execution-and-agent-operations",
+        "matchAny": [
+          "vi portal",
+          "vdb portal",
+          "run query",
+          "save and run",
+          "location change",
+          "change location",
+          "verse agent",
+          "run"
+        ],
+        "sectionIds": [
+          "agent-and-portal-operation-reference"
+        ]
+      },
+      {
+        "name": "portal-execution-and-agent-operations",
+        "matchAny": [
+          "vi portal",
+          "vdb portal",
+          "run query",
+          "save and run",
+          "location change",
+          "change location",
+          "verse agent",
+          "run"
+        ],
+        "sectionIds": [
+          "agent-and-portal-operation-reference"
+        ]
+      },
+      {
+        "name": "portal-execution-and-agent-operations",
+        "matchAny": [
+          "vi portal",
+          "vdb portal",
+          "run query",
+          "save and run",
+          "location change",
+          "change location",
+          "verse agent",
+          "run"
+        ],
+        "sectionIds": [
+          "agent-and-portal-operation-reference"
+        ]
+      },
+      {
+        "name": "portal-execution-and-agent-operations",
+        "matchAny": [
+          "vi portal",
+          "vdb portal",
+          "run query",
+          "save and run",
+          "location change",
+          "change location",
+          "verse agent",
+          "run"
+        ],
+        "sectionIds": [
+          "agent-and-portal-operation-reference"
+        ]
+      },
+      {
+        "name": "portal-execution-and-agent-operations",
+        "matchAny": [
+          "vi portal",
+          "vdb portal",
+          "run query",
+          "save and run",
+          "location change",
+          "change location",
+          "verse agent",
+          "run"
+        ],
+        "sectionIds": [
+          "agent-and-portal-operation-reference"
+        ]
+      },
+      {
+        "name": "portal-execution-and-agent-operations",
+        "matchAny": [
+          "vi portal",
+          "vdb portal",
+          "run query",
+          "save and run",
+          "location change",
+          "change location",
+          "verse agent",
+          "run"
+        ],
+        "sectionIds": [
+          "agent-and-portal-operation-reference"
+        ]
+      },
+      {
+        "name": "portal-execution-and-agent-operations",
+        "matchAny": [
+          "vi portal",
+          "vdb portal",
+          "run query",
+          "save and run",
+          "location change",
+          "change location",
+          "verse agent",
+          "run"
+        ],
+        "sectionIds": [
+          "agent-and-portal-operation-reference"
+        ]
+      }
+    ]
+  },
+  "highlighting": {
+    "keywords": [
+      "let",
+      "var",
+      "const",
+      "func",
+      "class",
+      "if",
+      "alt",
+      "else",
+      "for",
+      "while",
+      "try",
+      "catch",
+      "complete",
+      "throw",
+      "return",
+      "import",
+      "extends",
+      "static",
+      "match",
+      "case",
+      "in"
+    ],
+    "builtins": [
+      "print",
+      "input",
+      "exit",
+      "range",
+      "leng",
+      "join",
+      "map",
+      "type",
+      "is_type",
+      "is_unset",
+      "int",
+      "float",
+      "str",
+      "bool",
+      "set",
+      "AsFloat",
+      "json",
+      "xml"
+    ],
+    "constants": [
+      "true",
+      "false",
+      "null"
+    ]
+  },
+  "sections": [
+    {
+      "id": "quickstart",
+      "title": "Quickstart Rules",
+      "summary": "The shortest set of rules that prevents most Versa parser failures and keeps Verse agent drafts in the safe subset.",
+      "tags": [
+        "quickstart",
+        "syntax",
+        "safe subset",
+        "agent guidance"
+      ],
+      "constructs": [
+        "file extension",
+        "comments",
+        "semicolons",
+        "braced blocks",
+        "backtick interpolation",
+        "runtime globals"
+      ],
+      "queryHints": [
+        "new versa script",
+        "mad libs game",
+        "ephemeral script",
+        "parser-safe starter"
+      ],
+      "syntaxPatterns": [
+        "scratch/<slug>.versa",
+        "# comment",
+        "let name = value;",
+        "if (condition) { ... }",
+        "print(`Hello {name}`);"
+      ],
+      "rules": [
+        "Scripts use the .versa extension.",
+        "Single-line comments start with #.",
+        "Use semicolons for declaration-style and statement-style lines.",
+        "Use braces for blocks.",
+        "Use backticks for interpolation. Prefer {expr}; ${expr} also parses.",
+        "For service route scripts, params, service.env, env, and vdb should be referenced explicitly.",
+        "Core modules such as vdb, http, json_xml, crypto, jwt, time, datetime, random, email, and filer are only injected when imported at the top of the file."
+      ],
+      "validExamples": [
+        {
+          "title": "Minimal parser-safe script",
+          "code": [
+            "# animal greeting",
+            "let animal = \"lion\";",
+            "let adjective = \"curious\";",
+            "let line = `The {adjective} {animal} says hello.`;",
+            "print(line);"
+          ],
+          "notes": [
+            "Declarations and print statements end with semicolons.",
+            "Interpolation uses backticks, not Python f-strings."
+          ]
+        }
+      ],
+      "invalidExamples": [
+        {
+          "title": "Common first-draft mistakes",
+          "code": [
+            "// wrong comment syntax",
+            "let story = f\"The animal is funny\"",
+            "if (true):",
+            "  print(story)"
+          ],
+          "notes": [
+            "Versa does not use // comments.",
+            "Versa does not support Python f-strings.",
+            "Colon blocks and indentation-only bodies are wrong here.",
+            "The declaration and print statement are missing semicolons."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "paths-and-script-shapes",
+      "title": "Paths, Saveable Drafts, and Script Shapes",
+      "summary": "How new Versa drafts should be named and how standalone CLI scripts differ from service-route scripts.",
+      "tags": [
+        "path",
+        "save",
+        "draft",
+        "cli",
+        "service route"
+      ],
+      "constructs": [
+        "saveable path",
+        "scratch path",
+        "standalone script",
+        "service route script",
+        "vi draft"
+      ],
+      "queryHints": [
+        "save and run",
+        "load into vi",
+        "scratch path",
+        "service script path"
+      ],
+      "syntaxPatterns": [
+        "scratch/animal-mad-libs.versa",
+        "scratch/<slug>.versa"
+      ],
+      "rules": [
+        "New VI drafts should use a saveable relative path such as scratch/<slug>.versa.",
+        "Standalone scripts usually start with imports, declarations, helper funcs, and then executable statements.",
+        "Service route scripts often read params and service.env immediately because request context matters more than interactive prompts.",
+        "Do not return an empty or extensionless path for a vi-script artifact."
+      ],
+      "validExamples": [
+        {
+          "title": "Standalone CLI-style draft shape",
+          "code": [
+            "# scratch/animal-mad-libs.versa",
+            "let animal = input(\"Animal: \");",
+            "let adjective = input(\"Adjective: \");",
+            "print(`The {adjective} {animal} stole the show.`);"
+          ],
+          "notes": [
+            "This is the usual shape for a user-run CLI or terminal draft."
+          ]
+        },
+        {
+          "title": "Service-route draft shape",
+          "code": [
+            "let body = params.body ?? {};",
+            "let animal = str(body.animal ?? \"lion\").trim();",
+            "return {ok: true, animal: animal};"
+          ],
+          "notes": [
+            "Route scripts typically return structured data instead of relying on input(...)."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lexical-comments-and-strings",
+      "title": "Lexical Rules, Comments, and Strings",
+      "summary": "Tokens, comments, string forms, and quoting behavior that matter before you even reason about higher-level syntax.",
+      "tags": [
+        "lexical",
+        "comments",
+        "strings",
+        "quotes"
+      ],
+      "constructs": [
+        "single-line comments",
+        "single quotes",
+        "double quotes",
+        "backticks",
+        "object keys"
+      ],
+      "queryHints": [
+        "comments",
+        "string syntax",
+        "quotes",
+        "interpolation starter"
+      ],
+      "syntaxPatterns": [
+        "# comment",
+        "\"double quoted\"",
+        "'single quoted'",
+        "`backtick string`"
+      ],
+      "rules": [
+        "Use # for single-line comments.",
+        "String literals may use single quotes, double quotes, or backticks.",
+        "Backticks are the safest choice whenever interpolation may be needed.",
+        "Object keys can be bare, single-quoted, or double-quoted."
+      ],
+      "validExamples": [
+        {
+          "title": "Comment and string forms",
+          "code": [
+            "# single-line comment",
+            "let title = \"Animal Mad Libs\";",
+            "let role = 'host';",
+            "let greeting = `Welcome, {role}.`;",
+            "let meta = {name: title, \"role\": role, 'ok': true};"
+          ],
+          "notes": [
+            "All three string delimiters are valid.",
+            "Backticks let you move to interpolation without changing delimiters."
+          ]
+        }
+      ],
+      "invalidExamples": [
+        {
+          "title": "Python and JS habits that break Versa",
+          "code": [
+            "// JS-style comment",
+            "let greeting = f\"hello {role}\";"
+          ],
+          "notes": [
+            "Replace // with #.",
+            "Replace Python f-strings with backticks."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "interpolation-and-text-construction",
+      "title": "Interpolation and Text Construction",
+      "summary": "How Versa composes human-readable text safely, including the two parser-accepted interpolation forms and when concatenation is simpler.",
+      "tags": [
+        "interpolation",
+        "template strings",
+        "backticks",
+        "concatenation"
+      ],
+      "constructs": [
+        "backtick interpolation",
+        "{expr}",
+        "${expr}",
+        "string concatenation"
+      ],
+      "queryHints": [
+        "mad libs sentence",
+        "template string",
+        "interpolation",
+        "f-string replacement"
+      ],
+      "syntaxPatterns": [
+        "`The {animal} runs.`",
+        "`The ${animal} runs.`",
+        "\"The \" + animal + \" runs.\""
+      ],
+      "rules": [
+        "Use backticks for interpolated strings.",
+        "Both {expr} and ${expr} parse inside backticks.",
+        "Prefer {expr} in new drafts because the bundled demos use it more often.",
+        "If interpolation becomes noisy, plain string concatenation is also valid."
+      ],
+      "validExamples": [
+        {
+          "title": "Preferred brace interpolation",
+          "code": [
+            "let animal = \"zebra\";",
+            "let line = `The {animal} sprinted across the valley.`;",
+            "print(line);"
+          ],
+          "notes": [
+            "This matches the dominant bundled-demo style."
+          ]
+        },
+        {
+          "title": "Dollar-brace interpolation also parses",
+          "code": [
+            "let place = \"savanna\";",
+            "print(`Welcome to ${place}.`);"
+          ],
+          "notes": [
+            "The parser accepts this form too."
+          ]
+        },
+        {
+          "title": "Concatenation fallback",
+          "code": [
+            "let adjective = \"wild\";",
+            "let animal = \"hyena\";",
+            "let line = \"The \" + adjective + \" \" + animal + \" laughed.\";"
+          ],
+          "notes": [
+            "Concatenation is useful when you want the simplest possible repair path."
+          ]
+        }
+      ],
+      "invalidExamples": [
+        {
+          "title": "Python f-string is invalid",
+          "code": [
+            "let story = f\"The {animal} laughs\";"
+          ],
+          "notes": [
+            "Do not prefix strings with f in Versa."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "statements-and-declarations",
+      "title": "Statements, Declarations, Assignments, and Terminators",
+      "summary": "What must end with semicolons, what may omit them, and how declarations should be structured.",
+      "tags": [
+        "semicolons",
+        "declarations",
+        "assignment",
+        "return",
+        "throw"
+      ],
+      "constructs": [
+        "let",
+        "var",
+        "const",
+        "assignment",
+        "expression statement",
+        "return",
+        "throw"
+      ],
+      "queryHints": [
+        "expected semicolon",
+        "variable declaration",
+        "assignment syntax"
+      ],
+      "syntaxPatterns": [
+        "let count = 3;",
+        "value = value + 1;",
+        "return result;",
+        "throw error;"
+      ],
+      "rules": [
+        "A semicolon is required after let/var/const declarations.",
+        "A semicolon is required after assignments and expression statements.",
+        "A semicolon is required after return and throw statements.",
+        "Import statements should end with semicolons.",
+        "A semicolon is not required after a closing block brace."
+      ],
+      "validExamples": [
+        {
+          "title": "Declaration and block termination",
+          "code": [
+            "let count = 3;",
+            "let ready = count > 0;",
+            "if (ready) {",
+            "  print(count);",
+            "}",
+            "func describe(value) {",
+            "  return `value={value}`;",
+            "}"
+          ],
+          "notes": [
+            "The print and return lines use semicolons.",
+            "The closing braces do not."
+          ]
+        }
+      ],
+      "invalidExamples": [
+        {
+          "title": "Missing declaration semicolon",
+          "code": [
+            "let story = `The fox runs fast`",
+            "print(story);"
+          ],
+          "notes": [
+            "This commonly triggers errors like Expected ';' after variable declaration."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "values-access-collections-and-types",
+      "title": "Values, Access, Collections, and Type Labels",
+      "summary": "Core literals, object/list/set shapes, entry values, member access, and normalized runtime type labels.",
+      "tags": [
+        "values",
+        "lists",
+        "objects",
+        "sets",
+        "entry values",
+        "types"
+      ],
+      "constructs": [
+        "numbers",
+        "true",
+        "false",
+        "null",
+        "lists",
+        "objects",
+        "set()",
+        "items()",
+        "entry.key",
+        "entry.value"
+      ],
+      "queryHints": [
+        "object access",
+        "list syntax",
+        "items loop",
+        "type labels"
+      ],
+      "syntaxPatterns": [
+        "[1, 2, 3]",
+        "{name: \"lion\"}",
+        "obj.key",
+        "obj[\"key\"]",
+        "entry.value"
+      ],
+      "rules": [
+        "Numbers are int or float.",
+        "true, false, and null are built-in constants.",
+        "Lists use [...].",
+        "Objects use {...}.",
+        "set() creates an empty set-like value.",
+        "Object access forms obj.key, obj[\"key\"], obj['key'], and obj[key] can resolve the same field when the key exists.",
+        "object.items() returns Entry values that support entry.key, entry.value, entry[\"key\"], and entry[\"value\"]."
+      ],
+      "validExamples": [
+        {
+          "title": "Collection literals and access",
+          "code": [
+            "let numbers = [1, 2, 3, 4];",
+            "let animal = {name: \"elephant\", \"place\": \"savanna\", 'mood': \"happy\"};",
+            "print(animal.name);",
+            "print(animal[\"place\"]);",
+            "print(animal['mood']);"
+          ],
+          "notes": [
+            "Object key spelling is normalized across bare, single-quoted, and double-quoted forms."
+          ]
+        },
+        {
+          "title": "Entry values from object.items()",
+          "code": [
+            "let record = {name: \"Mist\", role: \"admin\"};",
+            "for (entry : record.items()) {",
+            "  print(entry.key);",
+            "  print(entry.value);",
+            "}"
+          ],
+          "notes": [
+            "Entry values support both dot access and key access."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ranges-comprehensions-and-iteration",
+      "title": "Ranges, Comprehensions, and Iteration Forms",
+      "summary": "Iteration syntax beyond the simplest loop body, including ranges, comprehensions, foreach variants, and nested iteration.",
+      "tags": [
+        "range",
+        "comprehension",
+        "loop",
+        "iteration"
+      ],
+      "constructs": [
+        "1..6",
+        "list comprehension",
+        "object comprehension",
+        "foreach loop",
+        "nested comprehension",
+        "filter clause"
+      ],
+      "queryHints": [
+        "range syntax",
+        "comprehension",
+        "for item in list",
+        "flatten list"
+      ],
+      "syntaxPatterns": [
+        "for (item in list) { ... }",
+        "for item in list { ... }",
+        "[x * x for x in numbers]",
+        "{x: x * 10 for x in 1..5}"
+      ],
+      "rules": [
+        "Versa supports C-style for loops, foreach-style for loops, and parser-supported sugar for item in list { ... }.",
+        "Ranges use start..stop.",
+        "List comprehensions can chain multiple for clauses and optional if filters.",
+        "Object comprehensions use {keyExpr: valueExpr for item in source ...}."
+      ],
+      "validExamples": [
+        {
+          "title": "Comprehensions and ranges",
+          "code": [
+            "let numbers = 1..6;",
+            "let squares = [x * x for x in numbers];",
+            "let evens = [x for x in numbers if x % 2 == 0];",
+            "let scoreMap = {x: x * 10 for x in 1..4};"
+          ],
+          "notes": [
+            "These patterns are used in the bundled demos."
+          ]
+        },
+        {
+          "title": "Foreach loop sugar",
+          "code": [
+            "let animals = [\"lion\", \"zebra\"];",
+            "for animal in animals {",
+            "  print(animal);",
+            "}"
+          ],
+          "notes": [
+            "This parses, but braced for (...) forms are usually clearer for generated code."
+          ]
+        }
+      ],
+      "invalidExamples": [
+        {
+          "title": "Python colon loop",
+          "code": [
+            "for animal in animals:",
+            "  print(animal)"
+          ],
+          "notes": [
+            "Use braces, not colon blocks."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "operators-and-expression-rules",
+      "title": "Operators and Expression Rules",
+      "summary": "Supported arithmetic, logical, comparison, assignment, ternary, null-coalescing, and string-expression behavior.",
+      "tags": [
+        "operators",
+        "expressions",
+        "arithmetic",
+        "logical",
+        "assignment"
+      ],
+      "constructs": [
+        "+",
+        "-",
+        "*",
+        "/",
+        "//",
+        "%",
+        "**",
+        "&&",
+        "||",
+        "!",
+        "??",
+        "?:",
+        "+=",
+        "++",
+        "--"
+      ],
+      "queryHints": [
+        "null coalescing",
+        "ternary",
+        "string concatenation",
+        "increment"
+      ],
+      "syntaxPatterns": [
+        "let safeName = params.name ?? \"guest\";",
+        "let outcome = total > 10 ? \"big\" : \"small\";",
+        "count++;",
+        "label += \"-done\";"
+      ],
+      "rules": [
+        "Arithmetic operators include +, -, *, /, //, %, and **.",
+        "Bitwise operators include &, |, ^^, ~, <<, and >>.",
+        "Logical operators include &&, ||, and !.",
+        "Null coalescing uses ??.",
+        "Conditional expressions use cond ? a : b.",
+        "String concatenation accepts mixed operands such as \"a\" + 1 and 1 + \"a\".",
+        "String repetition works with integer multipliers such as 3 * \"ha\"."
+      ],
+      "validExamples": [
+        {
+          "title": "Expression patterns",
+          "code": [
+            "let total = 4 + 5 * 2;",
+            "let safeName = str(params.name ?? \"guest\").trim();",
+            "let label = \"animal-\" + 7;",
+            "let repeated = 3 * \"ha\";",
+            "let outcome = total > 10 ? \"big\" : \"small\";"
+          ],
+          "notes": [
+            "The docs and demos both use ?? heavily for fallback behavior."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "control-flow-and-exceptions",
+      "title": "Control Flow and Exceptions",
+      "summary": "Conditionals, loops, match/case, throw, and the full try/catch/else/complete lifecycle.",
+      "tags": [
+        "control flow",
+        "if",
+        "alt",
+        "else if",
+        "loop",
+        "try",
+        "catch",
+        "complete"
+      ],
+      "constructs": [
+        "if",
+        "alt",
+        "else",
+        "else if",
+        "while",
+        "for",
+        "match",
+        "case",
+        "try",
+        "catch",
+        "else",
+        "complete",
+        "throw"
+      ],
+      "queryHints": [
+        "conditional syntax",
+        "else if",
+        "try catch",
+        "match case"
+      ],
+      "syntaxPatterns": [
+        "if (condition) { ... } alt (other) { ... } else { ... }",
+        "if (condition) { ... } else if (other) { ... } else { ... }",
+        "try { ... } catch (e) { ... } else { ... } complete { ... }"
+      ],
+      "rules": [
+        "Conditionals use braces.",
+        "alt is the documented chained-branch keyword in the house style.",
+        "else if also parses, but alt is preferred in new generated code.",
+        "Loops may be while, C-style for, foreach-style for (item in list), or for (item : list).",
+        "try/catch may also include else and complete blocks.",
+        "throw <expr>; is valid."
+      ],
+      "validExamples": [
+        {
+          "title": "if / alt / else",
+          "code": [
+            "if (score > 90) {",
+            "  print(\"great\");",
+            "} alt (score == 90) {",
+            "  print(\"exact\");",
+            "} else {",
+            "  print(\"keep going\");",
+            "}"
+          ],
+          "notes": [
+            "This is the preferred documented branching style."
+          ]
+        },
+        {
+          "title": "Parser-accepted else if form",
+          "code": [
+            "if (animal == \"lion\") {",
+            "  print(\"king\");",
+            "} else if (animal == \"zebra\") {",
+            "  print(\"striped\");",
+            "} else {",
+            "  print(\"other\");",
+            "}"
+          ],
+          "notes": [
+            "This parses successfully, but alt remains the preferred generated style."
+          ]
+        },
+        {
+          "title": "try / catch / else / complete",
+          "code": [
+            "try {",
+            "  risky();",
+            "} catch (e) {",
+            "  print(e.message);",
+            "} else {",
+            "  print(\"ok\");",
+            "} complete {",
+            "  print(\"always\");",
+            "}"
+          ],
+          "notes": [
+            "complete is the always-run cleanup block."
+          ]
+        }
+      ],
+      "invalidExamples": [
+        {
+          "title": "Python-style conditional block",
+          "code": [
+            "if (score > 90):",
+            "  print(\"great\")",
+            "elif (score == 90):",
+            "  print(\"exact\")"
+          ],
+          "notes": [
+            "Versa does not use colon blocks or elif in this form."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "functions-lambdas-and-classes",
+      "title": "Functions, Lambdas, Typed Parameters, Defaults, and Classes",
+      "summary": "How callable units are declared, including func blocks, arrow-body funcs, lambdas, typed params, defaults, extends, static, and VDB-bound classes.",
+      "tags": [
+        "func",
+        "lambda",
+        "class",
+        "extends",
+        "static",
+        "typed params"
+      ],
+      "constructs": [
+        "func",
+        "=>",
+        "typed params",
+        "default values",
+        "class",
+        "extends",
+        "static",
+        "<-> vdb.collection"
+      ],
+      "queryHints": [
+        "function syntax",
+        "lambda",
+        "class syntax",
+        "vdb bound class"
+      ],
+      "syntaxPatterns": [
+        "func add(x, y) { return x + y; }",
+        "func add(x, y) => x + y;",
+        "let square = (x) => x * x;",
+        "class Person(name: str) extends Being { ... }",
+        "class Person(name: str) <-> vdb.collection(\"people\") { ... }"
+      ],
+      "rules": [
+        "Functions use func when declaring named functions.",
+        "Block-body functions return with return ...;.",
+        "Arrow-body functions may use func add(x, y) => x + y;.",
+        "Lambda expressions may be assigned directly with let fn = (x) => x * x;.",
+        "Parameters and returns may be typed.",
+        "Classes can extend other classes.",
+        "Classes can bind to VDB collections with <-> vdb.collection(\"...\")."
+      ],
+      "validExamples": [
+        {
+          "title": "Typed functions, defaults, and lambda",
+          "code": [
+            "func addNumbers(a: int, b: int) -> int {",
+            "  return a + b;",
+            "}",
+            "",
+            "func greet(name: str = \"Guest\") -> str {",
+            "  return `Hello, {name}!`;",
+            "}",
+            "",
+            "let square = (x) => x * x;"
+          ],
+          "notes": [
+            "Both func declarations and lambda expressions are valid."
+          ]
+        },
+        {
+          "title": "VDB-bound class shape",
+          "code": [
+            "class Person(name: str) <-> vdb.collection(\"people_class_demo\") {",
+            "  schema() {",
+            "    return {",
+            "      name: {type: \"string\", required: true},",
+            "      student: {type: \"bool\", default: true}",
+            "    };",
+            "  }",
+            "",
+            "  init(name) {",
+            "    Person.name = name;",
+            "    Person.props_from_schema();",
+            "  }",
+            "}"
+          ],
+          "notes": [
+            "This mirrors the collection-bound class pattern used in bundled demos."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "imports-modules-and-builtins",
+      "title": "Imports, Modules, and Built-in Families",
+      "summary": "The supported import forms, documented module families, and when to use local path imports versus runtime-injected module names.",
+      "tags": [
+        "import",
+        "module",
+        "builtins",
+        "runtime modules"
+      ],
+      "constructs": [
+        "module import *;",
+        "module import { name };",
+        "import module;",
+        "path import",
+        "runtime-injected modules"
+      ],
+      "queryHints": [
+        "import syntax",
+        "module reference",
+        "json_xml import",
+        "mediacloud import"
+      ],
+      "syntaxPatterns": [
+        "json_xml import *;",
+        "demo/helpers import { helper };",
+        "import mediacloud;"
+      ],
+      "rules": [
+        "module import *; imports all exported resources into local scope.",
+        "module import { resource_a, resource_b }; imports selected resources.",
+        "import module; imports the namespace only.",
+        "Bare module names such as json_xml or http refer to runtime-injected modules.",
+        "Path-like imports such as demo/helpers import { helper }; refer to script files, not injected module families.",
+        "If you call module namespaces such as vdb.*, http.*, json_xml.*, crypto.*, jwt.*, time.*, datetime.*, random.*, email.*, or filer.* without importing the module first, the runtime raises Undefined variable for that module name."
+      ],
+      "tables": [
+        {
+          "title": "Documented module families",
+          "columns": [
+            "Module",
+            "Typical import",
+            "Use"
+          ],
+          "rows": [
+            [
+              "json_xml",
+              "json_xml import *;",
+              "Parse JSON/XML and read/write structured text"
+            ],
+            [
+              "http",
+              "http import *;",
+              "HTTP requests and auth option shapes"
+            ],
+            [
+              "email",
+              "email import *;",
+              "SMTP mail sending"
+            ],
+            [
+              "crypto",
+              "crypto import *;",
+              "Hashing, base64, PBKDF2, AES helpers, and UUIDs"
+            ],
+            [
+              "jwt",
+              "jwt import *;",
+              "JWT sign, verify, and decode flows"
+            ],
+            [
+              "time",
+              "time import *;",
+              "Epoch and low-level time helpers"
+            ],
+            [
+              "datetime",
+              "datetime import *;",
+              "Higher-level date/time helpers"
+            ],
+            [
+              "random",
+              "random import *;",
+              "Random ints, samples, and shuffle helpers"
+            ],
+            [
+              "filer",
+              "filer import *;",
+              "Filesystem helpers"
+            ],
+            [
+              "vdb",
+              "vdb import *;",
+              "Auth, context, collections, scripts, jobs, and transactions"
+            ],
+            [
+              "mediacloud",
+              "import mediacloud;",
+              "Custom module namespace import for Cloudinary upload helpers"
+            ]
+          ]
+        }
+      ],
+      "validExamples": [
+        {
+          "title": "All three import forms",
+          "code": [
+            "json_xml import *;",
+            "demo/mediacloud/lib/mediacloud_demo_helpers import { section, skip };",
+            "import mediacloud;"
+          ],
+          "notes": [
+            "Use the namespaced custom-module form when you want mediacloud.upload(...) style calls."
+          ]
+        }
+      ],
+      "invalidExamples": [
+        {
+          "title": "Wrong import family syntax",
+          "code": [
+            "from json_xml import parse_json",
+            "require(\"http\")"
+          ],
+          "notes": [
+            "Versa does not use Python from-import or Node require syntax."
+          ]
+        },
+        {
+          "title": "Using a module namespace without importing it",
+          "code": [
+            "let result = vdb.find(\"repairs\", {status: \"queued\"}, 5);"
+          ],
+          "notes": [
+            "Add vdb import *; or import vdb; at the top of the file before executable code."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "builtins-and-type-helpers",
+      "title": "Built-ins, Casts, and Type Helpers",
+      "summary": "The core built-ins that are safe to assume in generic Versa scripts and the normalized type labels they operate with.",
+      "tags": [
+        "builtins",
+        "casts",
+        "type helpers",
+        "core functions"
+      ],
+      "constructs": [
+        "print",
+        "input",
+        "exit",
+        "range",
+        "leng",
+        "join",
+        "map",
+        "int",
+        "float",
+        "str",
+        "bool",
+        "type",
+        "is_type",
+        "is_unset"
+      ],
+      "queryHints": [
+        "builtin functions",
+        "casting",
+        "type labels",
+        "cli input"
+      ],
+      "syntaxPatterns": [
+        "let count = int(\"3\");",
+        "print(type(count));",
+        "let label = str(42);",
+        "let missing = is_unset(optionalName);"
+      ],
+      "rules": [
+        "Core built-ins include print(...), input(prompt?), exit(code?), range(...), leng(value), join(separator, iterable), map(callable, iterable), filter(predicate, iterable), and reduce(reducer, iterable, initial?).",
+        "Built-in casts include int(value), float(value), str(value), and bool(value).",
+        "type(value) returns a runtime type label.",
+        "is_type(value, expected) recognizes aliases such as integer -> int and array -> list.",
+        "is_unset(identifier) checks whether a name is unset in the current environment."
+      ],
+      "validExamples": [
+        {
+          "title": "Casts and type helpers",
+          "code": [
+            "let count = int(\"3\");",
+            "let score = float(\"8.5\");",
+            "let label = str(count);",
+            "print(type(label));",
+            "print(is_type([1, 2, 3], \"array\"));"
+          ],
+          "notes": [
+            "Type aliases such as array and integer normalize to Versa labels."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "runtime-surfaces-and-liwiro-context",
+      "title": "Runtime Surfaces in VI and Liwiro",
+      "summary": "What globals are available in standalone scripts, REPL sessions, and generated service route scripts, plus the VDB auth/context expectations.",
+      "tags": [
+        "runtime",
+        "service route",
+        "params",
+        "service.env",
+        "env",
+        "vdb"
+      ],
+      "constructs": [
+        "params",
+        "service.env",
+        "env",
+        "vdb.auth",
+        "vdb.set",
+        "vdb.collection"
+      ],
+      "queryHints": [
+        "service script globals",
+        "params body",
+        "vdb auth",
+        "repl runtime"
+      ],
+      "syntaxPatterns": [
+        "let body = params.body ?? {};",
+        "let token = str(service.env.API_TOKEN ?? env.API_TOKEN ?? \"\").trim();",
+        "vdb.auth({user: DEMO_VDB_USER, pass: DEMO_VDB_PASS});"
+      ],
+      "rules": [
+        "Standalone and REPL scripts can import modules directly and then call module functions.",
+        "Service route scripts commonly receive merged request data under params.",
+        "Service env values are exposed on service.env and often mirrored on env.",
+        "VDB access should authenticate and set domain/database context before collection work unless the host has already done that for the route."
+      ],
+      "validExamples": [
+        {
+          "title": "Typical service route script",
+          "code": [
+            "import mediacloud;",
+            "",
+            "let req = params;",
+            "let body = req.body ?? {};",
+            "let assetCollection = str(service.env.MEDIA_ASSET_COLLECTION ?? \"media_assets\").trim();",
+            "let assets = vdb.collection(assetCollection);",
+            "let actor = str((req.auth ?? {}).username ?? \"system\").trim();",
+            "if (actor == \"\") {",
+            "  actor = \"system\";",
+            "}",
+            "return {ok: true, actor: actor, assetCollection: assetCollection};"
+          ],
+          "notes": [
+            "This is the route-script shape the Liwiro examples use."
+          ]
+        },
+        {
+          "title": "Explicit VDB auth in direct VI usage",
+          "code": [
+            "vdb.auth({user: DEMO_VDB_USER, pass: DEMO_VDB_PASS});",
+            "vdb.set({domain: DEMO_VDB_DOMAIN, database: DEMO_VDB_DB});",
+            "let rows = vdb.collection(\"products_demo\").find({}, 10);"
+          ],
+          "notes": [
+            "The REPL and file runner do not auto-authenticate VDB for you."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "unsupported-or-high-risk-assumptions",
+      "title": "Unsupported or High-Risk Assumptions",
+      "summary": "Patterns that agents commonly hallucinate or borrow from other languages and should therefore avoid unless this reference documents them explicitly.",
+      "tags": [
+        "unsupported",
+        "high risk",
+        "hallucination guard"
+      ],
+      "constructs": [
+        "f-strings",
+        "require",
+        "from import",
+        "async/await",
+        "decorators",
+        "switch",
+        "indentation-only blocks"
+      ],
+      "queryHints": [
+        "unsupported syntax",
+        "js style",
+        "python style",
+        "guessing risk"
+      ],
+      "rules": [
+        "Do not use // comments, /* */ comments, Python f-strings, require(...), or from ... import ... forms.",
+        "Do not assume async/await, decorators, interfaces, or enum syntax exists unless the canonical reference documents it.",
+        "Do not assume hidden globals beyond what this reference names explicitly.",
+        "Do not assume a module method exists just because a similarly named method exists in another language or SDK."
+      ],
+      "validExamples": [
+        {
+          "title": "Safe simplification when uncertain",
+          "code": [
+            "let line = \"The \" + animal + \" wins.\";",
+            "print(line);"
+          ],
+          "notes": [
+            "When interpolation or module surface details are uncertain, a simpler documented pattern is safer."
+          ]
+        }
+      ],
+      "invalidExamples": [
+        {
+          "title": "Unsupported borrowed syntax",
+          "code": [
+            "async func loadAnimals() {",
+            "  let res = await http.get(url);",
+            "}",
+            "",
+            "@cached",
+            "func build() {",
+            "  return 1;",
+            "}"
+          ],
+          "notes": [
+            "The canonical Versa reference does not document async/await or decorators."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "mistakes-and-parser-mappings",
+      "title": "Common Mistakes and Parser Error Mappings",
+      "summary": "Fast mapping from runtime complaints to the repair that usually fixes them.",
+      "tags": [
+        "errors",
+        "parser",
+        "repair"
+      ],
+      "constructs": [
+        "Expected ';' after variable declaration",
+        "Unexpected token ':'",
+        "Expected ')' after arguments",
+        "Undefined variable",
+        "Attempt to call non-function value: null"
+      ],
+      "queryHints": [
+        "parser error",
+        "validation issue",
+        "unexpected token",
+        "undefined variable"
+      ],
+      "errors": [
+        {
+          "errorContains": "Expected ';' after variable declaration",
+          "meaning": "A let/var/const line ended without a semicolon.",
+          "fix": [
+            "Add ; after the declaration line.",
+            "Check the lines immediately above the reported location, because the parser may point at the next token."
+          ]
+        },
+        {
+          "errorContains": "Unexpected token ':'",
+          "meaning": "You likely wrote a Python-style block or placed : outside an allowed context.",
+          "fix": [
+            "Use braces for if/alt/else, for, while, try/catch, func, and class blocks.",
+            "Keep : inside object literals, typed parameters, return types, or foreach-style for (item : list)."
+          ]
+        },
+        {
+          "errorContains": "Expected ')' after arguments",
+          "meaning": "A call expression likely contains invalid interpolation or an unsupported string form such as a Python f-string.",
+          "fix": [
+            "Replace Python f-strings with backticks.",
+            "Re-check commas and closing parentheses in the call."
+          ]
+        },
+        {
+          "errorContains": "Undefined variable",
+          "meaning": "A name was used before it was declared or imported.",
+          "fix": [
+            "Check import lines and object key names.",
+            "Do not assume JS globals or Python helpers exist."
+          ]
+        },
+        {
+          "errorContains": "Attempt to call non-function value: null",
+          "meaning": "A property exists but is null or unsupported in the loaded module build.",
+          "fix": [
+            "Guard optional module functions before calling them.",
+            "Prefer the documented module surface from this reference and the actual runtime."
+          ]
+        }
+      ],
+      "invalidExamples": [
+        {
+          "title": "Bad interpolation form",
+          "code": [
+            "let story = f\"The {animal} runs\";"
+          ],
+          "notes": [
+            "Correct form: let story = `The {animal} runs`;."
+          ]
+        },
+        {
+          "title": "Missing braces around conditional body",
+          "code": [
+            "if (ready)",
+            "  print(\"ok\");"
+          ],
+          "notes": [
+            "Correct form uses braces: if (ready) { print(\"ok\"); }"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "validation-and-repair-workflow",
+      "title": "Validation and Repair Workflow",
+      "summary": "The canonical workflow Verse agents should follow when drafting or repairing Versa so users do not get back invalid scripts prematurely.",
+      "tags": [
+        "workflow",
+        "repair loop",
+        "validation",
+        "agent process"
+      ],
+      "constructs": [
+        "whole-script review",
+        "retry loop",
+        "parser gate",
+        "missing-info policy"
+      ],
+      "queryHints": [
+        "repair workflow",
+        "validate fix",
+        "retry loop",
+        "agent process"
+      ],
+      "rules": [
+        "Before writing the first draft, identify the constructs the whole script needs and read the matching sections in this reference.",
+        "During every repair pass, review the whole script, not only the currently failing line.",
+        "Re-run the real parser after each repair pass.",
+        "If the parser still fails, use the mistakes catalog plus the relevant syntax sections to rewrite the affected construct family.",
+        "If the canonical reference lacks the needed construct or module information, say so explicitly to the user instead of inventing syntax."
+      ],
+      "validExamples": [
+        {
+          "title": "Safe authoring sequence",
+          "code": [
+            "# 1. choose a saveable path such as scratch/animal-mad-libs.versa",
+            "# 2. read quickstart, interpolation, statements, control flow, and builtins sections",
+            "# 3. write the draft",
+            "# 4. parse-validate the full script",
+            "# 5. if invalid, revisit the full construct set and repair"
+          ],
+          "notes": [
+            "This workflow exists so the user does not see the first broken attempt."
+          ]
+        }
+      ],
+      "invalidExamples": [
+        {
+          "title": "Bad repair behavior",
+          "code": [
+            "# only fix the line number in the error",
+            "# do not re-read docs for other constructs in the script",
+            "# guess module methods that are not documented"
+          ],
+          "notes": [
+            "This is exactly the behavior the canonical workflow is designed to prevent."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "builtins-runtime-inventory",
+      "title": "Built-ins, Special Forms, and Runtime Globals Inventory",
+      "summary": "Exact runtime-provided built-ins, special forms, and global surfaces exposed by the evaluator before any user code runs.",
+      "tags": [
+        "builtins",
+        "globals",
+        "runtime",
+        "special forms"
+      ],
+      "constructs": [
+        "print",
+        "input",
+        "exit",
+        "AsFloat",
+        "int",
+        "float",
+        "str",
+        "bool",
+        "range",
+        "len",
+        "leng",
+        "join",
+        "set",
+        "map",
+        "filter",
+        "any",
+        "all",
+        "sum",
+        "reduce",
+        "json",
+        "xml",
+        "type",
+        "is_type",
+        "is_unset",
+        "env",
+        "unset"
+      ],
+      "queryHints": [
+        "all builtins",
+        "runtime globals",
+        "is_unset",
+        "json builtin",
+        "xml builtin"
+      ],
+      "syntaxPatterns": [
+        "print(`Hello {name}`);",
+        "let ids = range(1, 4);",
+        "let raw = json(\"{\\\"ok\\\":true}\");",
+        "let missing = is_unset(optionalName);"
+      ],
+      "rules": [
+        "Built-ins are available without imports.",
+        "is_unset(identifier) is a special identifier-only call, not a normal value call.",
+        "json(value) and xml(value) accept either a string to parse or a value that is already recognized as that structured type.",
+        "env is injected as an object containing process environment variables.",
+        "unset exists as a runtime sentinel value."
+      ],
+      "tables": [
+        {
+          "title": "Core built-ins and globals",
+          "columns": [
+            "Name",
+            "Shape",
+            "Returns",
+            "Notes"
+          ],
+          "rows": [
+            [
+              "print",
+              "print(value, ...);",
+              "null",
+              "Prints every argument and adds a newline."
+            ],
+            [
+              "input",
+              "input(prompt?);",
+              "string",
+              "Reads one line exactly as typed."
+            ],
+            [
+              "exit",
+              "exit(code?);",
+              "never",
+              "Throws ExitException; default code is 0."
+            ],
+            [
+              "AsFloat",
+              "AsFloat(value);",
+              "float",
+              "One-argument float coercion helper."
+            ],
+            [
+              "int",
+              "int(value);",
+              "int",
+              "Rejects null and non-numeric text."
+            ],
+            [
+              "float",
+              "float(value);",
+              "float",
+              "Rejects null and non-numeric text."
+            ],
+            [
+              "str",
+              "str(value);",
+              "string",
+              "Uses the runtime display formatter."
+            ],
+            [
+              "bool",
+              "bool(value);",
+              "bool",
+              "One-argument boolean coercion helper."
+            ],
+            [
+              "range",
+              "range(end); range(start, end); range(start, end, step);",
+              "list<int>",
+              "Ranges stop before end; a non-zero step controls direction and spacing."
+            ],
+            [
+              "len",
+              "len(value);",
+              "int",
+              "Conventional length helper for lists, strings, maps, and sets."
+            ],
+            [
+              "leng",
+              "leng(value);",
+              "int",
+              "Historical spelling retained as an alias for len."
+            ],
+            [
+              "join",
+              "join(separator, iterable);",
+              "string",
+              "Stringifies members from a list, set, map (keys), or string with the runtime formatter."
+            ],
+            [
+              "set",
+              "set(); set(list); set(value, ...);",
+              "set",
+              "Builds a linked-hash set and preserves insertion order."
+            ],
+            [
+              "map",
+              "map(callable, iterable);",
+              "list",
+              "Calls the callable once per element of a list, set, map (keys), or string and collects the results."
+            ],
+            [
+              "filter",
+              "filter(predicate, iterable);",
+              "list",
+              "Keeps elements from a list, set, map (keys), or string for which the callable predicate is truthy."
+            ],
+            [
+              "any",
+              "any(iterable);",
+              "bool",
+              "Returns true when at least one iterable member is truthy; empty iterables return false."
+            ],
+            [
+              "all",
+              "all(iterable);",
+              "bool",
+              "Returns true when every iterable member is truthy; empty iterables return true."
+            ],
+            [
+              "sum",
+              "sum(iterable, initial?);",
+              "number",
+              "Sums numeric members and preserves an integer result when possible."
+            ],
+            [
+              "reduce",
+              "reduce(reducer, iterable, initial?);",
+              "any",
+              "Folds an iterable left-to-right; an initial value is required for an empty iterable."
+            ],
+            [
+              "json",
+              "json(jsonTextOrValue);",
+              "json value",
+              "Parses a JSON string or passes through an already-recognized json value."
+            ],
+            [
+              "xml",
+              "xml(xmlTextOrValue);",
+              "xml value",
+              "Parses an XML string or passes through an already-recognized xml value."
+            ],
+            [
+              "type",
+              "type(value);",
+              "string",
+              "Returns the runtime type label."
+            ],
+            [
+              "is_type",
+              "is_type(value, expected);",
+              "bool",
+              "Normalizes aliases such as array->list and integer->int."
+            ],
+            [
+              "is_unset",
+              "is_unset(identifier);",
+              "bool",
+              "Requires a bare identifier, not a quoted name or arbitrary expression."
+            ],
+            [
+              "env",
+              "env.KEY",
+              "object",
+              "Process environment map injected into every evaluator."
+            ],
+            [
+              "unset",
+              "unset",
+              "sentinel",
+              "Runtime sentinel value used for unset bindings."
+            ]
+          ]
+        }
+      ],
+      "validExamples": [
+        {
+          "title": "Built-ins and globals in one script",
+          "code": [
+            "let ids = range(1, 4);",
+            "let encoded = json(\"{\\\"ids\\\":[1,2,3]}\");",
+            "print(type(ids));",
+            "print(join(\", \", [str(ids[0]), str(ids[1]), str(ids[2])]));",
+            "print(is_unset(optional_name));",
+            "print(env.HOME ?? \"no-home\");"
+          ],
+          "notes": [
+            "The built-ins do not require imports.",
+            "is_unset uses a bare identifier."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "string-list-map-set-member-methods",
+      "title": "String, List, Map, Entry, and Set Member Methods",
+      "summary": "Native member methods exposed by the evaluator for strings and collection-like runtime values.",
+      "tags": [
+        "members",
+        "string methods",
+        "list methods",
+        "map methods",
+        "set methods"
+      ],
+      "constructs": [
+        "split",
+        "upper",
+        "trim",
+        "keys",
+        "items",
+        "add",
+        "union",
+        "swap"
+      ],
+      "queryHints": [
+        "string methods",
+        "list methods",
+        "set methods",
+        "map items",
+        "entry value"
+      ],
+      "syntaxPatterns": [
+        "\"alpha beta\".split(\" \")",
+        "items.keys()",
+        "tags.add(\"urgent\")",
+        "numbers.swap(0, 2)"
+      ],
+      "rules": [
+        "These methods are resolved by MemberAccessEvaluator and StringEvaluator, not by module imports.",
+        "Map items() returns Entry values with dot, bracket, and method access.",
+        "Set helpers return booleans, sets, or null depending on the operation; mutating helpers change the original set.",
+        "List helpers mutate the list for add, remove, clear, reverse, insert, swap, and sort."
+      ],
+      "tables": [
+        {
+          "title": "String methods",
+          "columns": [
+            "Method",
+            "Returns",
+            "Notes"
+          ],
+          "rows": [
+            [
+              "split(sep?)",
+              "list<string>",
+              "Default separator is a single space string."
+            ],
+            [
+              "splitlines()",
+              "list<string>",
+              "Splits on line boundaries."
+            ],
+            [
+              "toUpper()/upper()",
+              "string",
+              "Uppercase aliases."
+            ],
+            [
+              "toLower()/lower()/casefold()",
+              "string",
+              "Lowercase aliases."
+            ],
+            [
+              "capitalize()/capitalise()",
+              "string",
+              "Capitalizes the first character and lowers the rest."
+            ],
+            [
+              "title()",
+              "string",
+              "Title-cases whitespace-separated words."
+            ],
+            [
+              "trim()/strip()",
+              "string",
+              "Trims both ends."
+            ],
+            [
+              "lstrip()/rstrip()",
+              "string",
+              "Trim-left and trim-right variants."
+            ],
+            [
+              "contains(value)",
+              "bool",
+              "Substring containment."
+            ],
+            [
+              "startswith()/starts_with()",
+              "bool",
+              "Prefix aliases."
+            ],
+            [
+              "endswith()/ends_with()",
+              "bool",
+              "Suffix aliases."
+            ],
+            [
+              "replace(old, new)",
+              "string",
+              "Replaces every occurrence."
+            ],
+            [
+              "count(value)",
+              "int",
+              "Empty needle returns length + 1."
+            ],
+            [
+              "find(value)",
+              "int",
+              "Returns -1 when not found."
+            ],
+            [
+              "index(value)",
+              "int",
+              "Throws when not found."
+            ],
+            [
+              "isalpha()/isdigit()/isalnum()/isspace()",
+              "bool",
+              "Character-class predicates."
+            ],
+            [
+              "islower()/isupper()",
+              "bool",
+              "Require at least one letter."
+            ],
+            [
+              "message",
+              "string",
+              "Direct member access returns the string itself."
+            ]
+          ]
+        },
+        {
+          "title": "Map, Entry, list, and set methods",
+          "columns": [
+            "Type",
+            "Methods",
+            "Notes"
+          ],
+          "rows": [
+            [
+              "map/object",
+              "keys, values, items, update, pop, clear",
+              "items() returns Entry values."
+            ],
+            [
+              "Entry",
+              "key, value, k, v",
+              "entry.key and entry.value also work as direct fields."
+            ],
+            [
+              "list",
+              "add, remove, remove_all, clear, sort, reverse, insert, pop, index, all_indexes, count, contains, size, get, join, swap",
+              "All list member methods are evaluator-side helpers."
+            ],
+            [
+              "set",
+              "add, remove, discard, contains/has, clear, size/len, to_list/values, copy, update/union_update, union, intersection, difference, symmetric_difference, is_subset/issubset, is_superset/issuperset, equals, pop",
+              "Sets preserve insertion order because the runtime uses a linked-hash set."
+            ]
+          ]
+        }
+      ],
+      "validExamples": [
+        {
+          "title": "Native collection member methods",
+          "code": [
+            "let title = \"shoe repair queue\".title();",
+            "let numbers = [1, 2, 3];",
+            "numbers.swap(0, 2);",
+            "let record = {job: \"sole replacement\", price: 250};",
+            "for (entry in record.items()) {",
+            "  print(`${entry.key()}: {entry.value()}`);",
+            "}",
+            "let tags = set([\"repair\", \"urgent\"]);",
+            "print(tags.union([\"paid\"]));"
+          ],
+          "notes": [
+            "These helpers are available without module imports."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "http-module-reference",
+      "title": "`http` Module Reference",
+      "summary": "Exact evaluator-exposed HTTP methods and the supported option families used to build request headers, query strings, auth, and bodies.",
+      "tags": [
+        "module",
+        "http",
+        "networking"
+      ],
+      "constructs": [
+        "http.request",
+        "http.get",
+        "http.post",
+        "http.put",
+        "http.patch",
+        "http.delete"
+      ],
+      "queryHints": [
+        "http module methods",
+        "http auth options",
+        "http body options"
+      ],
+      "syntaxPatterns": [
+        "http.request(\"GET\", url, {query: {page: 1}});",
+        "http.post(url, {headers: {Accept: \"application/json\"}, body: {ok: true}});"
+      ],
+      "rules": [
+        "All exposed HTTP calls are synchronous from Versa and return a normalized response map.",
+        "GET and HEAD requests send no body.",
+        "When body is present and no Content-Type is supplied, the runtime defaults to application/json.",
+        "form and bodyBytesBase64 take precedence over body when supplied."
+      ],
+      "tables": [
+        {
+          "title": "HTTP methods",
+          "columns": [
+            "Method",
+            "Signature",
+            "Returns",
+            "Notes"
+          ],
+          "rows": [
+            [
+              "request",
+              "http.request(method, url, options={})",
+              "object",
+              "General entry point; method is uppercased internally."
+            ],
+            [
+              "get",
+              "http.get(url, options={})",
+              "object",
+              "Convenience wrapper for GET."
+            ],
+            [
+              "post",
+              "http.post(url, options={})",
+              "object",
+              "Convenience wrapper for POST."
+            ],
+            [
+              "put",
+              "http.put(url, options={})",
+              "object",
+              "Convenience wrapper for PUT."
+            ],
+            [
+              "patch",
+              "http.patch(url, options={})",
+              "object",
+              "Convenience wrapper for PATCH."
+            ],
+            [
+              "delete",
+              "http.delete(url, options={})",
+              "object",
+              "Convenience wrapper for DELETE."
+            ]
+          ]
+        },
+        {
+          "title": "Supported option keys",
+          "columns": [
+            "Option",
+            "Shape",
+            "Behavior"
+          ],
+          "rows": [
+            [
+              "headers",
+              "object",
+              "Request headers copied as strings."
+            ],
+            [
+              "query",
+              "object",
+              "Merged into the final query string."
+            ],
+            [
+              "body",
+              "object/list/string/scalar",
+              "Serialized as JSON text when no form or raw bytes override is present."
+            ],
+            [
+              "form",
+              "object",
+              "Serialized as application/x-www-form-urlencoded."
+            ],
+            [
+              "bodyBytesBase64",
+              "base64 string",
+              "Decoded and sent as raw bytes."
+            ],
+            [
+              "timeoutSeconds",
+              "number",
+              "Minimum effective timeout is 1 second."
+            ],
+            [
+              "authHeader",
+              "string",
+              "Applied to Authorization if not already set."
+            ],
+            [
+              "authBearer/authToken",
+              "string",
+              "Converted to Authorization: Bearer <token>."
+            ],
+            [
+              "authBasic",
+              "object",
+              "Needs username and password."
+            ],
+            [
+              "authOAuth2",
+              "object",
+              "Uses token/accessToken and optional tokenType."
+            ],
+            [
+              "authApiKey",
+              "object",
+              "Can place the key in headers or query params."
+            ],
+            [
+              "authDigest",
+              "object",
+              "Digest helper supported by the HTTP module."
+            ],
+            [
+              "auth",
+              "string or object",
+              "Generic auth dispatcher that routes by type."
+            ]
+          ]
+        }
+      ],
+      "validExamples": [
+        {
+          "title": "POST JSON with bearer auth",
+          "code": [
+            "http import *;",
+            "let response = http.post(\"https://api.example.com/jobs\", {",
+            "  authBearer: env.API_TOKEN,",
+            "  headers: {Accept: \"application/json\"},",
+            "  body: {status: \"queued\", count: 3}",
+            "});",
+            "print(response.status);"
+          ],
+          "notes": [
+            "The body is JSON-serialized by default."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "json-xml-module-reference",
+      "title": "`json_xml` Module Reference",
+      "summary": "Full JSON, XML, and text helper surface injected as the `json_xml` module.",
+      "tags": [
+        "module",
+        "json_xml",
+        "json",
+        "xml"
+      ],
+      "constructs": [
+        "parse_json",
+        "to_json",
+        "parse_xml",
+        "json_to_xml",
+        "xml_to_json",
+        "read_text"
+      ],
+      "queryHints": [
+        "json_xml methods",
+        "xml conversion",
+        "write_json",
+        "parse_xml"
+      ],
+      "syntaxPatterns": [
+        "json_xml.parse_json(raw);",
+        "json_xml.write_json(\"scratch/out.json\", payload, true);",
+        "json_xml.obj_to_xml(payload, \"job\");"
+      ],
+      "rules": [
+        "parse_json and parse_xml throw runtime errors when the input text is invalid.",
+        "to_json and obj_to_json are equivalent exports.",
+        "json_to_xml and obj_to_xml default the root element name to root when no name is supplied.",
+        "read_* and write_* helpers operate on UTF-8 text files."
+      ],
+      "tables": [
+        {
+          "title": "`json_xml` exports",
+          "columns": [
+            "Method",
+            "Signature",
+            "Returns",
+            "Notes"
+          ],
+          "rows": [
+            [
+              "parse_json",
+              "json_xml.parse_json(text)",
+              "value",
+              "Parses JSON text into Versa runtime values."
+            ],
+            [
+              "obj_to_json",
+              "json_xml.obj_to_json(value, pretty=false)",
+              "string",
+              "JSON serializer."
+            ],
+            [
+              "to_json",
+              "json_xml.to_json(value, pretty=false)",
+              "string",
+              "Alias of obj_to_json."
+            ],
+            [
+              "read_json",
+              "json_xml.read_json(path)",
+              "value",
+              "Reads then parses JSON."
+            ],
+            [
+              "write_json",
+              "json_xml.write_json(path, value, pretty=false)",
+              "string",
+              "Writes JSON and returns the path."
+            ],
+            [
+              "parse_xml",
+              "json_xml.parse_xml(text)",
+              "object",
+              "Returns a wrapped XML object rooted at root/name/attributes/children/text."
+            ],
+            [
+              "read_xml",
+              "json_xml.read_xml(path)",
+              "object",
+              "Reads then parses XML."
+            ],
+            [
+              "write_xml",
+              "json_xml.write_xml(path, xmlText)",
+              "string",
+              "Writes XML text and returns the path."
+            ],
+            [
+              "json_to_xml",
+              "json_xml.json_to_xml(value, rootName=\"root\")",
+              "string",
+              "Converts a generic value to XML text."
+            ],
+            [
+              "obj_to_xml",
+              "json_xml.obj_to_xml(value, rootName=\"root\")",
+              "string",
+              "Accepts either a generic object or an existing XML wrapper map."
+            ],
+            [
+              "xml_to_json",
+              "json_xml.xml_to_json(xmlText)",
+              "value",
+              "Parses XML and returns the root payload."
+            ],
+            [
+              "read_text",
+              "json_xml.read_text(path)",
+              "string",
+              "Raw UTF-8 file read."
+            ],
+            [
+              "write_text",
+              "json_xml.write_text(path, text)",
+              "string",
+              "Raw UTF-8 file write."
+            ]
+          ]
+        }
+      ],
+      "validExamples": [
+        {
+          "title": "Round-trip JSON and XML",
+          "code": [
+            "json_xml import *;",
+            "let payload = {job: \"heel repair\", price: 180};",
+            "let jsonText = json_xml.to_json(payload, true);",
+            "let xmlText = json_xml.obj_to_xml(payload, \"repair\");",
+            "print(json_xml.parse_json(jsonText).job);",
+            "print(json_xml.xml_to_json(xmlText).job);"
+          ],
+          "notes": [
+            "The same module covers JSON, XML, and raw text helpers."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "filer-module-reference",
+      "title": "`filer` Module Reference",
+      "summary": "Filesystem helpers exposed through the `filer` module for paths, directories, text, JSON, XML, bytes, and CSV.",
+      "tags": [
+        "module",
+        "filer",
+        "filesystem"
+      ],
+      "constructs": [
+        "join",
+        "ensure_dir",
+        "exists",
+        "write_text",
+        "read_csv_records"
+      ],
+      "queryHints": [
+        "filer methods",
+        "csv helpers",
+        "filesystem module"
+      ],
+      "syntaxPatterns": [
+        "filer.join(\"scratch\", \"jobs\", \"queue.json\")",
+        "filer.write_json(path, payload, true)"
+      ],
+      "rules": [
+        "filer writes create parent directories when needed.",
+        "read_bytes_base64 returns the file contents encoded as base64 text.",
+        "read_csv returns row arrays, while read_csv_records returns a record-oriented object wrapper."
+      ],
+      "tables": [
+        {
+          "title": "`filer` exports",
+          "columns": [
+            "Method",
+            "Signature",
+            "Returns",
+            "Notes"
+          ],
+          "rows": [
+            [
+              "join",
+              "filer.join(...parts)",
+              "string",
+              "Joins path fragments using the host filesystem separator."
+            ],
+            [
+              "ensure_dir",
+              "filer.ensure_dir(path)",
+              "string",
+              "Creates the directory tree and returns the path."
+            ],
+            [
+              "exists",
+              "filer.exists(path)",
+              "bool",
+              "Checks file or directory existence."
+            ],
+            [
+              "write_text",
+              "filer.write_text(path, text)",
+              "string",
+              "Writes UTF-8 text and returns the path."
+            ],
+            [
+              "read_text",
+              "filer.read_text(path)",
+              "string",
+              "Reads UTF-8 text."
+            ],
+            [
+              "read_bytes_base64",
+              "filer.read_bytes_base64(path)",
+              "string",
+              "Reads binary bytes and base64-encodes them."
+            ],
+            [
+              "write_json",
+              "filer.write_json(path, value, pretty=false)",
+              "string",
+              "Writes JSON text."
+            ],
+            [
+              "read_json",
+              "filer.read_json(path)",
+              "value",
+              "Reads and parses JSON."
+            ],
+            [
+              "write_xml",
+              "filer.write_xml(path, xmlText)",
+              "string",
+              "Writes XML text."
+            ],
+            [
+              "read_xml",
+              "filer.read_xml(path)",
+              "object",
+              "Reads and parses XML."
+            ],
+            [
+              "write_csv",
+              "filer.write_csv(path, rows)",
+              "string",
+              "Writes CSV rows."
+            ],
+            [
+              "read_csv",
+              "filer.read_csv(path)",
+              "list",
+              "Reads CSV into row arrays."
+            ],
+            [
+              "read_csv_records",
+              "filer.read_csv_records(path)",
+              "object",
+              "Reads CSV into a records-style object wrapper."
+            ]
+          ]
+        }
+      ],
+      "validExamples": [
+        {
+          "title": "Save a report to scratch",
+          "code": [
+            "filer import *;",
+            "let outDir = filer.join(\"scratch\", \"shoe-repair\");",
+            "filer.ensure_dir(outDir);",
+            "let outPath = filer.join(outDir, \"inventory.json\");",
+            "filer.write_json(outPath, {count: 3}, true);",
+            "print(filer.read_text(outPath));"
+          ],
+          "notes": [
+            "filer handles both path joining and structured file writes."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "email-module-reference",
+      "title": "`email` Module Reference",
+      "summary": "SMTP email sending surface exposed through the `email` module.",
+      "tags": [
+        "module",
+        "email",
+        "smtp"
+      ],
+      "constructs": [
+        "email.send"
+      ],
+      "queryHints": [
+        "email module",
+        "smtp options",
+        "send email"
+      ],
+      "syntaxPatterns": [
+        "email.send({host: ..., port: ..., to: ...})"
+      ],
+      "rules": [
+        "email exposes a single send(options) entry point.",
+        "The options map can use either auth or username/password credentials.",
+        "The result is a normalized delivery response envelope."
+      ],
+      "tables": [
+        {
+          "title": "`email` exports and options",
+          "columns": [
+            "Method or option",
+            "Shape",
+            "Notes"
+          ],
+          "rows": [
+            [
+              "send",
+              "email.send(options)",
+              "Sends one SMTP message and returns a structured result map."
+            ],
+            [
+              "host / port",
+              "string / number",
+              "SMTP server address and port."
+            ],
+            [
+              "ssl / startTls",
+              "bool",
+              "Transport security flags."
+            ],
+            [
+              "auth / username / password",
+              "object or strings",
+              "Authentication credentials."
+            ],
+            [
+              "from / to",
+              "string or list",
+              "Sender and recipient fields."
+            ],
+            [
+              "subject",
+              "string",
+              "Message subject."
+            ],
+            [
+              "text / html",
+              "string",
+              "Plain-text and HTML body variants."
+            ],
+            [
+              "timeoutMs",
+              "number",
+              "Delivery timeout in milliseconds."
+            ]
+          ]
+        }
+      ],
+      "validExamples": [
+        {
+          "title": "Send a text email",
+          "code": [
+            "email import *;",
+            "let result = email.send({",
+            "  host: env.SMTP_HOST,",
+            "  port: 587,",
+            "  startTls: true,",
+            "  username: env.SMTP_USER,",
+            "  password: env.SMTP_PASS,",
+            "  from: \"ops@example.com\",",
+            "  to: [\"owner@example.com\"],",
+            "  subject: \"Repairs queued\",",
+            "  text: \"Three shoes are ready for pickup.\"",
+            "});",
+            "print(result.status);"
+          ],
+          "notes": [
+            "Use html instead of text when you need an HTML message body."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "crypto-module-reference",
+      "title": "`crypto` Module Reference",
+      "summary": "Full hashing, HMAC, encoding, random, key-derivation, and AES-GCM surface exposed through the `crypto` module.",
+      "tags": [
+        "module",
+        "crypto",
+        "hashing",
+        "encryption"
+      ],
+      "constructs": [
+        "sha256",
+        "hmac_sha256",
+        "base64_encode",
+        "pbkdf2",
+        "aes_gcm_encrypt"
+      ],
+      "queryHints": [
+        "crypto methods",
+        "pbkdf2",
+        "aes gcm",
+        "uuid",
+        "base64url"
+      ],
+      "syntaxPatterns": [
+        "crypto.sha256(\"text\")",
+        "crypto.pbkdf2(password, salt, 100000, 32, \"HmacSHA256\")",
+        "crypto.aes_gcm_encrypt(plaintext, key, iv?)"
+      ],
+      "rules": [
+        "crypto exports are evaluator-side wrappers over the Java runtime implementation.",
+        "pbkdf2 defaults to 100000 iterations, 32-byte keys, and HmacSHA256 when optional arguments are omitted.",
+        "aes_gcm_encrypt returns a structured object containing ciphertext material, while aes_gcm_decrypt returns plaintext text."
+      ],
+      "tables": [
+        {
+          "title": "`crypto` exports",
+          "columns": [
+            "Method",
+            "Signature",
+            "Returns",
+            "Notes"
+          ],
+          "rows": [
+            [
+              "sha256",
+              "crypto.sha256(text)",
+              "string",
+              "Hex digest."
+            ],
+            [
+              "sha512",
+              "crypto.sha512(text)",
+              "string",
+              "Hex digest."
+            ],
+            [
+              "hmac_sha256",
+              "crypto.hmac_sha256(secret, message)",
+              "string",
+              "Hex HMAC digest."
+            ],
+            [
+              "hmac_sha512",
+              "crypto.hmac_sha512(secret, message)",
+              "string",
+              "Hex HMAC digest."
+            ],
+            [
+              "base64_encode",
+              "crypto.base64_encode(text)",
+              "string",
+              "Standard base64 output."
+            ],
+            [
+              "base64_decode",
+              "crypto.base64_decode(base64)",
+              "string",
+              "UTF-8 decoded text."
+            ],
+            [
+              "base64url_encode",
+              "crypto.base64url_encode(text)",
+              "string",
+              "Base64url output without standard alphabet."
+            ],
+            [
+              "base64url_decode",
+              "crypto.base64url_decode(base64url)",
+              "string",
+              "UTF-8 decoded text."
+            ],
+            [
+              "random_hex",
+              "crypto.random_hex(numBytes)",
+              "string",
+              "Random bytes rendered as hex."
+            ],
+            [
+              "random_bytes",
+              "crypto.random_bytes(numBytes)",
+              "string",
+              "Random bytes rendered as base64 text."
+            ],
+            [
+              "uuid",
+              "crypto.uuid()",
+              "string",
+              "Random UUID string."
+            ],
+            [
+              "pbkdf2",
+              "crypto.pbkdf2(password, salt, iterations=100000, keyLength=32, algorithm=\"HmacSHA256\")",
+              "string",
+              "Derived key rendered as base64 text."
+            ],
+            [
+              "aes_gcm_encrypt",
+              "crypto.aes_gcm_encrypt(plaintext, key, iv?)",
+              "object",
+              "Returns ciphertext metadata including IV when generated."
+            ],
+            [
+              "aes_gcm_decrypt",
+              "crypto.aes_gcm_decrypt(ciphertext, key, iv)",
+              "string",
+              "Decrypts AES-GCM ciphertext."
+            ]
+          ]
+        }
+      ],
+      "validExamples": [
+        {
+          "title": "Hash and encrypt",
+          "code": [
+            "crypto import *;",
+            "let digest = crypto.sha256(\"shoe-repair-job\");",
+            "let encrypted = crypto.aes_gcm_encrypt(\"ready\", env.APP_KEY);",
+            "let plain = crypto.aes_gcm_decrypt(encrypted.ciphertext, env.APP_KEY, encrypted.iv);",
+            "print(digest);",
+            "print(plain);"
+          ],
+          "notes": [
+            "AES-GCM encryption returns a structured object, not only a raw ciphertext string."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "jwt-module-reference",
+      "title": "`jwt` Module Reference",
+      "summary": "JWT signing, verification, and decode helpers exposed through the `jwt` module.",
+      "tags": [
+        "module",
+        "jwt",
+        "auth"
+      ],
+      "constructs": [
+        "jwt.sign",
+        "jwt.verify",
+        "jwt.decode"
+      ],
+      "queryHints": [
+        "jwt methods",
+        "jwt sign",
+        "jwt verify"
+      ],
+      "syntaxPatterns": [
+        "jwt.sign(payload, secret, {algorithm: \"HS256\"})",
+        "jwt.verify(token, secret, {issuer: \"liwiro\"})"
+      ],
+      "rules": [
+        "jwt.sign requires the payload to be an object.",
+        "jwt.verify returns a structured verification result object.",
+        "Supported signing algorithms are HS256, HS384, and HS512."
+      ],
+      "tables": [
+        {
+          "title": "`jwt` exports",
+          "columns": [
+            "Method",
+            "Signature",
+            "Returns",
+            "Notes"
+          ],
+          "rows": [
+            [
+              "sign",
+              "jwt.sign(payloadObject, secret, options={})",
+              "string",
+              "Signs a JWT token string."
+            ],
+            [
+              "verify",
+              "jwt.verify(token, secret, options={})",
+              "object",
+              "Verifies a token and returns payload/metadata."
+            ],
+            [
+              "decode",
+              "jwt.decode(token)",
+              "object",
+              "Decodes without verifying the signature."
+            ]
+          ]
+        },
+        {
+          "title": "Common JWT option keys",
+          "columns": [
+            "Option",
+            "Notes"
+          ],
+          "rows": [
+            [
+              "algorithm",
+              "HS256, HS384, or HS512."
+            ],
+            [
+              "issuer / audience / subject",
+              "Standard JWT claim helpers."
+            ],
+            [
+              "expiresInSeconds",
+              "exp claim helper."
+            ],
+            [
+              "notBeforeSeconds",
+              "nbf claim helper."
+            ]
+          ]
+        }
+      ],
+      "validExamples": [
+        {
+          "title": "Sign and verify a token",
+          "code": [
+            "jwt import *;",
+            "let token = jwt.sign({user: \"zulan\"}, env.JWT_SECRET, {algorithm: \"HS256\", issuer: \"liwiro\"});",
+            "let verified = jwt.verify(token, env.JWT_SECRET, {issuer: \"liwiro\"});",
+            "print(verified.payload.user);"
+          ],
+          "notes": [
+            "jwt.decode(token) skips verification and is only for inspection."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "time-module-reference",
+      "title": "`time` Module Reference",
+      "summary": "Low-level clock, sleep, formatting, and time-struct helpers exposed through the `time` module.",
+      "tags": [
+        "module",
+        "time",
+        "clock"
+      ],
+      "constructs": [
+        "time.time",
+        "time.sleep",
+        "time.strftime",
+        "time.ctime"
+      ],
+      "queryHints": [
+        "time module methods",
+        "strftime",
+        "ctime",
+        "time struct"
+      ],
+      "syntaxPatterns": [
+        "let stamp = time.time();",
+        "let struct = time.localtime();",
+        "print(time.strftime(\"%Y-%m-%d\", struct));"
+      ],
+      "rules": [
+        "sleep expects non-negative seconds and may be fractional.",
+        "strftime requires a format string and a time struct map; when omitted in the wrapper it defaults to localtime(now).",
+        "ctime supports default, iso, full, and custom format modes."
+      ],
+      "tables": [
+        {
+          "title": "`time` exports",
+          "columns": [
+            "Method",
+            "Signature",
+            "Returns",
+            "Notes"
+          ],
+          "rows": [
+            [
+              "time",
+              "time.time()",
+              "float",
+              "Epoch seconds as a fractional number."
+            ],
+            [
+              "time_ns",
+              "time.time_ns()",
+              "int",
+              "Epoch nanoseconds."
+            ],
+            [
+              "perf_counter",
+              "time.perf_counter()",
+              "float",
+              "Monotonic performance timer."
+            ],
+            [
+              "monotonic",
+              "time.monotonic()",
+              "float",
+              "Alias-style monotonic timer."
+            ],
+            [
+              "process_time",
+              "time.process_time()",
+              "float",
+              "Current thread CPU time when supported."
+            ],
+            [
+              "sleep",
+              "time.sleep(seconds)",
+              "null",
+              "Sleeps for the requested duration."
+            ],
+            [
+              "localtime",
+              "time.localtime(timestamp?)",
+              "object",
+              "Returns a time struct in the system timezone."
+            ],
+            [
+              "gmtime",
+              "time.gmtime(timestamp?)",
+              "object",
+              "Returns a UTC time struct."
+            ],
+            [
+              "strftime",
+              "time.strftime(format, timeStruct?)",
+              "string",
+              "Formats a time struct."
+            ],
+            [
+              "ctime",
+              "time.ctime(timestamp?, format?, customPattern?)",
+              "string",
+              "Supports default, iso, full, custom, and direct pattern strings."
+            ]
+          ]
+        },
+        {
+          "title": "Time struct fields",
+          "columns": [
+            "Field",
+            "Meaning"
+          ],
+          "rows": [
+            [
+              "year, month, day",
+              "Calendar date components."
+            ],
+            [
+              "hour, minute, second",
+              "Clock components."
+            ],
+            [
+              "weekday, yearday",
+              "Weekday and day-of-year values."
+            ],
+            [
+              "timezone, offset_seconds",
+              "Timezone label and offset metadata."
+            ]
+          ]
+        }
+      ],
+      "validExamples": [
+        {
+          "title": "Format local time",
+          "code": [
+            "time import *;",
+            "let now = time.localtime();",
+            "print(time.strftime(\"%Y-%m-%d %H:%M:%S\", now));",
+            "print(time.ctime(null, \"iso\"));"
+          ],
+          "notes": [
+            "Pass null as the timestamp to use the current instant."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "datetime-module-reference",
+      "title": "`datetime` Module Reference",
+      "summary": "Date/time constructors, timezone helpers, timedelta constructors, and the helper methods supported on returned datetime-like values.",
+      "tags": [
+        "module",
+        "datetime",
+        "date",
+        "timedelta",
+        "timezone"
+      ],
+      "constructs": [
+        "datetime.now",
+        "datetime.fromtimestamp",
+        "datetime.date.today",
+        "datetime.time.from_components",
+        "datetime.timedelta",
+        "datetime.timezone"
+      ],
+      "queryHints": [
+        "datetime module methods",
+        "timedelta",
+        "timezone",
+        "isoformat",
+        "human_readable"
+      ],
+      "syntaxPatterns": [
+        "let now = datetime.now();",
+        "let due = now + datetime.timedelta({days: 2});",
+        "print(due.isoformat());"
+      ],
+      "rules": [
+        "datetime.now and fromtimestamp return structured datetime values, not opaque Java objects.",
+        "datetime.time.from_components validates hour/minute/second/microsecond bounds.",
+        "datetime.timedelta accepts a map, a list, a number of seconds, or null.",
+        "datetime.timezone accepts either offset seconds or a +HH:MM/-HH:MM string."
+      ],
+      "tables": [
+        {
+          "title": "`datetime` exports",
+          "columns": [
+            "Method",
+            "Signature",
+            "Returns",
+            "Notes"
+          ],
+          "rows": [
+            [
+              "now",
+              "datetime.now()",
+              "datetime value",
+              "Current local datetime wrapper."
+            ],
+            [
+              "fromtimestamp",
+              "datetime.fromtimestamp(ts)",
+              "datetime value",
+              "Local datetime from epoch timestamp."
+            ],
+            [
+              "date.today",
+              "datetime.date.today()",
+              "date value",
+              "Current local date wrapper."
+            ],
+            [
+              "date.fromtimestamp",
+              "datetime.date.fromtimestamp(ts)",
+              "date value",
+              "Date from epoch timestamp."
+            ],
+            [
+              "time.from_components",
+              "datetime.time.from_components(hour, minute, second, microsecond)",
+              "time value",
+              "Validated time wrapper."
+            ],
+            [
+              "timedelta",
+              "datetime.timedelta(value)",
+              "timedelta value",
+              "Accepts map, list, number, or null."
+            ],
+            [
+              "timezone",
+              "datetime.timezone(offsetSecondsOrString)",
+              "timezone value",
+              "Accepts offset seconds or +HH:MM/-HH:MM."
+            ]
+          ]
+        },
+        {
+          "title": "Helper methods on returned values",
+          "columns": [
+            "Value type",
+            "Methods",
+            "Notes"
+          ],
+          "rows": [
+            [
+              "datetime",
+              "isoformat(), human(format?), human_readable(format?)",
+              "Supports + and - with timedelta and subtraction from another datetime."
+            ],
+            [
+              "date",
+              "isoformat(), human(format?), human_readable(format?)",
+              "Date-specific display helpers."
+            ],
+            [
+              "time",
+              "isoformat(), human(format?), human_readable(format?)",
+              "Time-specific display helpers."
+            ],
+            [
+              "timedelta",
+              "total_seconds(), human(), human_readable()",
+              "Duration helpers."
+            ],
+            [
+              "timezone",
+              "isoformat(), human(), human_readable()",
+              "Offset and label helpers."
+            ]
+          ]
+        }
+      ],
+      "validExamples": [
+        {
+          "title": "Datetime arithmetic and helpers",
+          "code": [
+            "datetime import *;",
+            "let start = datetime.now();",
+            "let delay = datetime.timedelta({hours: 2, minutes: 30});",
+            "let end = start + delay;",
+            "print(end.isoformat());",
+            "print(delay.total_seconds());"
+          ],
+          "notes": [
+            "datetime and timedelta values participate in evaluator-side arithmetic."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "random-module-reference",
+      "title": "`random` Module Reference",
+      "summary": "All random-number, sampling, shuffle, and probability helpers exposed through the `random` module.",
+      "tags": [
+        "module",
+        "random",
+        "sampling"
+      ],
+      "constructs": [
+        "seed",
+        "random",
+        "randint",
+        "randints",
+        "randrange",
+        "uniform",
+        "choice",
+        "choices",
+        "shuffle",
+        "sample",
+        "boolean",
+        "chance"
+      ],
+      "queryHints": [
+        "random module methods",
+        "randrange",
+        "shuffle",
+        "sample",
+        "chance"
+      ],
+      "syntaxPatterns": [
+        "random.seed(42);",
+        "let pick = random.choice(items);",
+        "let ok = random.chance(0.75);"
+      ],
+      "rules": [
+        "seed accepts null or a seed value and mutates the module's shared random state.",
+        "randint is inclusive on both ends.",
+        "randrange supports one-argument and two/three-argument forms through the evaluator wrapper.",
+        "shuffle mutates the input list and returns the same list reference."
+      ],
+      "tables": [
+        {
+          "title": "`random` exports",
+          "columns": [
+            "Method",
+            "Signature",
+            "Returns",
+            "Notes"
+          ],
+          "rows": [
+            [
+              "seed",
+              "random.seed(value?)",
+              "null",
+              "Reseeds the shared RNG."
+            ],
+            [
+              "random",
+              "random.random()",
+              "float",
+              "Uniform value in [0, 1)."
+            ],
+            [
+              "randint",
+              "random.randint(min, max)",
+              "int",
+              "Inclusive range."
+            ],
+            [
+              "randints",
+              "random.randints(min, max, count)",
+              "list<int>",
+              "Repeated inclusive draws."
+            ],
+            [
+              "randrange",
+              "random.randrange(stop) or random.randrange(start, stop, step?)",
+              "int",
+              "Step defaults to 1."
+            ],
+            [
+              "uniform",
+              "random.uniform(min, max)",
+              "float",
+              "Uniform float in range."
+            ],
+            [
+              "choice",
+              "random.choice(list)",
+              "value",
+              "Single element from a list."
+            ],
+            [
+              "choices",
+              "random.choices(list, count=1)",
+              "list",
+              "Repeated draws with replacement."
+            ],
+            [
+              "shuffle",
+              "random.shuffle(list)",
+              "list",
+              "Mutates and returns the original list."
+            ],
+            [
+              "sample",
+              "random.sample(list, count)",
+              "list",
+              "Unique sample without replacement."
+            ],
+            [
+              "boolean",
+              "random.boolean()",
+              "bool",
+              "Random true/false."
+            ],
+            [
+              "chance",
+              "random.chance(probability)",
+              "bool",
+              "Probability must be between 0 and 1."
+            ]
+          ]
+        }
+      ],
+      "validExamples": [
+        {
+          "title": "Sample repair jobs",
+          "code": [
+            "random import *;",
+            "let jobs = [\"sole\", \"zip\", \"heel\", \"polish\"];",
+            "random.seed(42);",
+            "print(random.sample(jobs, 2));",
+            "print(random.chance(0.6));"
+          ],
+          "notes": [
+            "Use sample for unique picks and choices for repeated picks with replacement."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vdb-bridge-global-reference",
+      "title": "`vdb` Bridge Global Reference",
+      "summary": "Full global `vdb` bridge surface exposed by MemberAccessEvaluator, including auth, context, CRUD, indexes, scripts, jobs, transactions, aggregation, TUMI, and model binding.",
+      "tags": [
+        "module",
+        "vdb",
+        "database",
+        "bridge"
+      ],
+      "constructs": [
+        "vdb.auth",
+        "vdb.use",
+        "vdb.collection",
+        "vdb.execute_script",
+        "vdb.schedule_job",
+        "vdb.tumi"
+      ],
+      "queryHints": [
+        "all vdb methods",
+        "vdb auth",
+        "vdb scripts",
+        "vdb jobs",
+        "vdb indexes",
+        "tumi"
+      ],
+      "syntaxPatterns": [
+        "vdb.auth({user: \"zulan\", pass: \"secret\"});",
+        "vdb.use({domain: \"liwiro\", db: \"main\"});",
+        "let parts = vdb.collection(\"parts\");"
+      ],
+      "rules": [
+        "All `vdb` methods other than auth and config require an authenticated VDB session.",
+        "The bridge returns a normalized response envelope with ok, status, operation, message, data, error, and context fields.",
+        "set and use accept domain with db or database aliases.",
+        "Wrong credentials surface VDBAuthenticationException; missing auth surfaces VDBNotAuthenticatedException."
+      ],
+      "tables": [
+        {
+          "title": "Auth, context, and metadata",
+          "columns": [
+            "Method",
+            "Signature",
+            "Returns",
+            "Notes"
+          ],
+          "rows": [
+            [
+              "auth",
+              "vdb.auth({user, pass})",
+              "object",
+              "Starts or refreshes the authenticated VDB session."
+            ],
+            [
+              "config",
+              "vdb.config(); vdb.config({logging: true|false});",
+              "object",
+              "Reads or updates bridge logging flags; logs and logging are accepted."
+            ],
+            [
+              "set",
+              "vdb.set({domain, db|database})",
+              "object",
+              "Sets the active domain/database context."
+            ],
+            [
+              "use",
+              "vdb.use({domain, db|database})",
+              "object",
+              "Same context intent as set; validates domain/db existence."
+            ],
+            [
+              "define",
+              "vdb.define({...})",
+              "object",
+              "Defines domain/db metadata through the bridge."
+            ],
+            [
+              "list_domains",
+              "vdb.list_domains()",
+              "object",
+              "Lists domains."
+            ],
+            [
+              "list_databases",
+              "vdb.list_databases()",
+              "object",
+              "Lists databases in the current domain."
+            ],
+            [
+              "list_collections",
+              "vdb.list_collections()",
+              "object",
+              "Lists collections in the current database."
+            ],
+            [
+              "drop",
+              "vdb.drop(collectionOrPayload)",
+              "object",
+              "Drops a collection or context target, depending on payload."
+            ],
+            [
+              "model",
+              "vdb.model(classRef)",
+              "object",
+              "Registers a Versa class against a VDB collection binding."
+            ],
+            [
+              "collection",
+              "vdb.collection(name)",
+              "collection handle",
+              "Returns a collection wrapper with collection-scoped methods."
+            ]
+          ]
+        },
+        {
+          "title": "CRUD, aggregation, and index operations",
+          "columns": [
+            "Method",
+            "Signature",
+            "Returns",
+            "Notes"
+          ],
+          "rows": [
+            [
+              "insert",
+              "vdb.insert(collection, doc)",
+              "object",
+              "Collection-agnostic insert wrapper."
+            ],
+            [
+              "find",
+              "vdb.find(collection, query, limit?)",
+              "object",
+              "Collection-agnostic find wrapper."
+            ],
+            [
+              "update",
+              "vdb.update(collection, query, patch)",
+              "object",
+              "Collection-agnostic update wrapper."
+            ],
+            [
+              "delete",
+              "vdb.delete(collection, query)",
+              "object",
+              "Collection-agnostic delete wrapper."
+            ],
+            [
+              "aggregate",
+              "vdb.aggregate(collection, pipeline)",
+              "object",
+              "Runs an aggregation pipeline."
+            ],
+            [
+              "create_index",
+              "vdb.create_index(collection, field, unique=false)",
+              "object",
+              "Creates an index."
+            ],
+            [
+              "drop_index",
+              "vdb.drop_index(collection, field)",
+              "object",
+              "Drops an index."
+            ],
+            [
+              "list_indexes",
+              "vdb.list_indexes(collection)",
+              "object",
+              "Lists indexes for a collection."
+            ],
+            [
+              "rebuild_indexes",
+              "vdb.rebuild_indexes(collection)",
+              "object",
+              "Rebuilds collection indexes."
+            ],
+            [
+              "index_advisor_status",
+              "vdb.index_advisor_status()",
+              "object",
+              "Reads advisor status for the current domain/db."
+            ],
+            [
+              "index_advisor_apply",
+              "vdb.index_advisor_apply(limit?)",
+              "object",
+              "Applies recommended indexes."
+            ],
+            [
+              "index_advisor_policy",
+              "vdb.index_advisor_policy(mode?)",
+              "object",
+              "Reads or sets advisor policy: auto, manual, off."
+            ],
+            [
+              "index_advisor_remove_auto_indexes",
+              "vdb.index_advisor_remove_auto_indexes()",
+              "object",
+              "Removes advisor-created auto indexes."
+            ]
+          ]
+        },
+        {
+          "title": "Scripts, jobs, transactions, and RBAC",
+          "columns": [
+            "Method",
+            "Signature",
+            "Returns",
+            "Notes"
+          ],
+          "rows": [
+            [
+              "save_script",
+              "vdb.save_script(name, service, code)",
+              "object",
+              "Stores a Versa script in VDB."
+            ],
+            [
+              "load_script",
+              "vdb.load_script(name)",
+              "object",
+              "Loads a stored script."
+            ],
+            [
+              "delete_script",
+              "vdb.delete_script(name)",
+              "object",
+              "Deletes a stored script."
+            ],
+            [
+              "execute_script",
+              "vdb.execute_script(name, params={})",
+              "object",
+              "Executes a stored script through the bridge."
+            ],
+            [
+              "list_scripts",
+              "vdb.list_scripts()",
+              "object",
+              "Lists stored script names/metadata."
+            ],
+            [
+              "schedule_job",
+              "vdb.schedule_job({name, script, start_at?, every_seconds?, params?})",
+              "object",
+              "Creates an in-memory scheduled script job."
+            ],
+            [
+              "list_jobs",
+              "vdb.list_jobs()",
+              "object",
+              "Lists scheduled jobs."
+            ],
+            [
+              "cancel_job",
+              "vdb.cancel_job(name)",
+              "object",
+              "Cancels a scheduled job."
+            ],
+            [
+              "begin_transaction",
+              "vdb.begin_transaction()",
+              "object",
+              "Begins a transaction."
+            ],
+            [
+              "commit_transaction",
+              "vdb.commit_transaction()",
+              "object",
+              "Commits the active transaction."
+            ],
+            [
+              "abort_transaction",
+              "vdb.abort_transaction()",
+              "object",
+              "Aborts the active transaction."
+            ],
+            [
+              "tumi",
+              "vdb.tumi(payload)",
+              "object",
+              "Forwards RBAC/TUMI commands to VDB."
+            ]
+          ]
+        },
+        {
+          "title": "Normalized response envelope",
+          "columns": [
+            "Field",
+            "Meaning"
+          ],
+          "rows": [
+            [
+              "ok",
+              "Boolean success flag."
+            ],
+            [
+              "status",
+              "success, error, or not_found."
+            ],
+            [
+              "operation",
+              "Bridge operation name."
+            ],
+            [
+              "message",
+              "Human-readable result text."
+            ],
+            [
+              "data",
+              "Operation payload."
+            ],
+            [
+              "error",
+              "Error detail when present."
+            ],
+            [
+              "context",
+              "Domain, database, collection, timestamp, and operation metadata."
+            ]
+          ]
+        }
+      ],
+      "validExamples": [
+        {
+          "title": "Authenticate, switch context, and query a collection",
+          "code": [
+            "vdb.auth({user: env.VDB_USER, pass: env.VDB_PASS});",
+            "vdb.use({domain: \"liwiro\", db: \"main\"});",
+            "let res = vdb.find(\"repairs\", {status: \"queued\"}, 10);",
+            "print(res.status);"
+          ],
+          "notes": [
+            "Call auth before any non-config bridge operation."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vdb-collection-and-model-reference",
+      "title": "VDB Collection, Class, and Instance Method Reference",
+      "summary": "Evaluator-exposed methods on collection handles, VDB-bound Versa classes, and persisted Versa instances.",
+      "tags": [
+        "vdb",
+        "collection handle",
+        "class binding",
+        "instance methods"
+      ],
+      "constructs": [
+        "collection.insert",
+        "Class.find_many",
+        "Class.create",
+        "instance.save",
+        "instance.reload"
+      ],
+      "queryHints": [
+        "vdb collection methods",
+        "vdb class methods",
+        "vdb instance methods"
+      ],
+      "syntaxPatterns": [
+        "let repairs = vdb.collection(\"repairs\");",
+        "let Repair = vdb.model(RepairJob);",
+        "let row = Repair.create({status: \"queued\"});"
+      ],
+      "rules": [
+        "Collection handles expose collection-scoped CRUD and index helpers.",
+        "Versa classes bound through vdb.model(...) expose static data-access helpers.",
+        "Persisted instances expose save/update/delete/reload plus schema and field access helpers."
+      ],
+      "tables": [
+        {
+          "title": "Collection handle methods",
+          "columns": [
+            "Method",
+            "Signature",
+            "Notes"
+          ],
+          "rows": [
+            [
+              "insert",
+              "collection.insert(doc)",
+              "Insert into the bound collection."
+            ],
+            [
+              "find",
+              "collection.find(query, limit?)",
+              "Query the bound collection."
+            ],
+            [
+              "update",
+              "collection.update(query, patch)",
+              "Update matching documents."
+            ],
+            [
+              "delete",
+              "collection.delete(query)",
+              "Delete matching documents."
+            ],
+            [
+              "create_index",
+              "collection.create_index(field, unique=false)",
+              "Create a collection index."
+            ],
+            [
+              "drop_index",
+              "collection.drop_index(field)",
+              "Drop a collection index."
+            ],
+            [
+              "list_indexes",
+              "collection.list_indexes()",
+              "List collection indexes."
+            ],
+            [
+              "rebuild_indexes",
+              "collection.rebuild_indexes()",
+              "Rebuild collection indexes."
+            ]
+          ]
+        },
+        {
+          "title": "VDB-bound class methods",
+          "columns": [
+            "Method",
+            "Signature",
+            "Notes"
+          ],
+          "rows": [
+            [
+              "name/class_name",
+              "Class.name or Class.class_name",
+              "Class metadata."
+            ],
+            [
+              "collection/collection_name",
+              "Class.collection",
+              "Resolved collection name."
+            ],
+            [
+              "binding_info/meta",
+              "Class.binding_info()",
+              "Binding metadata."
+            ],
+            [
+              "schema/schema_defaults",
+              "Class.schema()",
+              "Schema map."
+            ],
+            [
+              "new/build/construct",
+              "Class.new(...)",
+              "Create an unsaved instance."
+            ],
+            [
+              "find",
+              "Class.find(query={})",
+              "Find one instance."
+            ],
+            [
+              "find_by_id",
+              "Class.find_by_id(id)",
+              "Find one by id."
+            ],
+            [
+              "find_many/all",
+              "Class.find_many(query={}, limit=100); Class.all(limit?)",
+              "Find multiple instances."
+            ],
+            [
+              "count",
+              "Class.count(query={})",
+              "Count matches."
+            ],
+            [
+              "exists",
+              "Class.exists(query={})",
+              "Existence check."
+            ],
+            [
+              "delete_many/delete_by_id",
+              "Class.delete_many(query={}); Class.delete_by_id(id)",
+              "Delete helpers."
+            ],
+            [
+              "update_many",
+              "Class.update_many(query={}, patch={})",
+              "Bulk update helper."
+            ],
+            [
+              "create",
+              "Class.create(data={})",
+              "Instantiate, assign, persist, and return an instance."
+            ],
+            [
+              "from_object",
+              "Class.from_object(data, persist=false)",
+              "Build from raw data, optionally persisting."
+            ],
+            [
+              "first_or_create",
+              "Class.first_or_create(query={}, defaults={})",
+              "Find or insert helper."
+            ],
+            [
+              "upsert",
+              "Class.upsert(query={}, patch={})",
+              "Upsert helper."
+            ]
+          ]
+        },
+        {
+          "title": "Persisted instance methods",
+          "columns": [
+            "Method",
+            "Signature",
+            "Notes"
+          ],
+          "rows": [
+            [
+              "save",
+              "instance.save()",
+              "Persists the instance."
+            ],
+            [
+              "update",
+              "instance.update(patch={})",
+              "Updates persisted fields."
+            ],
+            [
+              "delete",
+              "instance.delete()",
+              "Deletes the backing row."
+            ],
+            [
+              "reload/refresh",
+              "instance.reload()",
+              "Reloads from VDB."
+            ],
+            [
+              "to_object",
+              "instance.to_object()",
+              "Returns a document map."
+            ],
+            [
+              "assign",
+              "instance.assign(patch={})",
+              "Mutates fields without necessarily persisting yet."
+            ],
+            [
+              "set/get",
+              "instance.set(key, value); instance.get(key, fallback?)",
+              "Field access helpers."
+            ],
+            [
+              "clone",
+              "instance.clone()",
+              "Clones the instance."
+            ],
+            [
+              "validate",
+              "instance.validate()",
+              "Runs schema validation."
+            ],
+            [
+              "props_from_schema",
+              "instance.props_from_schema()",
+              "Applies schema defaults/properties."
+            ],
+            [
+              "class_name/id/is_persisted",
+              "instance.class_name, instance.id, instance.is_persisted",
+              "Instance metadata."
+            ]
+          ]
+        }
+      ],
+      "validExamples": [
+        {
+          "title": "Collection and model-style access",
+          "code": [
+            "let repairs = vdb.collection(\"repairs\");",
+            "repairs.create_index(\"ticket_id\", true);",
+            "let rows = repairs.find({status: \"queued\"}, 5);",
+            "print(rows.status);"
+          ],
+          "notes": [
+            "Class-bound helpers depend on the vdb.model(...) binding flow, while collection handles only need vdb.collection(name)."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "agent-and-portal-operation-reference",
+      "title": "Verse Agent, VI Portal, and VDB Portal Operation",
+      "summary": "How Verse agents are expected to operate the VI and VDB surfaces now that location changes and page actions are direct rather than confirmation-driven.",
+      "tags": [
+        "verse agents",
+        "vi portal",
+        "vdb portal",
+        "operations"
+      ],
+      "constructs": [
+        "vi-script artifact",
+        "vdb-query artifact",
+        "Run",
+        "Save and Run",
+        "Run Query"
+      ],
+      "queryHints": [
+        "agent capabilities",
+        "vi portal actions",
+        "vdb portal actions",
+        "automatic location change"
+      ],
+      "syntaxPatterns": [
+        "artifact.kind = vi-script",
+        "artifact.kind = vdb-query",
+        "executeLabel = Run"
+      ],
+      "rules": [
+        "Verse agents should return direct VI or VDB artifacts instead of location-only placeholder artifacts.",
+        "When the user runs a VI or VDB artifact from another page, Liwiro can switch workspaces automatically and continue the requested action there.",
+        "VI drafts should prefer Run and Save and Run; VDB drafts should prefer Run Query.",
+        "Redundant open/load labels are optional and should not be the default when the requested action is already executable."
+      ],
+      "tables": [
+        {
+          "title": "Direct execution behavior",
+          "columns": [
+            "Surface",
+            "Artifact kind",
+            "Primary action(s)",
+            "Behavior"
+          ],
+          "rows": [
+            [
+              "VI Portal",
+              "vi-script",
+              "Run, Save and Run",
+              "Run executes the current draft buffer; Save and Run persists first, then executes."
+            ],
+            [
+              "VDB Portal",
+              "vdb-query",
+              "Run Query",
+              "Loads the prepared query into the editor and executes it through the portal."
+            ],
+            [
+              "Service Builder",
+              "service-builder-lapis",
+              "Generate Service",
+              "Opens or generates a validated service definition."
+            ],
+            [
+              "Service Manager",
+              "service-manager-action",
+              "Start/Stop/Delete",
+              "Runs the requested management action."
+            ]
+          ]
+        }
+      ],
+      "validExamples": [
+        {
+          "title": "Direct VI execution flow",
+          "code": [
+            "# User request: create a Versa CLI prototype",
+            "# Agent response: return artifact.kind = vi-script",
+            "# UI action: Run or Save and Run"
+          ],
+          "notes": [
+            "The agent should not stop at a location handoff when the prepared artifact is already executable."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "indexing-and-slices",
+      "title": "Indexing, Slices, and Slice Assignment",
+      "summary": "Lists and strings support indexed access, half-open slices, optional step traversal, and list slice replacement.",
+      "tags": [
+        "indexing",
+        "slices",
+        "lists",
+        "strings",
+        "assignment"
+      ],
+      "constructs": [
+        "value[index]",
+        "value[start:end]",
+        "value[start:end:step]",
+        "list_slice = replacement"
+      ],
+      "queryHints": [
+        "list indexing",
+        "string slicing",
+        "reverse slices",
+        "slice assignment"
+      ],
+      "syntaxPatterns": [
+        "items[0]",
+        "items[1:]",
+        "items[::2]",
+        "items[4:0:-1]",
+        "items[1:3] = [20, 30]"
+      ],
+      "rules": [
+        "Slice bounds are start-inclusive and end-exclusive; either bound may be omitted.",
+        "A negative bound counts from the end and a negative step traverses backwards.",
+        "A slice step may not be zero; a missing step defaults to 1.",
+        "List slice assignment accepts a list and may resize the list when the step is 1.",
+        "Extended slice assignment with a non-unit step requires an equal-length replacement list.",
+        "Strings are immutable and cannot be assigned through a slice."
+      ],
+      "tables": [
+        {
+          "title": "Slice forms",
+          "columns": [
+            "Form",
+            "Meaning",
+            "Example"
+          ],
+          "rows": [
+            [
+              "value[index]",
+              "One element",
+              "items[0]"
+            ],
+            [
+              "value[start:end]",
+              "Forward half-open range",
+              "items[1:3]"
+            ],
+            [
+              "value[start:end:step]",
+              "Stepped range",
+              "items[::2]"
+            ],
+            [
+              "list[start:end] = list",
+              "Replace/delete list range",
+              "items[1:2] = [\"new\"]"
+            ]
+          ]
+        }
+      ],
+      "validExamples": [
+        {
+          "title": "Stepped reads and replacement",
+          "code": [
+            "let values = [0, 1, 2, 3, 4, 5];",
+            "let even = values[::2];",
+            "let reverse = values[5:0:-2];",
+            "values[1:3] = [10, 20, 30];"
+          ],
+          "notes": [
+            "Use an equal-length replacement for non-unit steps."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "collection-comprehensions",
+      "title": "List and Dictionary Comprehensions",
+      "summary": "Compact derived collections over lists, sets, maps (by key), and strings with optional filters and nested clauses.",
+      "tags": [
+        "comprehensions",
+        "lists",
+        "dictionaries",
+        "sets"
+      ],
+      "constructs": [
+        "[expression for item in iterable]",
+        "{key: value for item in iterable}"
+      ],
+      "queryHints": [
+        "list comprehension",
+        "dictionary comprehension",
+        "comprehension filter"
+      ],
+      "syntaxPatterns": [
+        "[x * 2 for x in values if x > 1]",
+        "{x: x for x in \"ab\"}"
+      ],
+      "rules": [
+        "List and dictionary comprehensions accept lists, sets, maps (iterating keys), and strings as iterables.",
+        "String iteration binds one-character string values.",
+        "Filters use normal Versa truthiness and nested clauses are evaluated left to right.",
+        "Unsupported scalar iterables raise a runtime error instead of silently producing an empty result."
+      ],
+      "tables": [],
+      "validExamples": [
+        {
+          "title": "Filtered list and dictionary comprehensions",
+          "code": [
+            "let doubled = [x * 2 for x in [1, 2, 3] if x > 1];",
+            "let letters = {x: x for x in \"ab\"};"
+          ],
+          "notes": []
+        }
+      ]
+    }
+  ]
+}

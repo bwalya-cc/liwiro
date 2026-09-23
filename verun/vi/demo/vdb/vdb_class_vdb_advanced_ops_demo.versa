@@ -1,0 +1,49 @@
+vdb import *;
+
+print("=== vdb_class_vdb_advanced_ops_demo ===");
+
+try {
+    vdb.auth({user: DEMO_VDB_USER, pass: DEMO_VDB_PASS});
+    vdb.set({domain: "Class Demo Domain", database: "main"});
+
+    class Product(name: str, price: float = 0.0) <-> vdb.collection("products_class_demo") {
+        schema() {
+            return {
+                name: {type: "string", required: true, unique: true},
+                price: {type: "number", required: true},
+                stock: {type: "int", default: 0},
+                active: {type: "bool", default: true}
+            };
+        }
+
+        init(name, price) {
+            Product.name = name;
+            Product.price = price;
+            Product.props_from_schema();
+        }
+    }
+
+    let p1 = Product.first_or_create({name: {$eq: "Laptop"}}, {price: 999.99, stock: 4});
+    let p2 = Product.upsert({name: {$eq: "Phone"}}, {price: 699.99, stock: 8});
+    print(p1.to_object());
+    print(p2.to_object());
+
+    print(Product.count({}));
+    print(Product.all(20));
+    print(Product.update_many({active: {$eq: true}}, {stock: 10}));
+    print(Product.find_many({stock: {$eq: 10}}, 50));
+    print(Product.delete_many({stock: {$eq: 10}}));
+
+    # create unsaved then persist later
+    let draft = Product.build("Tablet", 450.00);
+    print(draft.is_persisted);
+    draft.set("stock", 3).save();
+    print(draft.is_persisted);
+    print(Product.delete_by_id(draft.id));
+
+    vdb.drop("products_class_demo");
+} catch (e) {
+    print("VDB class advanced ops demo skipped / failed gracefully");
+    print(`type={e.type}`);
+    print(`message={e.message}`);
+}

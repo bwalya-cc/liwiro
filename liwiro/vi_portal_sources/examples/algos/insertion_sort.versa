@@ -1,0 +1,18 @@
+print("=== insertion sort ===");
+let arr = [9, 5, 1, 4, 3];
+
+func insertion_sort(a) {
+    let n = leng(a);
+    for (i in 1..(n - 1)) {
+        let key = a[i];
+        let j = i - 1;
+        while (j >= 0 && a[j] > key) {
+            a[j + 1] = a[j];
+            j = j - 1;
+        }
+        a[j + 1] = key;
+    }
+    return a;
+}
+
+print(insertion_sort(arr));

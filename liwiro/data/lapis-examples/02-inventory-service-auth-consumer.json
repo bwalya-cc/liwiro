@@ -1,0 +1,447 @@
+{
+  "metadata": {
+    "apiName": "InventoryService",
+    "basePath": "/api/inventory",
+    "version": "1.0.0",
+    "database": "ops",
+    "rateLimiting": {
+      "enabled": true,
+      "limit": 200,
+      "timeframe": "minute"
+    },
+    "documentation": {
+      "enabled": true,
+      "key": "liwiroservicepass0!"
+    },
+    "developerNotes": "Managed by Liwiro Service Builder. Docs/help visibility and notes are synced from LAPIS metadata.",
+    "setupApiKey": "liwiroservicepass0!",
+    "seedData": {
+      "enabled": true,
+      "collections": {
+        "inventory_items": [
+          {
+            "sku": "SKU-KALULU-1001",
+            "name": "Kalulu Kaumba",
+            "quantity": 1,
+            "supplier": {}
+          }
+        ]
+      }
+    }
+  },
+  "auth": {
+    "enabled": true,
+    "isAuthService": false,
+    "keyManagement": "auto",
+    "useAsymmetricJWT": true,
+    "customEndpoints": {
+      "enabled": false,
+      "signIn": "/signin",
+      "signOut": "/auth/signout",
+      "signUp": "/auth/signup"
+    },
+    "defaultSuperAdmin": {
+      "enabled": false,
+      "username": "superadmin",
+      "email": "superadmin@liwiro.local",
+      "password": "ChangeMeNow1!",
+      "role": "SUPER_ADMIN"
+    },
+    "authServiceName": "AuthCoreService"
+  },
+  "models": {
+    "m_item": {
+      "name": "InventoryItem",
+      "collection": "inventory_items",
+      "fields": {
+        "f_sku": {
+          "id": "f_sku",
+          "name": "sku",
+          "type": "string",
+          "required": true,
+          "unique": true,
+          "default": false,
+          "defaultValue": "",
+          "embeddedFields": [],
+          "depth": 1
+        },
+        "f_name": {
+          "id": "f_name",
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "unique": false,
+          "default": false,
+          "defaultValue": "",
+          "embeddedFields": [],
+          "depth": 1
+        },
+        "f_qty": {
+          "id": "f_qty",
+          "name": "quantity",
+          "type": "number",
+          "required": true,
+          "unique": false,
+          "default": true,
+          "defaultValue": "0",
+          "embeddedFields": [],
+          "depth": 1
+        },
+        "f_supplier": {
+          "id": "f_supplier",
+          "name": "supplier",
+          "type": "object",
+          "required": false,
+          "unique": false,
+          "default": false,
+          "defaultValue": "",
+          "embeddedFields": [
+            {
+              "id": "f_sup_name",
+              "name": "name",
+              "type": "string",
+              "required": false,
+              "unique": false,
+              "default": false,
+              "defaultValue": "",
+              "embeddedFields": [],
+              "depth": 2
+            },
+            {
+              "id": "f_sup_country",
+              "name": "country",
+              "type": "string",
+              "required": false,
+              "unique": false,
+              "default": false,
+              "defaultValue": "",
+              "embeddedFields": [],
+              "depth": 2
+            }
+          ],
+          "depth": 1
+        }
+      }
+    }
+  },
+  "endpoints": {
+    "ep_item_create": {
+      "method": "POST",
+      "path": "/items",
+      "operationType": "crud",
+      "crudOperation": "create",
+      "linkedModel": "InventoryItem",
+      "requiresAuth": true,
+      "defaultParameters": {
+        "data": {
+          "enabled": true,
+          "name": "data"
+        },
+        "query": {
+          "enabled": false,
+          "name": "query",
+          "operator": "$eq"
+        }
+      },
+      "developerNotes": "crud endpoint for /items; requiresAuth=True.",
+      "exampleParams": {
+        "query": {
+          "scenario": "kalulu-onboarding-flow"
+        },
+        "body": {
+          "sku": "SKU-VALIDATION-9001",
+          "name": "Validation Inventory Item",
+          "quantity": 2,
+          "supplier": {}
+        },
+        "headers": {
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "POST /items create operation for InventoryItem",
+        "description": "Generated documentation for the InventoryService example service. Override `endpoint.documentation` if this endpoint needs service-specific wording.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Bearer authentication is required before the handler runs."
+          },
+          {
+            "title": "Request Contract",
+            "body": "The request examples below are copied from the LAPIS endpoint definition and are the default values used by the interactive docs.\n\nExample query JSON:\n{\n  \"scenario\": \"kalulu-onboarding-flow\"\n}\n\nExample body JSON:\n{\n  \"sku\": \"SKU-KALULU-1001\",\n  \"name\": \"Kalulu Kaumba\",\n  \"quantity\": 1,\n  \"supplier\": {}\n}\n\nExample headers:\n{\n  \"X-Trace-Id\": \"demo-trace-001\"\n}"
+          },
+          {
+            "title": "Parameters",
+            "body": "No explicit parameter list was declared for this endpoint. Use the example query/body payloads as the contract."
+          },
+          {
+            "title": "Responses",
+            "body": "Successful requests return `201 Created` with insert metadata. Validation and persistence failures return `400` or `500`."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "crud endpoint for /items; requiresAuth=True."
+          }
+        ]
+      }
+    },
+    "ep_item_read": {
+      "method": "GET",
+      "path": "/items",
+      "operationType": "crud",
+      "crudOperation": "read",
+      "linkedModel": "InventoryItem",
+      "requiresAuth": true,
+      "defaultParameters": {
+        "data": {
+          "enabled": false,
+          "name": "data"
+        },
+        "query": {
+          "enabled": true,
+          "name": "sku",
+          "operator": "$eq"
+        }
+      },
+      "developerNotes": "crud endpoint for /items; requiresAuth=True.",
+      "exampleParams": {
+        "query": {
+          "sku": "SKU-KALULU-1001"
+        },
+        "headers": {
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "GET /items read operation for InventoryItem",
+        "description": "Generated documentation for the InventoryService example service. Override `endpoint.documentation` if this endpoint needs service-specific wording.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Bearer authentication is required before the handler runs."
+          },
+          {
+            "title": "Request Contract",
+            "body": "The request examples below are copied from the LAPIS endpoint definition and are the default values used by the interactive docs.\n\nExample query JSON:\n{\n  \"sku\": \"SKU-KALULU-1001\"\n}\n\nExample body JSON:\n{}\n\nExample headers:\n{\n  \"X-Trace-Id\": \"demo-trace-001\"\n}"
+          },
+          {
+            "title": "Parameters",
+            "body": "No explicit parameter list was declared for this endpoint. Use the example query/body payloads as the contract."
+          },
+          {
+            "title": "Responses",
+            "body": "Successful requests return `200 OK` with every matching record. Empty query objects such as `{}` mean “match all records”."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "crud endpoint for /items; requiresAuth=True."
+          }
+        ]
+      }
+    },
+    "ep_item_update": {
+      "method": "PUT",
+      "path": "/items",
+      "operationType": "crud",
+      "crudOperation": "update",
+      "linkedModel": "InventoryItem",
+      "requiresAuth": true,
+      "defaultParameters": {
+        "data": {
+          "enabled": true,
+          "name": "data"
+        },
+        "query": {
+          "enabled": true,
+          "name": "sku",
+          "operator": "$eq"
+        }
+      },
+      "developerNotes": "crud endpoint for /items; requiresAuth=True.",
+      "exampleParams": {
+        "query": {
+          "sku": "SKU-KALULU-1001"
+        },
+        "body": {
+          "sku": "SKU-KALULU-1001",
+          "name": "Kalulu Kaumba",
+          "quantity": 1,
+          "supplier": {}
+        },
+        "headers": {
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "PUT /items update operation for InventoryItem",
+        "description": "Generated documentation for the InventoryService example service. Override `endpoint.documentation` if this endpoint needs service-specific wording.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Bearer authentication is required before the handler runs."
+          },
+          {
+            "title": "Request Contract",
+            "body": "The request examples below are copied from the LAPIS endpoint definition and are the default values used by the interactive docs.\n\nExample query JSON:\n{\n  \"sku\": \"SKU-KALULU-1001\"\n}\n\nExample body JSON:\n{\n  \"sku\": \"SKU-KALULU-1001\",\n  \"name\": \"Kalulu Kaumba\",\n  \"quantity\": 1,\n  \"supplier\": {}\n}\n\nExample headers:\n{\n  \"X-Trace-Id\": \"demo-trace-001\"\n}"
+          },
+          {
+            "title": "Parameters",
+            "body": "No explicit parameter list was declared for this endpoint. Use the example query/body payloads as the contract."
+          },
+          {
+            "title": "Responses",
+            "body": "Successful requests return `200 OK` with update metadata. `404` is returned when no records match the supplied query."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "crud endpoint for /items; requiresAuth=True."
+          }
+        ]
+      }
+    },
+    "ep_item_delete": {
+      "method": "DELETE",
+      "path": "/items",
+      "operationType": "crud",
+      "crudOperation": "delete",
+      "linkedModel": "InventoryItem",
+      "requiresAuth": true,
+      "defaultParameters": {
+        "data": {
+          "enabled": false,
+          "name": "data"
+        },
+        "query": {
+          "enabled": true,
+          "name": "sku",
+          "operator": "$eq"
+        }
+      },
+      "developerNotes": "crud endpoint for /items; requiresAuth=True.",
+      "exampleParams": {
+        "query": {
+          "sku": "SKU-KALULU-1001"
+        },
+        "headers": {
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "DELETE /items delete operation for InventoryItem",
+        "description": "Generated documentation for the InventoryService example service. Override `endpoint.documentation` if this endpoint needs service-specific wording.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Bearer authentication is required before the handler runs."
+          },
+          {
+            "title": "Request Contract",
+            "body": "The request examples below are copied from the LAPIS endpoint definition and are the default values used by the interactive docs.\n\nExample query JSON:\n{\n  \"sku\": \"SKU-KALULU-1001\"\n}\n\nExample body JSON:\n{}\n\nExample headers:\n{\n  \"X-Trace-Id\": \"demo-trace-001\"\n}"
+          },
+          {
+            "title": "Parameters",
+            "body": "No explicit parameter list was declared for this endpoint. Use the example query/body payloads as the contract."
+          },
+          {
+            "title": "Responses",
+            "body": "Successful requests return `200 OK` with delete metadata. `404` is returned when no records match the supplied query."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "crud endpoint for /items; requiresAuth=True."
+          }
+        ]
+      }
+    },
+    "ep_low_stock_custom": {
+      "method": "POST",
+      "path": "/items/low-stock",
+      "operationType": "custom",
+      "requiresAuth": true,
+      "vqlQuery": "read collection inventory_items where quantity < 10 limit 200;",
+      "developerNotes": "custom endpoint for /items/low-stock; requiresAuth=True.",
+      "exampleParams": {
+        "query": {
+          "scenario": "kalulu-onboarding-flow"
+        },
+        "body": {
+          "dryRun": true
+        },
+        "headers": {
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "POST /items/low-stock custom operation",
+        "description": "Generated documentation for the InventoryService example service. Override `endpoint.documentation` if this endpoint needs service-specific wording.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Bearer authentication is required before the handler runs."
+          },
+          {
+            "title": "Request Contract",
+            "body": "The request examples below are copied from the LAPIS endpoint definition and are the default values used by the interactive docs.\n\nExample query JSON:\n{\n  \"scenario\": \"kalulu-onboarding-flow\"\n}\n\nExample body JSON:\n{\n  \"dryRun\": true\n}\n\nExample headers:\n{\n  \"X-Trace-Id\": \"demo-trace-001\"\n}"
+          },
+          {
+            "title": "Parameters",
+            "body": "No explicit parameter list was declared for this endpoint. Use the example query/body payloads as the contract."
+          },
+          {
+            "title": "Responses",
+            "body": "Successful requests return JSON. Script-level `statusCode` values are promoted to the HTTP response automatically."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "custom endpoint for /items/low-stock; requiresAuth=True."
+          }
+        ]
+      }
+    },
+    "ep_restock_script": {
+      "method": "POST",
+      "path": "/items/restock",
+      "operationType": "script",
+      "requiresAuth": true,
+      "versaScript": "json_xml import *;\nvdb import *;\nhttp import *;\nemail import *;\ncrypto import *;\njwt import *;\ntime import *;\ndatetime import *;\n\nlet p = params;\nlet claims = p.auth;\nlet actor = claims.username;\nif (actor == \"\") {\n  actor = claims.sub;\n}\nif (actor == \"\") {\n  actor = \"anonymous\";\n}\nlet role = claims.role;\nif (role == \"\") {\n  role = \"USER\";\n}\nlet allowed = role == \"SUPER_ADMIN\" || role == \"WAREHOUSE_MANAGER\";\nif (!allowed) {\n  {authorized: false, reason: \"Role does not permit restock\", actor: actor, role: role};\n} else {\n  let sku = p.sku;\n  if (sku == \"\") {\n    {authorized: true, updated: false, reason: \"sku is required\", actor: actor};\n  } else {\n    let delta = p.delta;\n    if (delta == \"\") {\n      delta = 0;\n    }\n    let items = vdb.collection(\"inventory_items\");\n    let found = items.find({sku: {$eq: sku}}, 1);\n    let rows = found.data;\n    if (leng(rows) == 0) {\n      {authorized: true, updated: false, reason: \"Inventory item not found\", sku: sku, actor: actor};\n    } else {\n      let current = rows[0];\n      let currentQty = current.quantity;\n      if (currentQty == \"\") {\n        currentQty = 0;\n      }\n      let nextQty = currentQty + delta;\n      let updateResult = items.update({sku: {$eq: sku}}, {quantity: nextQty, updatedBy: actor, updatedAt: time.time()});\n      let updated = true;\n      if (updateResult.ok == false) {\n        updated = false;\n      }\n      {authorized: true, updated: updated, sku: sku, previousQuantity: currentQty, delta: delta, quantity: nextQty, actor: actor, role: role, updateResult: updateResult};\n    }\n  }\n}",
+      "developerNotes": "Real authenticated script: consumes verified JWT claims from params.auth and applies role-aware VDB restock update.",
+      "exampleParams": {
+        "query": {},
+        "body": {
+          "sku": "SKU-KALULU-1001",
+          "delta": 5
+        },
+        "headers": {
+          "X-Trace-Id": "demo-trace-001",
+          "Authorization": "Bearer <auto-filled-after-auth>"
+        }
+      },
+      "documentation": {
+        "summary": "POST /items/restock script operation",
+        "description": "Generated documentation for the InventoryService example service. Override `endpoint.documentation` if this endpoint needs service-specific wording.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Bearer authentication is required before the handler runs."
+          },
+          {
+            "title": "Request Contract",
+            "body": "The request examples below are copied from the LAPIS endpoint definition and are the default values used by the interactive docs.\n\nExample query JSON:\n{}\n\nExample body JSON:\n{\n  \"sku\": \"SKU-KALULU-1001\",\n  \"delta\": 5\n}\n\nExample headers:\n{\n  \"X-Trace-Id\": \"demo-trace-001\",\n  \"Authorization\": \"Bearer <auto-filled-after-auth>\"\n}"
+          },
+          {
+            "title": "Parameters",
+            "body": "No explicit parameter list was declared for this endpoint. Use the example query/body payloads as the contract."
+          },
+          {
+            "title": "Responses",
+            "body": "Successful requests return JSON. Script-level `statusCode` values are promoted to the HTTP response automatically."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "Real authenticated script: consumes verified JWT claims from params.auth and applies role-aware VDB restock update."
+          }
+        ]
+      }
+    }
+  }
+}

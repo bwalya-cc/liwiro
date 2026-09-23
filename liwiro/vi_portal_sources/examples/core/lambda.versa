@@ -1,0 +1,20 @@
+# Lambda function examples
+
+# 1. Basic lambda: square a number
+let square = (x) => x * x;
+
+print("Square of 5: " + square(5));  # Expected: 25
+
+# 2. Multi-argument lambda: add two numbers
+let add = (a, b) => a + b;
+print("3 + 4 = " + add(3, 4));      # Expected: 7
+
+let numbers = [1, 2, 3, 4];
+let doubled = map((x) => x * 2, numbers);  # Fixed: Correct argument order
+
+print("Numbers: " + str(doubled));
+print("Doubled numbers: " + doubled);
+
+# 4. No-parameter lambda
+let greet = () => "Hello from lambda!";
+print(greet());  # Expected: "Hello from lambda!"

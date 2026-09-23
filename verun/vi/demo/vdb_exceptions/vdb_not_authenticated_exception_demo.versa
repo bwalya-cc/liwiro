@@ -1,0 +1,18 @@
+vdb import *;
+
+func show_exception(label: str, e) {
+    print(`\n[${label}]`);
+    print(`type=${e.type}`);
+    print(`base=${e.base_type}`);
+    print(`alias=${e.type_alias}`);
+    print(`message=${e.message}`);
+}
+
+print("=== VDB not authenticated exception demo ===");
+
+try {
+    vdb.list_collections();
+    print("unexpected success");
+} catch (e) {
+    show_exception("not authenticated", e);
+}

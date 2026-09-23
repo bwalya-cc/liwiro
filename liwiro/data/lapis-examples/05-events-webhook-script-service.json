@@ -1,0 +1,287 @@
+{
+  "metadata": {
+    "apiName": "EventWebhookService",
+    "basePath": "/api/events",
+    "version": "1.0.0",
+    "database": "events",
+    "rateLimiting": {
+      "enabled": true,
+      "limit": 300,
+      "timeframe": "minute"
+    },
+    "documentation": {
+      "enabled": true,
+      "key": "liwiroservicepass0!"
+    },
+    "developerNotes": "Managed by Liwiro Service Builder. Docs/help visibility and notes are synced from LAPIS metadata.",
+    "setupApiKey": "liwiroservicepass0!",
+    "seedData": {
+      "enabled": true,
+      "collections": {
+        "inbound_events": [
+          {
+            "eventId": "evt-auth-signin-001",
+            "source": "auth-core-service",
+            "payload": {}
+          }
+        ]
+      }
+    }
+  },
+  "auth": {
+    "enabled": true,
+    "isAuthService": false,
+    "keyManagement": "auto",
+    "customEndpoints": {
+      "enabled": false,
+      "signIn": "/signin",
+      "signOut": "/auth/signout",
+      "signUp": "/auth/signup"
+    },
+    "defaultSuperAdmin": {
+      "enabled": false,
+      "username": "superadmin",
+      "email": "superadmin@liwiro.local",
+      "password": "ChangeMeNow1!",
+      "role": "SUPER_ADMIN"
+    }
+  },
+  "models": {
+    "m_event": {
+      "name": "InboundEvent",
+      "collection": "inbound_events",
+      "fields": {
+        "f_event_id": {
+          "id": "f_event_id",
+          "name": "eventId",
+          "type": "string",
+          "required": true,
+          "unique": true,
+          "default": false,
+          "defaultValue": "",
+          "embeddedFields": [],
+          "depth": 1
+        },
+        "f_source": {
+          "id": "f_source",
+          "name": "source",
+          "type": "string",
+          "required": true,
+          "unique": false,
+          "default": false,
+          "defaultValue": "",
+          "embeddedFields": [],
+          "depth": 1
+        },
+        "f_payload": {
+          "id": "f_payload",
+          "name": "payload",
+          "type": "object",
+          "required": true,
+          "unique": false,
+          "default": false,
+          "defaultValue": "",
+          "objectTemplate": "{\"type\":\"\",\"body\":{}}",
+          "embeddedFields": [],
+          "depth": 1
+        }
+      }
+    }
+  },
+  "endpoints": {
+    "ep_ingest": {
+      "method": "POST",
+      "path": "/ingest",
+      "operationType": "crud",
+      "crudOperation": "create",
+      "linkedModel": "InboundEvent",
+      "requiresAuth": true,
+      "defaultParameters": {
+        "data": {
+          "enabled": true,
+          "name": "data"
+        },
+        "query": {
+          "enabled": false,
+          "name": "query",
+          "operator": "$eq"
+        }
+      },
+      "developerNotes": "crud endpoint for /ingest; requiresAuth=True.",
+      "exampleParams": {
+        "query": {
+          "scenario": "kalulu-onboarding-flow"
+        },
+        "body": {
+          "eventId": "evt-validation-001",
+          "source": "validation-sandbox",
+          "payload": {}
+        },
+        "headers": {
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "POST /ingest create operation for InboundEvent",
+        "description": "Generated documentation for the EventWebhookService example service. Override `endpoint.documentation` if this endpoint needs service-specific wording.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Bearer authentication is required before the handler runs."
+          },
+          {
+            "title": "Request Contract",
+            "body": "The request examples below are copied from the LAPIS endpoint definition and are the default values used by the interactive docs.\n\nExample query JSON:\n{\n  \"scenario\": \"kalulu-onboarding-flow\"\n}\n\nExample body JSON:\n{\n  \"eventId\": \"evt-auth-signin-001\",\n  \"source\": \"auth-core-service\",\n  \"payload\": {}\n}\n\nExample headers:\n{\n  \"X-Trace-Id\": \"demo-trace-001\"\n}"
+          },
+          {
+            "title": "Parameters",
+            "body": "No explicit parameter list was declared for this endpoint. Use the example query/body payloads as the contract."
+          },
+          {
+            "title": "Responses",
+            "body": "Successful requests return `201 Created` with insert metadata. Validation and persistence failures return `400` or `500`."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "crud endpoint for /ingest; requiresAuth=True."
+          }
+        ]
+      }
+    },
+    "ep_transform": {
+      "method": "POST",
+      "path": "/transform",
+      "operationType": "script",
+      "requiresAuth": true,
+      "versaScript": "json_xml import *;\nvdb import *;\nhttp import *;\nemail import *;\ncrypto import *;\njwt import *;\ntime import *;\ndatetime import *;\n\nlet req = params;\nlet body = req.body ?? {};\nlet authCtx = req.auth ?? {};\nlet actor = str(authCtx.username ?? authCtx.sub ?? \"system\").trim();\nif (actor == \"\") {\n  actor = \"system\";\n}\nlet dryRun = body.dryRun == true || req.dryRun == true;\nlet eventId = str(body.eventId ?? req.eventId ?? \"\").trim();\n\nlet events = vdb.collection(\"inbound_events\");\nlet rows = [];\nif (eventId != \"\") {\n  let lookup = events.find({eventId: {$eq: eventId}}, 1);\n  rows = lookup.data ?? [];\n}\nif (leng(rows) == 0) {\n  let fallback = events.find({}, 1);\n  rows = fallback.data ?? [];\n}\nif (leng(rows) == 0) {\n  return {ok: false, statusCode: 404, reason: \"No inbound event is available to transform\"};\n}\n\nlet eventDoc = rows[0];\neventId = str(eventDoc.eventId ?? eventId).trim();\nlet source = str(eventDoc.source ?? \"\").trim();\nlet payload = type(eventDoc.payload) == \"object\" ? eventDoc.payload : {};\nlet nowTs = datetime.now().isoformat();\nlet transformedPayload = {\n  original: payload,\n  normalizedSource: source.lower(),\n  transformedAt: nowTs,\n  transformedBy: actor,\n  eventId: eventId\n};\n\nif (dryRun) {\n  return {ok: true, dryRun: true, eventId: eventId, source: source, transformed: transformedPayload};\n}\n\nlet updateRes = events.update({eventId: {$eq: eventId}}, {payload: transformedPayload});\nif (updateRes.ok == false) {\n  return {ok: false, statusCode: 500, reason: updateRes.error ?? \"Failed to persist transformed event\", eventId: eventId, result: updateRes};\n}\n\nlet runs = vdb.collection(\"event_transform_runs\");\nlet runId = crypto.uuid();\nlet runRes = runs.insert({\n  runId: runId,\n  eventId: eventId,\n  source: source,\n  transformedAt: nowTs,\n  transformedBy: actor,\n  payload: transformedPayload\n});\n\nreturn {ok: true, eventId: eventId, runId: runId, transformedAt: nowTs, updated: true, runRecorded: runRes.ok ?? false, transformed: transformedPayload};",
+      "developerNotes": "Transforms a real inbound event from VDB, persists the transformed payload, records an event_transform_runs audit row, and supports dryRun previews.",
+      "exampleParams": {
+        "query": {
+          "scenario": "kalulu-onboarding-flow"
+        },
+        "body": {
+          "dryRun": true
+        },
+        "headers": {
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "POST /transform script operation",
+        "description": "Generated documentation for the EventWebhookService example service. Override `endpoint.documentation` if this endpoint needs service-specific wording.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Bearer authentication is required before the handler runs."
+          },
+          {
+            "title": "Request Contract",
+            "body": "The request examples below are copied from the LAPIS endpoint definition and are the default values used by the interactive docs.\n\nExample query JSON:\n{\n  \"scenario\": \"kalulu-onboarding-flow\"\n}\n\nExample body JSON:\n{\n  \"dryRun\": true\n}\n\nExample headers:\n{\n  \"X-Trace-Id\": \"demo-trace-001\"\n}"
+          },
+          {
+            "title": "Parameters",
+            "body": "No explicit parameter list was declared for this endpoint. Use the example query/body payloads as the contract."
+          },
+          {
+            "title": "Responses",
+            "body": "Successful requests return JSON. Script-level `statusCode` values are promoted to the HTTP response automatically."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "Transforms a real inbound event from VDB, persists the transformed payload, records an event_transform_runs audit row, and supports dryRun previews."
+          }
+        ]
+      }
+    },
+    "ep_dispatch": {
+      "method": "POST",
+      "path": "/dispatch",
+      "operationType": "script",
+      "requiresAuth": true,
+      "versaScript": "json_xml import *;\nvdb import *;\nhttp import *;\nemail import *;\ncrypto import *;\njwt import *;\ntime import *;\ndatetime import *;\n\nlet req = params;\nlet body = req.body ?? {};\nlet authCtx = req.auth ?? {};\nlet actor = str(authCtx.username ?? authCtx.sub ?? \"system\").trim();\nif (actor == \"\") {\n  actor = \"system\";\n}\nlet dryRun = body.dryRun == true || req.dryRun == true;\nlet eventId = str(body.eventId ?? req.eventId ?? \"\").trim();\n\nlet events = vdb.collection(\"inbound_events\");\nlet rows = [];\nif (eventId != \"\") {\n  let lookup = events.find({eventId: {$eq: eventId}}, 1);\n  rows = lookup.data ?? [];\n}\nif (leng(rows) == 0) {\n  let fallback = events.find({}, 1);\n  rows = fallback.data ?? [];\n}\nif (leng(rows) == 0) {\n  return {ok: false, statusCode: 404, reason: \"No inbound event is available to dispatch\"};\n}\n\nlet eventDoc = rows[0];\neventId = str(eventDoc.eventId ?? eventId).trim();\nlet source = str(eventDoc.source ?? \"\").trim();\nlet payload = type(eventDoc.payload) == \"object\" ? eventDoc.payload : {};\nlet target = str(body.target ?? req.target ?? payload.target ?? \"\").trim();\nif (target == \"\") {\n  target = \"internal://\" + (source == \"\" ? \"unknown-source\" : source);\n}\n\nlet nowTs = datetime.now().isoformat();\nlet jobId = crypto.uuid();\nlet job = {\n  jobId: jobId,\n  eventId: eventId,\n  source: source,\n  target: target,\n  status: \"QUEUED\",\n  queuedAt: nowTs,\n  queuedBy: actor,\n  payload: payload\n};\n\nif (dryRun) {\n  return {ok: true, dryRun: true, eventId: eventId, target: target, job: job};\n}\n\nlet queue = vdb.collection(\"event_dispatch_jobs\");\nlet queueRes = queue.insert(job);\nif (queueRes.ok == false) {\n  return {ok: false, statusCode: 500, reason: queueRes.error ?? \"Failed to queue dispatch job\", eventId: eventId, jobId: jobId, result: queueRes};\n}\n\nlet nextPayload = {\n  original: payload.original ?? payload,\n  normalizedSource: str(payload.normalizedSource ?? source.lower()).trim(),\n  dispatch: {\n    target: target,\n    status: \"QUEUED\",\n    queuedAt: nowTs,\n    queuedBy: actor,\n    jobId: jobId\n  }\n};\nlet updateRes = events.update({eventId: {$eq: eventId}}, {payload: nextPayload});\n\nreturn {ok: true, eventId: eventId, jobId: jobId, target: target, queuedAt: nowTs, queued: true, updated: updateRes.ok ?? false};",
+      "developerNotes": "Queues dispatch work for a real inbound event, records the queued job in event_dispatch_jobs, updates event dispatch state, and supports dryRun previews.",
+      "exampleParams": {
+        "query": {
+          "scenario": "kalulu-onboarding-flow"
+        },
+        "body": {
+          "dryRun": true
+        },
+        "headers": {
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "POST /dispatch script operation",
+        "description": "Generated documentation for the EventWebhookService example service. Override `endpoint.documentation` if this endpoint needs service-specific wording.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Bearer authentication is required before the handler runs."
+          },
+          {
+            "title": "Request Contract",
+            "body": "The request examples below are copied from the LAPIS endpoint definition and are the default values used by the interactive docs.\n\nExample query JSON:\n{\n  \"scenario\": \"kalulu-onboarding-flow\"\n}\n\nExample body JSON:\n{\n  \"dryRun\": true\n}\n\nExample headers:\n{\n  \"X-Trace-Id\": \"demo-trace-001\"\n}"
+          },
+          {
+            "title": "Parameters",
+            "body": "No explicit parameter list was declared for this endpoint. Use the example query/body payloads as the contract."
+          },
+          {
+            "title": "Responses",
+            "body": "Successful requests return JSON. Script-level `statusCode` values are promoted to the HTTP response automatically."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "Queues dispatch work for a real inbound event, records the queued job in event_dispatch_jobs, updates event dispatch state, and supports dryRun previews."
+          }
+        ]
+      }
+    },
+    "ep_replay": {
+      "method": "POST",
+      "path": "/replay",
+      "operationType": "custom",
+      "requiresAuth": true,
+      "vqlQuery": "read collection inbound_events limit 500;",
+      "developerNotes": "custom endpoint for /replay; requiresAuth=True.",
+      "exampleParams": {
+        "query": {
+          "scenario": "kalulu-onboarding-flow"
+        },
+        "body": {
+          "dryRun": true
+        },
+        "headers": {
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "POST /replay custom operation",
+        "description": "Generated documentation for the EventWebhookService example service. Override `endpoint.documentation` if this endpoint needs service-specific wording.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Bearer authentication is required before the handler runs."
+          },
+          {
+            "title": "Request Contract",
+            "body": "The request examples below are copied from the LAPIS endpoint definition and are the default values used by the interactive docs.\n\nExample query JSON:\n{\n  \"scenario\": \"kalulu-onboarding-flow\"\n}\n\nExample body JSON:\n{\n  \"dryRun\": true\n}\n\nExample headers:\n{\n  \"X-Trace-Id\": \"demo-trace-001\"\n}"
+          },
+          {
+            "title": "Parameters",
+            "body": "No explicit parameter list was declared for this endpoint. Use the example query/body payloads as the contract."
+          },
+          {
+            "title": "Responses",
+            "body": "Successful requests return JSON. Script-level `statusCode` values are promoted to the HTTP response automatically."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "custom endpoint for /replay; requiresAuth=True."
+          }
+        ]
+      }
+    }
+  }
+}

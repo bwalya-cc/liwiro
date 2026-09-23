@@ -1,0 +1,315 @@
+{
+  "metadata": {
+    "apiName": "NotificationService",
+    "basePath": "/api/notify",
+    "version": "1.0.0",
+    "database": "messaging",
+    "rateLimiting": {
+      "enabled": true,
+      "limit": 240,
+      "timeframe": "minute"
+    },
+    "documentation": {
+      "enabled": true,
+      "key": "liwiroservicepass0!"
+    },
+    "developerNotes": "Managed by Liwiro Service Builder. Docs/help visibility and notes are synced from LAPIS metadata.",
+    "setupApiKey": "liwiroservicepass0!",
+    "seedData": {
+      "enabled": true,
+      "collections": {
+        "messages": [
+          {
+            "messageId": "msg-kalulu-001",
+            "channel": "email",
+            "target": "kalulu.kaumba@zmail.com",
+            "body": {
+              "dryRun": true
+            }
+          }
+        ]
+      }
+    }
+  },
+  "auth": {
+    "enabled": true,
+    "isAuthService": false,
+    "keyManagement": "auto",
+    "useAsymmetricJWT": true,
+    "customEndpoints": {
+      "enabled": false,
+      "signIn": "/signin",
+      "signOut": "/auth/signout",
+      "signUp": "/auth/signup"
+    },
+    "defaultSuperAdmin": {
+      "enabled": false,
+      "username": "superadmin",
+      "email": "superadmin@liwiro.local",
+      "password": "ChangeMeNow1!",
+      "role": "SUPER_ADMIN"
+    },
+    "authServiceName": "AuthCoreService"
+  },
+  "models": {
+    "m_message": {
+      "name": "Message",
+      "collection": "messages",
+      "fields": {
+        "f_message_id": {
+          "id": "f_message_id",
+          "name": "messageId",
+          "type": "string",
+          "required": true,
+          "unique": true,
+          "default": false,
+          "defaultValue": "",
+          "embeddedFields": [],
+          "depth": 1
+        },
+        "f_channel": {
+          "id": "f_channel",
+          "name": "channel",
+          "type": "string",
+          "required": true,
+          "unique": false,
+          "default": true,
+          "defaultValue": "email",
+          "embeddedFields": [],
+          "depth": 1
+        },
+        "f_target": {
+          "id": "f_target",
+          "name": "target",
+          "type": "string",
+          "required": true,
+          "unique": false,
+          "default": false,
+          "defaultValue": "",
+          "embeddedFields": [],
+          "depth": 1
+        },
+        "f_body": {
+          "id": "f_body",
+          "name": "body",
+          "type": "object",
+          "required": true,
+          "unique": false,
+          "default": false,
+          "defaultValue": "",
+          "objectTemplate": "{\"subject\":\"\",\"text\":\"\"}",
+          "embeddedFields": [],
+          "depth": 1
+        }
+      }
+    }
+  },
+  "endpoints": {
+    "ep_msg_create": {
+      "method": "POST",
+      "path": "/messages",
+      "operationType": "crud",
+      "crudOperation": "create",
+      "linkedModel": "Message",
+      "requiresAuth": true,
+      "defaultParameters": {
+        "data": {
+          "enabled": true,
+          "name": "data"
+        },
+        "query": {
+          "enabled": false,
+          "name": "query",
+          "operator": "$eq"
+        }
+      },
+      "developerNotes": "crud endpoint for /messages; requiresAuth=True.",
+      "exampleParams": {
+        "query": {
+          "scenario": "kalulu-onboarding-flow"
+        },
+        "body": {
+          "messageId": "msg-validation-001",
+          "channel": "email",
+          "target": "validation@example.com",
+          "body": {
+            "dryRun": true
+          }
+        },
+        "headers": {
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "POST /messages create operation for Message",
+        "description": "Generated documentation for the NotificationService example service. Override `endpoint.documentation` if this endpoint needs service-specific wording.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Bearer authentication is required before the handler runs."
+          },
+          {
+            "title": "Request Contract",
+            "body": "The request examples below are copied from the LAPIS endpoint definition and are the default values used by the interactive docs.\n\nExample query JSON:\n{\n  \"scenario\": \"kalulu-onboarding-flow\"\n}\n\nExample body JSON:\n{\n  \"messageId\": \"msg-kalulu-001\",\n  \"channel\": \"email\",\n  \"target\": \"kalulu.kaumba@zmail.com\",\n  \"body\": {\n    \"dryRun\": true\n  }\n}\n\nExample headers:\n{\n  \"X-Trace-Id\": \"demo-trace-001\"\n}"
+          },
+          {
+            "title": "Parameters",
+            "body": "No explicit parameter list was declared for this endpoint. Use the example query/body payloads as the contract."
+          },
+          {
+            "title": "Responses",
+            "body": "Successful requests return `201 Created` with insert metadata. Validation and persistence failures return `400` or `500`."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "crud endpoint for /messages; requiresAuth=True."
+          }
+        ]
+      }
+    },
+    "ep_msg_read": {
+      "method": "GET",
+      "path": "/messages",
+      "operationType": "crud",
+      "crudOperation": "read",
+      "linkedModel": "Message",
+      "requiresAuth": true,
+      "defaultParameters": {
+        "data": {
+          "enabled": false,
+          "name": "data"
+        },
+        "query": {
+          "enabled": true,
+          "name": "target",
+          "operator": "$eq"
+        }
+      },
+      "developerNotes": "crud endpoint for /messages; requiresAuth=True.",
+      "exampleParams": {
+        "query": {
+          "messageId": "msg-kalulu-001"
+        },
+        "headers": {
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "GET /messages read operation for Message",
+        "description": "Generated documentation for the NotificationService example service. Override `endpoint.documentation` if this endpoint needs service-specific wording.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Bearer authentication is required before the handler runs."
+          },
+          {
+            "title": "Request Contract",
+            "body": "The request examples below are copied from the LAPIS endpoint definition and are the default values used by the interactive docs.\n\nExample query JSON:\n{\n  \"messageId\": \"msg-kalulu-001\"\n}\n\nExample body JSON:\n{}\n\nExample headers:\n{\n  \"X-Trace-Id\": \"demo-trace-001\"\n}"
+          },
+          {
+            "title": "Parameters",
+            "body": "No explicit parameter list was declared for this endpoint. Use the example query/body payloads as the contract."
+          },
+          {
+            "title": "Responses",
+            "body": "Successful requests return `200 OK` with every matching record. Empty query objects such as `{}` mean “match all records”."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "crud endpoint for /messages; requiresAuth=True."
+          }
+        ]
+      }
+    },
+    "ep_msg_send": {
+      "method": "POST",
+      "path": "/send",
+      "operationType": "script",
+      "requiresAuth": true,
+      "versaScript": "json_xml import *;\nvdb import *;\nhttp import *;\nemail import *;\ncrypto import *;\njwt import *;\ntime import *;\ndatetime import *;\n\nlet req = params;\nlet body = req.body ?? {};\nlet authCtx = req.auth ?? {};\nlet actor = str(authCtx.username ?? authCtx.sub ?? \"system\").trim();\nif (actor == \"\") {\n  actor = \"system\";\n}\nlet dryRun = body.dryRun == true || req.dryRun == true;\nlet messageId = str(body.messageId ?? req.messageId ?? \"\").trim();\n\nlet messages = vdb.collection(\"messages\");\nlet rows = [];\nif (messageId != \"\") {\n  let lookup = messages.find({messageId: {$eq: messageId}}, 1);\n  rows = lookup.data ?? [];\n}\nif (leng(rows) == 0) {\n  let target = str(body.target ?? req.target ?? \"\").trim();\n  let channel = str(body.channel ?? req.channel ?? \"email\").trim();\n  let payloadBody = type(body.body) == \"object\" ? body.body : {};\n  if (target != \"\") {\n    if (messageId == \"\") {\n      messageId = crypto.uuid();\n    }\n    let draft = {messageId: messageId, channel: channel, target: target, body: payloadBody};\n    rows = [draft];\n  } else {\n    let fallback = messages.find({}, 1);\n    rows = fallback.data ?? [];\n  }\n}\nif (leng(rows) == 0) {\n  return {ok: false, statusCode: 404, reason: \"No message is available to queue\"};\n}\n\nlet message = rows[0];\nmessageId = str(message.messageId ?? messageId).trim();\nlet channel = str(message.channel ?? body.channel ?? req.channel ?? \"email\").trim();\nlet target = str(message.target ?? body.target ?? req.target ?? \"\").trim();\nif (target == \"\") {\n  return {ok: false, statusCode: 400, reason: \"target is required to queue notification\", messageId: messageId};\n}\n\nlet messageBody = type(message.body) == \"object\" ? message.body : {};\nlet nowTs = datetime.now().isoformat();\nlet jobId = crypto.uuid();\nlet job = {\n  jobId: jobId,\n  messageId: messageId,\n  channel: channel,\n  target: target,\n  payload: messageBody,\n  status: \"QUEUED\",\n  queuedAt: nowTs,\n  queuedBy: actor\n};\n\nif (dryRun) {\n  return {ok: true, dryRun: true, messageId: messageId, job: job};\n}\n\nlet persistedMessage = true;\nif (str(message.messageId ?? \"\").trim() == \"\") {\n  let createRes = messages.insert({messageId: messageId, channel: channel, target: target, body: messageBody});\n  if (createRes.ok == false) {\n    return {ok: false, statusCode: 500, reason: createRes.error ?? \"Failed to create message before queueing\", messageId: messageId, result: createRes};\n  }\n} else {\n  let updateRes = messages.update({messageId: {$eq: messageId}}, {deliveryStatus: \"QUEUED\", queuedAt: nowTs, queuedBy: actor});\n  persistedMessage = updateRes.ok ?? false;\n}\n\nlet queue = vdb.collection(\"notification_queue\");\nlet queueRes = queue.insert(job);\nif (queueRes.ok == false) {\n  return {ok: false, statusCode: 500, reason: queueRes.error ?? \"Failed to queue notification\", messageId: messageId, jobId: jobId, result: queueRes};\n}\n\nreturn {ok: true, messageId: messageId, jobId: jobId, queued: true, channel: channel, target: target, persistedMessage: persistedMessage, queuedAt: nowTs};",
+      "developerNotes": "Queues delivery for a real message record, persists queue state in notification_queue, updates the message delivery fields, and supports dryRun previews.",
+      "exampleParams": {
+        "query": {
+          "scenario": "kalulu-onboarding-flow"
+        },
+        "body": {
+          "dryRun": true
+        },
+        "headers": {
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "POST /send script operation",
+        "description": "Generated documentation for the NotificationService example service. Override `endpoint.documentation` if this endpoint needs service-specific wording.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Bearer authentication is required before the handler runs."
+          },
+          {
+            "title": "Request Contract",
+            "body": "The request examples below are copied from the LAPIS endpoint definition and are the default values used by the interactive docs.\n\nExample query JSON:\n{\n  \"scenario\": \"kalulu-onboarding-flow\"\n}\n\nExample body JSON:\n{\n  \"dryRun\": true\n}\n\nExample headers:\n{\n  \"X-Trace-Id\": \"demo-trace-001\"\n}"
+          },
+          {
+            "title": "Parameters",
+            "body": "No explicit parameter list was declared for this endpoint. Use the example query/body payloads as the contract."
+          },
+          {
+            "title": "Responses",
+            "body": "Successful requests return JSON. Script-level `statusCode` values are promoted to the HTTP response automatically."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "Queues delivery for a real message record, persists queue state in notification_queue, updates the message delivery fields, and supports dryRun previews."
+          }
+        ]
+      }
+    },
+    "ep_msg_retry": {
+      "method": "POST",
+      "path": "/retry",
+      "operationType": "custom",
+      "requiresAuth": true,
+      "vqlQuery": "read collection messages where channel == \"email\" limit 50;",
+      "developerNotes": "custom endpoint for /retry; requiresAuth=True.",
+      "exampleParams": {
+        "query": {
+          "scenario": "kalulu-onboarding-flow"
+        },
+        "body": {
+          "dryRun": true
+        },
+        "headers": {
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "POST /retry custom operation",
+        "description": "Generated documentation for the NotificationService example service. Override `endpoint.documentation` if this endpoint needs service-specific wording.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Bearer authentication is required before the handler runs."
+          },
+          {
+            "title": "Request Contract",
+            "body": "The request examples below are copied from the LAPIS endpoint definition and are the default values used by the interactive docs.\n\nExample query JSON:\n{\n  \"scenario\": \"kalulu-onboarding-flow\"\n}\n\nExample body JSON:\n{\n  \"dryRun\": true\n}\n\nExample headers:\n{\n  \"X-Trace-Id\": \"demo-trace-001\"\n}"
+          },
+          {
+            "title": "Parameters",
+            "body": "No explicit parameter list was declared for this endpoint. Use the example query/body payloads as the contract."
+          },
+          {
+            "title": "Responses",
+            "body": "Successful requests return JSON. Script-level `statusCode` values are promoted to the HTTP response automatically."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "custom endpoint for /retry; requiresAuth=True."
+          }
+        ]
+      }
+    }
+  }
+}

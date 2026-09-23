@@ -1,0 +1,64 @@
+import mediacloud;
+demo/mediacloud/lib/mediacloud_demo_helpers import { section, skip, show_exception, show_pretty, show_result, show_provider_status, skip_blocked_environment };
+
+section("MediaCloud Cleanup Demo");
+
+let operations = [];
+let cleanupRan = false;
+
+let cloudConfig = cloudinary_media_config;
+if (cloudConfig == null) {
+  skip("Set VERUN_DEMO_CLOUDINARY_* in " + DEMO_ENV_FILE + " to run Cloudinary demos");
+} else if (mediacloud.remove == null) {
+  cleanupRan = true;
+  skip("cloudinary cleanup skipped because mediacloud.remove is not available in this build");
+} else {
+  cleanupRan = true;
+  show_provider_status("cloudinary", cloudConfig);
+  try {
+    let cloudinaryDeletes = [
+      {
+        label: "delete cloudinary image demo uploads",
+        resourceType: "image",
+        prefix: "liwiro-demo/liwiro-mediacloud-kalulu-"
+      },
+      {
+        label: "delete cloudinary video demo uploads",
+        resourceType: "video",
+        prefix: "liwiro-demo/liwiro-mediacloud-ba-kalulu"
+      }
+    ];
+
+    for (item : cloudinaryDeletes) {
+      let result = mediacloud.remove({
+        provider: "cloudinary",
+        config: cloudConfig,
+        resourceType: item.resourceType,
+        prefix: item.prefix
+      });
+      show_result(item.label, result);
+      if (!(result.ok == true) && result.statusCode != 404) {
+        throw item.label + " failed: " + str(result.error ?? result.statusCode ?? "unknown error");
+      }
+      operations.add({
+        provider: "cloudinary",
+        label: item.label,
+        statusCode: result.statusCode,
+        deleted: result.deleted ?? {}
+      });
+    }
+  } catch (e) {
+    if (!skip_blocked_environment("cloudinary cleanup", e)) {
+      show_exception("cloudinary cleanup failed", e);
+      throw e;
+    }
+  }
+}
+
+if (!cleanupRan) {
+  skip("no provider-specific media configs were available");
+}
+
+show_pretty("Cleanup summary", {
+  operations: operations
+});

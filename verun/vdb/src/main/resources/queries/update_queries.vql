@@ -1,0 +1,2 @@
+update users where name="TestUser" set age=26
+read collection users where name="TestUser"

@@ -1,0 +1,53 @@
+# VI language features demo
+
+let a = 12;
+let b = 5;
+
+print("Arithmetic");
+print(a + b);
+print(a - b);
+print(a * b);
+print(a / b);
+print(a % b);
+print(2.0 ^ 3);
+
+print("Comparison");
+print(a == b);
+print(a != b);
+print(a < b);
+print(a > b);
+print(a <= b);
+print(a >= b);
+
+print("Logical");
+print((a > b) && true);
+print((a < b) || true);
+print(!(a < b));
+
+print("Bitwise");
+print(a & b);
+print(a | b);
+print(a ^^ b);
+print(~b);
+print(a << 1);
+print(a >> 1);
+
+print("Assignments");
+let total = 10;
+total += 5;
+total -= 2;
+total *= 3;
+total /= 4;
+total %= 5;
+print(total);
+
+print("Ternary and null coalescing");
+let label = (a > b) ? "bigger" : "smaller";
+print(label);
+let maybeName = null;
+print(maybeName ?? "fallback");
+
+print("type()");
+print(type(a));
+print(type(label));
+print(type(maybeName));

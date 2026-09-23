@@ -1,0 +1,11 @@
+filer import *;
+
+print("=== file_handling demo (filer quick start) ===");
+
+let outDir = filer.join("tmp", "vi", "filer_demo");
+filer.ensure_dir(outDir);
+let txtPath = filer.join(outDir, "hello.txt");
+
+filer.write_text(txtPath, "Hello from filer");
+print(filer.read_text(txtPath));
+print(`exists={filer.exists(txtPath)}`);

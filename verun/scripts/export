@@ -1,0 +1,232 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+VERUN_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+ROOT_DIR="$(cd "$VERUN_DIR/.." && pwd)"
+
+POM_FILE="$VERUN_DIR/pom.xml"
+if [[ ! -f "$POM_FILE" ]]; then
+  echo "Missing $POM_FILE"
+  exit 1
+fi
+
+VERSION="$(
+  awk '
+    /<artifactId>verun<\/artifactId>/ { in_verun=1; next }
+    in_verun && /<version>/ {
+      gsub(/.*<version>|<\/version>.*/, "", $0);
+      print $0;
+      exit
+    }
+  ' "$POM_FILE"
+)"
+
+JVM_TARGET="$(
+  awk '
+    /<maven.compiler.target>/ {
+      gsub(/.*<maven.compiler.target>|<\/maven.compiler.target>.*/, "", $0);
+      print $0;
+      exit
+    }
+  ' "$POM_FILE"
+)"
+
+if [[ -z "${VERSION:-}" ]]; then
+  echo "Failed to resolve version from $POM_FILE"
+  exit 1
+fi
+
+if [[ -z "${JVM_TARGET:-}" ]]; then
+  echo "Failed to resolve maven.compiler.target from $POM_FILE"
+  exit 1
+fi
+
+PACKAGE_NAME="verun-${VERSION}-jvm-${JVM_TARGET}"
+OUT_BASE_RAW="${1:-$ROOT_DIR/export}"
+if [[ "$OUT_BASE_RAW" = /* ]]; then
+  EXPORT_DIR="$OUT_BASE_RAW"
+else
+  OUT_PARENT="$(dirname "$OUT_BASE_RAW")"
+  OUT_NAME="$(basename "$OUT_BASE_RAW")"
+  EXPORT_DIR="$(cd "$OUT_PARENT" && pwd)/$OUT_NAME"
+fi
+PACKAGE_DIR="$EXPORT_DIR/$PACKAGE_NAME"
+
+echo "Building verun artifacts..."
+(
+  cd "$VERUN_DIR"
+  mvn -q -DskipTests package
+)
+
+VI_JAR="$(ls -1t "$VERUN_DIR/vi/target"/vi-*-jar-with-dependencies.jar | head -n 1 || true)"
+VDB_JAR="$(ls -1t "$VERUN_DIR/vdb/target"/vdb-*-jar-with-dependencies.jar | head -n 1 || true)"
+
+if [[ -z "$VI_JAR" || ! -f "$VI_JAR" ]]; then
+  echo "Could not find VI jar-with-dependencies artifact"
+  exit 1
+fi
+
+if [[ -z "$VDB_JAR" || ! -f "$VDB_JAR" ]]; then
+  echo "Could not find VDB jar-with-dependencies artifact"
+  exit 1
+fi
+
+echo "Preparing package directory: $PACKAGE_DIR"
+mkdir -p "$EXPORT_DIR"
+rm -rf "$PACKAGE_DIR"
+mkdir -p "$PACKAGE_DIR/scripts/linux" "$PACKAGE_DIR/scripts/macos" "$PACKAGE_DIR/scripts/win"
+
+cp "$VI_JAR" "$PACKAGE_DIR/vi.jar"
+cp "$VDB_JAR" "$PACKAGE_DIR/vdb.jar"
+
+if [[ -d "$ROOT_DIR/docs" ]]; then
+  cp -R "$ROOT_DIR/docs" "$PACKAGE_DIR/docs"
+else
+  mkdir -p "$PACKAGE_DIR/docs"
+fi
+
+cat > "$PACKAGE_DIR/scripts/linux/vi.sh" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PKG_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+JAR="$PKG_ROOT/vi.jar"
+if [[ $# -ge 1 ]]; then
+  exec java -jar "$JAR" "$@"
+else
+  exec java -jar "$JAR"
+fi
+EOF
+
+cat > "$PACKAGE_DIR/scripts/linux/convo.sh" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PKG_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+exec java -jar "$PKG_ROOT/vdb.jar" "$@"
+EOF
+
+cat > "$PACKAGE_DIR/scripts/linux/serve.sh" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PKG_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+exec java -cp "$PKG_ROOT/vdb.jar" verun.vdb.VDBHttpServer "$@"
+EOF
+
+cat > "$PACKAGE_DIR/scripts/linux/socket.sh" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PKG_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+if [[ -n "${VDB_UNIX_SOCKET_PATH:-${VDB_INTERFACE_UNIXSOCKET_PATH:-}}" ]]; then
+  exec java -Dvdb.interface.unixsocket.enabled=true -Dvdb.interface.unixsocket.path="${VDB_UNIX_SOCKET_PATH:-${VDB_INTERFACE_UNIXSOCKET_PATH:-}}" -cp "$PKG_ROOT/vdb.jar" verun.vdb.VDBUnixSocket "$@"
+fi
+exec java -Dvdb.interface.unixsocket.enabled=true -cp "$PKG_ROOT/vdb.jar" verun.vdb.VDBUnixSocket "$@"
+EOF
+
+cat > "$PACKAGE_DIR/scripts/macos/vi.sh" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PKG_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+JAR="$PKG_ROOT/vi.jar"
+if [[ $# -ge 1 ]]; then
+  exec java -jar "$JAR" "$@"
+else
+  exec java -jar "$JAR"
+fi
+EOF
+
+cat > "$PACKAGE_DIR/scripts/macos/convo.sh" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PKG_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+exec java -jar "$PKG_ROOT/vdb.jar" "$@"
+EOF
+
+cat > "$PACKAGE_DIR/scripts/macos/serve.sh" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PKG_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+exec java -cp "$PKG_ROOT/vdb.jar" verun.vdb.VDBHttpServer "$@"
+EOF
+
+cat > "$PACKAGE_DIR/scripts/macos/socket.sh" <<'EOF'
+#!/usr/bin/env bash
+set -euo pipefail
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PKG_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+if [[ -n "${VDB_UNIX_SOCKET_PATH:-${VDB_INTERFACE_UNIXSOCKET_PATH:-}}" ]]; then
+  exec java -Dvdb.interface.unixsocket.enabled=true -Dvdb.interface.unixsocket.path="${VDB_UNIX_SOCKET_PATH:-${VDB_INTERFACE_UNIXSOCKET_PATH:-}}" -cp "$PKG_ROOT/vdb.jar" verun.vdb.VDBUnixSocket "$@"
+fi
+exec java -Dvdb.interface.unixsocket.enabled=true -cp "$PKG_ROOT/vdb.jar" verun.vdb.VDBUnixSocket "$@"
+EOF
+
+cat > "$PACKAGE_DIR/scripts/win/vi.bat" <<'EOF'
+@echo off
+set SCRIPT_DIR=%~dp0
+set PKG_ROOT=%SCRIPT_DIR%\..\..
+set JAR=%PKG_ROOT%\vi.jar
+if "%~1"=="" (
+  java -jar "%JAR%"
+) else (
+  java -jar "%JAR%" %*
+)
+EOF
+
+cat > "$PACKAGE_DIR/scripts/win/convo.bat" <<'EOF'
+@echo off
+set SCRIPT_DIR=%~dp0
+set PKG_ROOT=%SCRIPT_DIR%\..\..
+java -jar "%PKG_ROOT%\vdb.jar" %*
+EOF
+
+cat > "$PACKAGE_DIR/scripts/win/serve.bat" <<'EOF'
+@echo off
+set SCRIPT_DIR=%~dp0
+set PKG_ROOT=%SCRIPT_DIR%\..\..
+java -cp "%PKG_ROOT%\vdb.jar" verun.vdb.VDBHttpServer %*
+EOF
+
+chmod +x \
+  "$PACKAGE_DIR/scripts/linux/vi.sh" \
+  "$PACKAGE_DIR/scripts/linux/convo.sh" \
+  "$PACKAGE_DIR/scripts/linux/serve.sh" \
+  "$PACKAGE_DIR/scripts/linux/socket.sh" \
+  "$PACKAGE_DIR/scripts/macos/vi.sh" \
+  "$PACKAGE_DIR/scripts/macos/convo.sh" \
+  "$PACKAGE_DIR/scripts/macos/serve.sh" \
+  "$PACKAGE_DIR/scripts/macos/socket.sh"
+
+cat > "$PACKAGE_DIR/README.txt" <<EOF
+Verun Export Package
+====================
+
+Package: $PACKAGE_NAME
+Java target: $JVM_TARGET+
+
+Contents:
+- vi.jar
+- vdb.jar
+- docs/
+- scripts/linux/{vi.sh,convo.sh,serve.sh,socket.sh}
+- scripts/macos/{vi.sh,convo.sh,serve.sh,socket.sh}
+- scripts/win/{vi.bat,convo.bat,serve.bat}
+
+Usage:
+- Linux/macOS REPL: ./scripts/linux/vi.sh   (or ./scripts/macos/vi.sh)
+- Linux/macOS file: ./scripts/linux/vi.sh <source_file>
+- Linux/macOS convo: ./scripts/linux/convo.sh
+- Linux/macOS serve: ./scripts/linux/serve.sh
+- Linux/macOS unix socket: ./scripts/linux/socket.sh
+- Windows REPL: scripts\\win\\vi.bat
+- Windows file: scripts\\win\\vi.bat <source_file>
+- Windows convo: scripts\\win\\convo.bat
+- Windows serve: scripts\\win\\serve.bat
+EOF
+
+echo "Done: $PACKAGE_DIR"

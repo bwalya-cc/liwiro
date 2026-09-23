@@ -1,0 +1,36 @@
+jwt import *;
+
+print("=== jwt module demo ===");
+
+let payload = {
+  sub: "demo.user",
+  role: "SUPER_ADMIN",
+  scopes: ["READ", "WRITE", "MANAGE_USERS"],
+  tenant: "liwiro"
+};
+
+let signOptions = {
+  algorithm: "HS256",
+  issuer: "AuthCoreService",
+  audience: "liwiro-clients",
+  expiresInSeconds: 900
+};
+
+let token = jwt.sign(payload, "demo-jwt-secret", signOptions);
+print("token: " + token);
+
+let verified = jwt.verify(token, "demo-jwt-secret", {
+  algorithm: "HS256",
+  issuer: "AuthCoreService",
+  audience: "liwiro-clients"
+});
+print("verified.valid: " + str(verified.valid));
+print("verified.payload: " + str(verified.payload));
+
+let decoded = jwt.decode(token);
+print("decoded.header: " + str(decoded.header));
+print("decoded.payload: " + str(decoded.payload));
+
+let bad = jwt.verify(token, "wrong-secret", {algorithm: "HS256"});
+print("wrong secret valid: " + str(bad.valid));
+print("wrong secret error: " + bad.error);

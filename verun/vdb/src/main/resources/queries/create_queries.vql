@@ -1,0 +1,6 @@
+echo "=== SCHEMA CREATION ==="
+create collection users schema {"name":{"type":"string","required":true},"age":{"type":"int"}}
+echo "=== DOCUMENT CREATION ==="
+insert users data {"name":"TestUser","age":25}
+echo "=== SCRIPT CREATION ==="
+create script hello service chalo code "print('Hello, Chalo!');"

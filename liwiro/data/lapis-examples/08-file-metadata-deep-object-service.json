@@ -1,0 +1,275 @@
+{
+  "metadata": {
+    "apiName": "FileMetadataService",
+    "basePath": "/api/files",
+    "version": "1.0.0",
+    "database": "files",
+    "rateLimiting": {
+      "enabled": true,
+      "limit": 220,
+      "timeframe": "minute"
+    },
+    "documentation": {
+      "enabled": true,
+      "key": "liwiroservicepass0!"
+    },
+    "developerNotes": "Managed by Liwiro Service Builder. Docs/help visibility and notes are synced from LAPIS metadata.",
+    "setupApiKey": "liwiroservicepass0!",
+    "seedData": {
+      "enabled": true,
+      "collections": {
+        "file_records": [
+          {
+            "fileId": "file-kalulu-portfolio-001",
+            "owner": "kalulu.kaumba",
+            "metadata": {}
+          }
+        ]
+      }
+    }
+  },
+  "auth": {
+    "enabled": true,
+    "isAuthService": false,
+    "keyManagement": "auto",
+    "customEndpoints": {
+      "enabled": false,
+      "signIn": "/signin",
+      "signOut": "/auth/signout",
+      "signUp": "/auth/signup"
+    },
+    "defaultSuperAdmin": {
+      "enabled": false,
+      "username": "superadmin",
+      "email": "superadmin@liwiro.local",
+      "password": "ChangeMeNow1!",
+      "role": "SUPER_ADMIN"
+    }
+  },
+  "models": {
+    "m_file": {
+      "name": "FileRecord",
+      "collection": "file_records",
+      "fields": {
+        "f_file_id": {
+          "id": "f_file_id",
+          "name": "fileId",
+          "type": "string",
+          "required": true,
+          "unique": true,
+          "default": false,
+          "defaultValue": "",
+          "embeddedFields": [],
+          "depth": 1
+        },
+        "f_owner": {
+          "id": "f_owner",
+          "name": "owner",
+          "type": "string",
+          "required": true,
+          "unique": false,
+          "default": false,
+          "defaultValue": "",
+          "embeddedFields": [],
+          "depth": 1
+        },
+        "f_metadata": {
+          "id": "f_metadata",
+          "name": "metadata",
+          "type": "object",
+          "required": false,
+          "unique": false,
+          "default": false,
+          "defaultValue": "",
+          "embeddedFields": [
+            {
+              "id": "f_meta_security",
+              "name": "security",
+              "type": "object",
+              "required": false,
+              "unique": false,
+              "default": false,
+              "defaultValue": "",
+              "embeddedFields": [
+                {
+                  "id": "f_meta_security_policy",
+                  "name": "policy",
+                  "type": "object",
+                  "required": false,
+                  "unique": false,
+                  "default": false,
+                  "defaultValue": "",
+                  "embeddedFields": [],
+                  "objectTemplate": "{\"classification\":\"internal\",\"retentionDays\":365}",
+                  "depth": 3
+                }
+              ],
+              "depth": 2
+            }
+          ],
+          "depth": 1
+        }
+      }
+    }
+  },
+  "endpoints": {
+    "ep_file_create": {
+      "method": "POST",
+      "path": "/records",
+      "operationType": "crud",
+      "crudOperation": "create",
+      "linkedModel": "FileRecord",
+      "requiresAuth": true,
+      "defaultParameters": {
+        "data": {
+          "enabled": true,
+          "name": "data"
+        },
+        "query": {
+          "enabled": false,
+          "name": "query",
+          "operator": "$eq"
+        }
+      },
+      "developerNotes": "crud endpoint for /records; requiresAuth=True.",
+      "exampleParams": {
+        "query": {
+          "scenario": "kalulu-onboarding-flow"
+        },
+        "body": {
+          "fileId": "file-validation-9001",
+          "owner": "validation.user",
+          "metadata": {}
+        },
+        "headers": {
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "POST /records create operation for FileRecord",
+        "description": "Generated documentation for the FileMetadataService example service. Override `endpoint.documentation` if this endpoint needs service-specific wording.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Bearer authentication is required before the handler runs."
+          },
+          {
+            "title": "Request Contract",
+            "body": "The request examples below are copied from the LAPIS endpoint definition and are the default values used by the interactive docs.\n\nExample query JSON:\n{\n  \"scenario\": \"kalulu-onboarding-flow\"\n}\n\nExample body JSON:\n{\n  \"fileId\": \"file-kalulu-portfolio-001\",\n  \"owner\": \"kalulu.kaumba\",\n  \"metadata\": {}\n}\n\nExample headers:\n{\n  \"X-Trace-Id\": \"demo-trace-001\"\n}"
+          },
+          {
+            "title": "Parameters",
+            "body": "No explicit parameter list was declared for this endpoint. Use the example query/body payloads as the contract."
+          },
+          {
+            "title": "Responses",
+            "body": "Successful requests return `201 Created` with insert metadata. Validation and persistence failures return `400` or `500`."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "crud endpoint for /records; requiresAuth=True."
+          }
+        ]
+      }
+    },
+    "ep_file_read": {
+      "method": "GET",
+      "path": "/records",
+      "operationType": "crud",
+      "crudOperation": "read",
+      "linkedModel": "FileRecord",
+      "requiresAuth": true,
+      "defaultParameters": {
+        "data": {
+          "enabled": false,
+          "name": "data"
+        },
+        "query": {
+          "enabled": true,
+          "name": "fileId",
+          "operator": "$eq"
+        }
+      },
+      "developerNotes": "crud endpoint for /records; requiresAuth=True.",
+      "exampleParams": {
+        "query": {
+          "fileId": "file-kalulu-portfolio-001"
+        },
+        "headers": {
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "GET /records read operation for FileRecord",
+        "description": "Generated documentation for the FileMetadataService example service. Override `endpoint.documentation` if this endpoint needs service-specific wording.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Bearer authentication is required before the handler runs."
+          },
+          {
+            "title": "Request Contract",
+            "body": "The request examples below are copied from the LAPIS endpoint definition and are the default values used by the interactive docs.\n\nExample query JSON:\n{\n  \"fileId\": \"file-kalulu-portfolio-001\"\n}\n\nExample body JSON:\n{}\n\nExample headers:\n{\n  \"X-Trace-Id\": \"demo-trace-001\"\n}"
+          },
+          {
+            "title": "Parameters",
+            "body": "No explicit parameter list was declared for this endpoint. Use the example query/body payloads as the contract."
+          },
+          {
+            "title": "Responses",
+            "body": "Successful requests return `200 OK` with every matching record. Empty query objects such as `{}` mean “match all records”."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "crud endpoint for /records; requiresAuth=True."
+          }
+        ]
+      }
+    },
+    "ep_file_validate": {
+      "method": "POST",
+      "path": "/records/validate",
+      "operationType": "script",
+      "requiresAuth": true,
+      "versaScript": "json_xml import *;\nvdb import *;\nhttp import *;\nemail import *;\ncrypto import *;\njwt import *;\ntime import *;\ndatetime import *;\n\nlet req = params;\nlet body = req.body ?? {};\nlet authCtx = req.auth ?? {};\nlet actor = str(authCtx.username ?? authCtx.sub ?? \"system\").trim();\nif (actor == \"\") {\n  actor = \"system\";\n}\nlet dryRun = body.dryRun == true || req.dryRun == true;\nlet fileId = str(body.fileId ?? req.fileId ?? \"\").trim();\n\nlet files = vdb.collection(\"file_records\");\nlet rows = [];\nif (fileId != \"\") {\n  let lookup = files.find({fileId: {$eq: fileId}}, 1);\n  rows = lookup.data ?? [];\n}\nif (leng(rows) == 0) {\n  let fallback = files.find({}, 1);\n  rows = fallback.data ?? [];\n}\nif (leng(rows) == 0) {\n  return {ok: false, statusCode: 404, reason: \"No file record is available to validate\"};\n}\n\nlet file = rows[0];\nfileId = str(file.fileId ?? fileId).trim();\nlet metadata = type(file.metadata) == \"object\" ? file.metadata : {};\nlet security = type(metadata.security) == \"object\" ? metadata.security : {};\nlet policy = type(security.policy) == \"object\" ? security.policy : {};\nlet checks = [];\nlet issues = [];\n\nlet ownerOk = str(file.owner ?? \"\").trim() != \"\";\nchecks.add({name: \"owner_present\", ok: ownerOk});\nif (!ownerOk) {\n  issues.add(\"owner_missing\");\n}\n\nlet securityOk = type(security) == \"object\" && leng(security.keys()) > 0;\nchecks.add({name: \"security_present\", ok: securityOk});\nif (!securityOk) {\n  issues.add(\"security_block_missing\");\n}\n\nlet classification = str(policy.classification ?? \"\").trim();\nlet classificationOk = classification != \"\";\nchecks.add({name: \"classification_present\", ok: classificationOk});\nif (!classificationOk) {\n  issues.add(\"classification_missing\");\n}\n\nlet retentionDays = policy.retentionDays ?? 0;\nif (retentionDays == \"\") {\n  retentionDays = 0;\n}\nlet retentionOk = retentionDays > 0;\nchecks.add({name: \"retention_positive\", ok: retentionOk});\nif (!retentionOk) {\n  issues.add(\"retention_days_invalid\");\n}\n\nlet validated = ownerOk && securityOk && classificationOk && retentionOk;\nlet nowTs = datetime.now().isoformat();\nlet validation = {\n  status: validated ? \"VALID\" : \"INVALID\",\n  validatedAt: nowTs,\n  validatedBy: actor,\n  classification: classification,\n  retentionDays: retentionDays,\n  issues: issues\n};\nlet nextMetadata = {\n  security: security,\n  validation: validation\n};\n\nif (dryRun) {\n  return {ok: true, dryRun: true, fileId: fileId, validated: validated, checks: checks, validation: validation};\n}\n\nlet updateRes = files.update({fileId: {$eq: fileId}}, {metadata: nextMetadata});\nif (updateRes.ok == false) {\n  return {ok: false, statusCode: 500, reason: updateRes.error ?? \"Failed to persist validation result\", fileId: fileId, result: updateRes};\n}\n\nlet runs = vdb.collection(\"file_validation_runs\");\nlet runId = crypto.uuid();\nlet runRes = runs.insert({\n  runId: runId,\n  fileId: fileId,\n  validated: validated,\n  checks: checks,\n  validation: validation\n});\n\nreturn {ok: true, fileId: fileId, validated: validated, checks: checks, runId: runId, runRecorded: runRes.ok ?? false, validation: validation};",
+      "developerNotes": "Validates a real file record, computes concrete policy checks, persists metadata.validation plus a file_validation_runs audit row, and supports dryRun previews.",
+      "exampleParams": {
+        "query": {
+          "scenario": "kalulu-onboarding-flow"
+        },
+        "body": {
+          "dryRun": true
+        },
+        "headers": {
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "POST /records/validate script operation",
+        "description": "Generated documentation for the FileMetadataService example service. Override `endpoint.documentation` if this endpoint needs service-specific wording.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Bearer authentication is required before the handler runs."
+          },
+          {
+            "title": "Request Contract",
+            "body": "The request examples below are copied from the LAPIS endpoint definition and are the default values used by the interactive docs.\n\nExample query JSON:\n{\n  \"scenario\": \"kalulu-onboarding-flow\"\n}\n\nExample body JSON:\n{\n  \"dryRun\": true\n}\n\nExample headers:\n{\n  \"X-Trace-Id\": \"demo-trace-001\"\n}"
+          },
+          {
+            "title": "Parameters",
+            "body": "No explicit parameter list was declared for this endpoint. Use the example query/body payloads as the contract."
+          },
+          {
+            "title": "Responses",
+            "body": "Successful requests return JSON. Script-level `statusCode` values are promoted to the HTTP response automatically."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "Validates a real file record, computes concrete policy checks, persists metadata.validation plus a file_validation_runs audit row, and supports dryRun previews."
+          }
+        ]
+      }
+    }
+  }
+}

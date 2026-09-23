@@ -1,0 +1,42 @@
+email import *;
+
+func section(title: str) {
+    print("\n=== " + title + " ===");
+}
+
+func showResult(res) {
+    print("ok=" + str(res.ok) + " status=" + res.status + " op=" + res.operation);
+    print("message=" + res.message);
+    if (res.error != null) {
+        print("error=" + res.error);
+    }
+    if (res.data != null) {
+        print("data=" + str(res.data));
+    }
+    print("context=" + str(res.context));
+}
+
+section("Email SMTP Text Demo");
+
+if (DEMO_EMAIL_CONFIGURED != true) {
+    print("Skipping email demo. Set VERUN_DEMO_EMAIL_* in " + DEMO_ENV_FILE);
+} else {
+    try {
+        let result = email.send({
+            host: EMAIL_SMTP_HOST,
+            port: EMAIL_SMTP_PORT,
+            startTls: EMAIL_SMTP_STARTTLS,
+            ssl: EMAIL_SMTP_SSL,
+            auth: EMAIL_SMTP_AUTH,
+            username: EMAIL_SMTP_USERNAME,
+            password: EMAIL_SMTP_PASSWORD,
+            from: EMAIL_FROM,
+            to: [EMAIL_TO],
+            subject: "VI SMTP Text Demo",
+            body: "Hello from Versa email module.\nThis is a plain-text test."
+        });
+        showResult(result);
+    } catch (e) {
+        print("Email send failed: " + e.message);
+    }
+}

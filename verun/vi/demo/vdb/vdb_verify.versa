@@ -1,0 +1,41 @@
+vdb import *;
+time import *;
+
+print("=== vdb_verify ===");
+
+let exit_code = 1;
+
+try {
+    let auth_result = vdb.auth({user: DEMO_VDB_USER, pass: DEMO_VDB_PASS});
+    if (!(auth_result.ok ?? false)) {
+        print("auth_failed");
+        print(auth_result.error ?? auth_result.message ?? "unknown_auth_error");
+    } else {
+        let domain_name = DEMO_VDB_DOMAIN ?? "vi_demos";
+        let db_name = DEMO_VDB_DB ?? "main";
+
+        # Creates the domain/database if missing via vdb.set implementation.
+        let context_result = vdb.set({domain: domain_name, database: db_name});
+        print(context_result);
+
+        let verify_collection = vdb.collection("verify_runtime_probe");
+        let write_result = verify_collection.insert({
+            marker: "ok",
+            source: "vdb_verify",
+            ts: time.time()
+        });
+        print(write_result);
+
+        let read_result = verify_collection.find({marker: {$eq: "ok"}}, 1);
+        print(read_result);
+
+        let cleanup_result = vdb.drop("verify_runtime_probe");
+        print(cleanup_result);
+
+        exit_code = 0;
+    }
+} catch (e) {
+    print(`verify_error={e.type} {e.message}`);
+}
+
+print(exit_code);

@@ -1,0 +1,63 @@
+jwt import *;
+time import *;
+
+print("=== async-style jwt service demo ===");
+
+let secret = "liwiro-demo-secret";
+let pending_user = null;
+let pending_service = null;
+let pending_token = null;
+
+func queue_auth_request(user_id: str, service: str) {
+    pending_user = user_id;
+    pending_service = service;
+    pending_token = null;
+}
+
+func auth_service_tick() {
+    if (pending_user == null || pending_service == null) {
+        return null;
+    }
+    pending_token = jwt.sign({
+        sub: pending_user,
+        service: pending_service,
+        authenticated: true
+    }, secret, {
+        issuer: "authenticator",
+        audience: pending_service,
+        expiresInSeconds: 60
+    });
+    pending_user = null;
+    pending_service = null;
+    return pending_token;
+}
+
+func authenticated_service_call(service_name: str) {
+    let attempts = 0;
+    while (pending_token == null && attempts < 5) {
+        auth_service_tick();
+        if (pending_token == null) {
+            time.sleep(0.05);
+        }
+        attempts = attempts + 1;
+    }
+    if (pending_token == null) {
+        return {ok: false, error: "no token issued"};
+    }
+    let verified = jwt.verify(pending_token, secret, {
+        issuer: "authenticator",
+        audience: service_name
+    });
+    pending_token = null;
+    return verified;
+}
+
+queue_auth_request("user-123", "orders-service");
+let verified = authenticated_service_call("orders-service");
+print(verified);
+print(verified.valid);
+if (verified.valid) {
+    print(verified.payload.sub);
+    print(verified.payload.service);
+    print(verified.payload.authenticated);
+}

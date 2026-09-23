@@ -1,0 +1,49 @@
+vdb import *;
+time import *;
+
+print("=== vdb indexes + production features demo ===");
+
+let authUser = "CHANGE_ME_VDB_USER";
+let authPass = "CHANGE_ME_VDB_PASSWORD";
+let demoDomain = "vi_demos";
+let demoDb = "main";
+
+try {
+    authUser = DEMO_VDB_USER;
+    authPass = DEMO_VDB_PASS;
+    demoDomain = DEMO_VDB_DOMAIN;
+    demoDb = DEMO_VDB_DB;
+} catch (e) {
+}
+
+let authRes = vdb.auth({user: authUser, pass: authPass});
+try {
+    vdb.drop("products_indexed_demo");
+} catch (e) {
+}
+print(authRes.status);
+
+vdb.set({
+    domain: demoDomain,
+    db: demoDb
+});
+let coll = vdb.collection("products_indexed_demo");
+
+coll.insert({sku: "P-100", category: "db", price: 1200, active: true, created_at: ctime(null, "iso")});
+coll.insert({sku: "P-200", category: "db", price: 950, active: true, created_at: ctime(null, "iso")});
+coll.insert({sku: "P-300", category: "api", price: 500, active: false, created_at: ctime(null, "iso")});
+
+print(vdb.create_index("products_indexed_demo", "sku", true).status);
+print(vdb.create_index("products_indexed_demo", "category", false).status);
+print(vdb.list_indexes("products_indexed_demo").data);
+
+let fast = coll.find({sku: "P-200"}, 10);
+print(fast);
+
+coll.update({sku: "P-200"}, {price: 980});
+print(coll.find({sku: "P-200"}, 10));
+
+print(vdb.rebuild_indexes("products_indexed_demo").status);
+print(vdb.drop_index("products_indexed_demo", "category").status);
+print(vdb.list_indexes("products_indexed_demo").data);
+print(vdb.drop("products_indexed_demo").status);

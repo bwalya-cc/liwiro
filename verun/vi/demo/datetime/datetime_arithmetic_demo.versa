@@ -1,0 +1,13 @@
+datetime import *;
+
+print("=== datetime arithmetic demo ===");
+let start = datetime.now();
+let gap = datetime.timedelta({hours: 5, minutes: 15});
+let end = start.add(gap);
+
+print("start:");
+print(start.human());
+print("end:");
+print(end.human());
+print("end.diff(start):");
+print(end.diff(start).human());

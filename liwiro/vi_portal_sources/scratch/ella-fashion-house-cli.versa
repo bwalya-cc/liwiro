@@ -1,0 +1,131 @@
+# Ella Fashion House inventory and project management CLI
+vdb import *;
+
+let APP_DOMAIN = "ellafashionhouse";
+let APP_DB = "operations";
+let APP_USER = "zulan";
+let APP_PASS = "VersatilityIsKey0!";
+let PROMPT = "Ella";
+let command = "";
+
+func line(text: str) {
+    print(`[${PROMPT}] {text}`);
+}
+
+func read_value(label: str) {
+    return input(`[${PROMPT}] {label}: `);
+}
+
+func setup_workspace() {
+    try {
+        vdb.auth({user: APP_USER, pass: APP_PASS});
+        vdb.define({domain: APP_DOMAIN, db: APP_DB});
+        vdb.set({domain: APP_DOMAIN, db: APP_DB});
+        line(`Connected to {APP_DOMAIN}/{APP_DB}`);
+    }
+    catch (err) {
+        line(`Startup failed: {err.message}`);
+        exit(1);
+    }
+}
+
+func inventory_collection() {
+    return vdb.collection("inventory_items");
+}
+
+func projects_collection() {
+    return vdb.collection("projects");
+}
+
+func show_menu() {
+    line("Commands");
+    line("  menu        Show this menu");
+    line("  inventory   Add an inventory item");
+    line("  stock       List inventory items");
+    line("  project     Create a project");
+    line("  projects    List projects");
+    line("  exit        Leave Ella CLI");
+}
+
+func add_inventory_item() {
+    let sku = read_value("SKU");
+    let name = read_value("Item name");
+    let quantity = int(read_value("Quantity"));
+    let collection = inventory_collection();
+    let payload = {
+        sku: sku,
+        name: name,
+        quantity: quantity,
+        status: quantity > 0 ? "in-stock" : "out-of-stock"
+    };
+    collection.insert(payload);
+    line(`Saved inventory item {name}`);
+}
+
+func list_inventory() {
+    let items = inventory_collection().find({}).data;
+    if (leng(items) <= 0) {
+        line("No inventory items yet.");
+    }
+    else {
+        for (item in items) {
+            line(`{item.sku} | {item.name} | qty {item.quantity} | {item.status}`);
+        }
+    }
+}
+
+func add_project() {
+    let code = read_value("Project code");
+    let name = read_value("Project name");
+    let owner = read_value("Owner");
+    let projects = projects_collection();
+    projects.insert({
+        code: code,
+        name: name,
+        owner: owner,
+        status: "planned"
+    });
+    line(`Saved project {name}`);
+}
+
+func list_projects() {
+    let projects = projects_collection().find({}).data;
+    if (leng(projects) <= 0) {
+        line("No projects yet.");
+    }
+    else {
+        for (project in projects) {
+            line(`{project.code} | {project.name} | {project.owner} | {project.status}`);
+        }
+    }
+}
+
+func main_loop() {
+    let end = false;
+    show_menu();
+    while (!end) {
+        command = input(`[${PROMPT}] command: `);
+        if (command == "menu") {
+            show_menu();
+        }
+        alt (command == "inventory") {
+            add_inventory_item();
+        }
+        alt (command == "stock") {
+            list_inventory();
+        }
+        alt (command == "project") {
+            add_project();
+        }
+        alt (command == "projects") {
+            list_projects();
+        }
+        else {
+            line("Goodbye.");
+            end = true;
+        }
+    }
+}
+
+setup_workspace();
+main_loop();

@@ -1,0 +1,47 @@
+{
+  "liwiro-architect": {
+    "owns": ["architecture", "integration", "service-design", "lapis", "versa-planning", "vdb-planning"],
+    "supports": ["reliability", "documentation", "compliance"],
+    "artifactKindsAllowed": ["service-builder-lapis", "vi-script", "vdb-query"],
+    "mustConsult": ["reliability-risk", "compliance-risk", "documentation-artifact"],
+    "mustBlock": ["undocumented-versa-runtime", "unsupported-vdb-shape"],
+    "requiredEvidence": ["routing-reason", "relevant-manual", "artifact-validation"],
+    "forbiddenAssumptions": ["undocumented-runtime-globals", "implicit-vdb-auth", "parser-unsafe-versa"]
+  },
+  "liwiro-analyst": {
+    "owns": ["analysis", "metrics", "trends", "workbench"],
+    "supports": ["architecture", "documentation"],
+    "artifactKindsAllowed": ["ananse-analysis"],
+    "mustConsult": ["architecture-root-cause", "documentation-artifact"],
+    "mustBlock": ["insufficient-data"],
+    "requiredEvidence": ["dataset-shape", "analysis-summary"],
+    "forbiddenAssumptions": ["invented-metrics", "unsupported-causality"]
+  },
+  "liwiro-reliability-advisor": {
+    "owns": ["reliability", "operations", "deployments", "observability"],
+    "supports": ["architecture", "compliance"],
+    "artifactKindsAllowed": [],
+    "mustConsult": ["architecture-risk", "compliance-risk"],
+    "mustBlock": ["missing-runtime-context"],
+    "requiredEvidence": ["operational-risk", "failure-mode"],
+    "forbiddenAssumptions": ["imagined-rollback", "imagined-observability"]
+  },
+  "liwiro-compliance-advisor": {
+    "owns": ["compliance", "controls", "governance"],
+    "supports": ["architecture", "documentation"],
+    "artifactKindsAllowed": [],
+    "mustConsult": ["documentation-artifact", "architecture-risk"],
+    "mustBlock": ["missing-policy-basis"],
+    "requiredEvidence": ["control-basis", "scope"],
+    "forbiddenAssumptions": ["invented-policy", "implicit-control-coverage"]
+  },
+  "liwiro-documentation-advisor": {
+    "owns": ["documentation", "runbooks", "adrs", "summaries"],
+    "supports": ["architecture", "analysis", "reliability", "compliance"],
+    "artifactKindsAllowed": [],
+    "mustConsult": ["specialist-source-needed"],
+    "mustBlock": ["missing-source-material"],
+    "requiredEvidence": ["thread-summary", "specialist-findings"],
+    "forbiddenAssumptions": ["flattened-disagreements", "unattributed-decisions"]
+  }
+}

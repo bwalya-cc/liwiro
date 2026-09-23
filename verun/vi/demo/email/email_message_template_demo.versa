@@ -1,0 +1,31 @@
+email import *;
+
+let payload = {
+  host: EMAIL_SMTP_HOST,
+  port: EMAIL_SMTP_PORT,
+  username: EMAIL_SMTP_USERNAME,
+  password: EMAIL_SMTP_PASSWORD,
+  from: EMAIL_FROM,
+  to: [EMAIL_TO],
+  subject: "Template Mail",
+  body: "Hello from Versa email demo"
+};
+
+print("Payload");
+print(payload);
+
+if (DEMO_EMAIL_CONFIGURED != true) {
+  print("Skipping email demo. Set VERUN_DEMO_EMAIL_* in " + DEMO_ENV_FILE);
+} else {
+  try {
+    let res = email.send(payload);
+    if (res.ok == true) {
+      print("Email Sent");
+    } else {
+      print("Email Failed");
+    }
+    print(res);
+  } catch (e) {
+    print(`Error sending email: {e.message}`);
+  }
+}

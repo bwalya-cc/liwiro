@@ -1,0 +1,7 @@
+# Basic list definition and iteration
+let numbers = [1, 2, 3, 4, 5];
+
+print("Original numbers:");
+for (let num in numbers) {
+    print(`- {num}`);
+}

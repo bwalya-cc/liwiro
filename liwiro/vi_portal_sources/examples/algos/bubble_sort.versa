@@ -1,0 +1,18 @@
+print("=== bubble sort ===");
+let arr = [5, 1, 4, 2, 8, 3];
+
+func bubble_sort(a) {
+    let n = leng(a);
+    for (i in 0..(n - 2)) {
+        for (j in 0..(n - i - 2)) {
+            if (a[j] > a[j + 1]) {
+                let tmp = a[j];
+                a[j] = a[j + 1];
+                a[j + 1] = tmp;
+            }
+        }
+    }
+    return a;
+}
+
+print(bubble_sort(arr));

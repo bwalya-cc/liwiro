@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VDB Interface Transport Guide</title>
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg: #07111c;
+            --bg-deep: #091420;
+            --panel: rgba(9, 18, 29, 0.9);
+            --panel-soft: rgba(14, 24, 37, 0.86);
+            --panel-strong: rgba(5, 12, 20, 0.96);
+            --border: rgba(255, 255, 255, 0.1);
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --muted-strong: #cbd5e1;
+            --primary: #38bdf8;
+            --primary-soft: rgba(56, 189, 248, 0.12);
+            --primary-strong: rgba(56, 189, 248, 0.22);
+            --success: #34d399;
+            --warning: #f59e0b;
+            --danger: #fb7185;
+            --shadow: 0 26px 56px rgba(2, 6, 23, 0.34);
+            --radius-xl: 1.9rem;
+            --radius-lg: 1.55rem;
+            --radius-md: 1.15rem;
+            --font-ui: "Space Grotesk", "Plus Jakarta Sans", "Segoe UI", sans-serif;
+            --font-mono: "JetBrains Mono", "Fira Code", "SFMono-Regular", monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            min-height: 100%;
+            background:
+                radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 28%),
+                radial-gradient(circle at top right, rgba(14, 165, 233, 0.08), transparent 22%),
+                linear-gradient(180deg, var(--bg) 0%, #0a1726 54%, var(--bg-deep) 100%);
+            color: var(--text);
+            font-family: var(--font-ui);
+        }
+
+        body {
+            padding: 32px 18px 56px;
+        }
+
+        a {
+            color: #7dd3fc;
+        }
+
+        .page {
+            max-width: 1180px;
+            margin: 0 auto;
+        }
+
+        .hero,
+        .panel {
+            border: 1px solid var(--border);
+            backdrop-filter: blur(22px);
+            box-shadow: var(--shadow);
+        }
+
+        .hero {
+            border-radius: var(--radius-xl);
+            padding: 28px;
+            background:
+                linear-gradient(135deg, rgba(8, 18, 31, 0.96), rgba(13, 28, 45, 0.92)),
+                radial-gradient(circle at top right, rgba(56, 189, 248, 0.16), transparent 32%);
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: var(--primary-soft);
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            color: #bae6fd;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.24em;
+            text-transform: uppercase;
+        }
+
+        h1, h2, h3 {
+            letter-spacing: -0.02em;
+            margin: 0;
+        }
+
+        h1 {
+            margin-top: 18px;
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            line-height: 1.04;
+        }
+
+        .hero-copy {
+            margin-top: 16px;
+            max-width: 780px;
+            color: var(--muted-strong);
+            font-size: 1rem;
+            line-height: 1.8;
+        }
+
+        .hero-grid,
+        .content-grid,
+        .metric-grid,
+        .card-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .hero-grid {
+            grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.75fr);
+            margin-top: 26px;
+        }
+
+        .content-grid {
+            grid-template-columns: minmax(260px, 0.9fr) minmax(0, 1.1fr);
+            margin-top: 22px;
+        }
+
+        .metric-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            margin-top: 22px;
+        }
+
+        .card-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            margin-top: 22px;
+        }
+
+        .panel {
+            border-radius: var(--radius-lg);
+            background: var(--panel);
+            overflow: hidden;
+        }
+
+        .panel.soft {
+            background: var(--panel-soft);
+        }
+
+        .panel-header {
+            padding: 22px 24px 0;
+        }
+
+        .panel-body {
+            padding: 20px 24px 24px;
+        }
+
+        .section-label {
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+        }
+
+        .section-copy {
+            margin-top: 10px;
+            color: var(--muted-strong);
+            line-height: 1.75;
+        }
+
+        .stat-card {
+            border-radius: 1.25rem;
+            border: 1px solid var(--border);
+            background: rgba(12, 22, 35, 0.86);
+            padding: 18px 18px 16px;
+        }
+
+        .stat-label {
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            display: block;
+            margin-top: 12px;
+            font-size: clamp(1.5rem, 3vw, 2.2rem);
+            font-weight: 700;
+            color: #f8fafc;
+        }
+
+        .stat-note {
+            margin-top: 10px;
+            color: var(--muted);
+            font-size: 0.92rem;
+            line-height: 1.6;
+        }
+
+        .control-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .slider-wrap {
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.03);
+            padding: 16px;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 12px;
+        }
+
+        .slider-value {
+            color: #f8fafc;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            margin-top: 14px;
+            accent-color: var(--primary);
+        }
+
+        .callout {
+            border-radius: var(--radius-md);
+            border: 1px solid var(--primary-strong);
+            background: rgba(56, 189, 248, 0.08);
+            padding: 16px;
+            color: #dbeafe;
+            line-height: 1.7;
+        }
+
+        .transport-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .transport-row {
+            display: grid;
+            grid-template-columns: 160px minmax(0, 1fr) 74px;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .transport-name {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #f8fafc;
+        }
+
+        .bar-shell {
+            position: relative;
+            height: 14px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            position: absolute;
+            inset: 0 auto 0 0;
+            border-radius: 999px;
+        }
+
+        .transport-total {
+            text-align: right;
+            color: var(--muted-strong);
+            font-family: var(--font-mono);
+            font-size: 0.92rem;
+        }
+
+        .stack {
+            display: grid;
+            gap: 14px;
+        }
+
+        .chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .chip {
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.04);
+            padding: 8px 12px;
+            color: var(--muted-strong);
+            font-size: 0.86rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            overflow: hidden;
+            border-radius: 1.2rem;
+        }
+
+        thead th {
+            padding: 14px 14px;
+            text-align: left;
+            color: var(--muted);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        tbody td {
+            padding: 16px 14px;
+            border-top: 1px solid var(--border);
+            vertical-align: top;
+            color: var(--muted-strong);
+            line-height: 1.65;
+        }
+
+        tbody td strong {
+            color: #f8fafc;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 999px;
+            padding: 7px 11px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .badge.success {
+            color: #d1fae5;
+            background: rgba(52, 211, 153, 0.12);
+            border: 1px solid rgba(52, 211, 153, 0.22);
+        }
+
+        .badge.warning {
+            color: #fde68a;
+            background: rgba(245, 158, 11, 0.12);
+            border: 1px solid rgba(245, 158, 11, 0.22);
+        }
+
+        .badge.danger {
+            color: #fecdd3;
+            background: rgba(251, 113, 133, 0.12);
+            border: 1px solid rgba(251, 113, 133, 0.22);
+        }
+
+        .badge.info {
+            color: #bae6fd;
+            background: rgba(56, 189, 248, 0.12);
+            border: 1px solid rgba(56, 189, 248, 0.22);
+        }
+
+        .note-list,
+        .decision-list {
+            margin: 0;
+            padding-left: 1.1rem;
+            color: var(--muted-strong);
+            line-height: 1.8;
+        }
+
+        .decision-list li,
+        .note-list li {
+            margin-bottom: 10px;
+        }
+
+        .footer-note {
+            margin-top: 22px;
+            color: var(--muted);
+            font-size: 0.92rem;
+            line-height: 1.7;
+        }
+
+        @media (max-width: 980px) {
+            .hero-grid,
+            .content-grid,
+            .metric-grid,
+            .card-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .transport-row {
+                grid-template-columns: 1fr;
+            }
+
+            .transport-total {
+                text-align: left;
+            }
+
+            body {
+                padding: 18px 12px 40px;
+            }
+
+            .hero,
+            .panel-header,
+            .panel-body {
+                padding-left: 18px;
+                padding-right: 18px;
+            }
+
+            .hero {
+                padding-top: 22px;
+                padding-bottom: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="page">
+        <section class="hero">
+            <span class="eyebrow">VDB Interfaces · Transport Guide</span>
+            <h1>Choose the fastest safe transport for the host you are actually running on.</h1>
+            <p class="hero-copy">
+                This guide reframes the old IPC comparison into a Liwiro-style operator reference.
+                It is meant to support platform-aware startup, local performance decisions, and clearer expectations
+                around when to use Unix sockets, named pipes, or localhost HTTP.
+            </p>
+
+            <div class="metric-grid">
+                <article class="stat-card">
+                    <span class="stat-label">Fastest Local IPC</span>
+                    <strong class="stat-value">Unix Socket</strong>
+                    <p class="stat-note">Best raw latency on Linux and macOS when the caller and VDB are on the same machine.</p>
+                </article>
+                <article class="stat-card">
+                    <span class="stat-label">Windows Native IPC</span>
+                    <strong class="stat-value">Named Pipe</strong>
+                    <p class="stat-note">Preferred local IPC on Windows when the integration path is same-host and not remote.</p>
+                </article>
+                <article class="stat-card">
+                    <span class="stat-label">Most Portable</span>
+                    <strong class="stat-value">HTTP</strong>
+                    <p class="stat-note">Easiest to debug and script across tools, but carries extra framing and TCP overhead.</p>
+                </article>
+            </div>
+
+            <div class="hero-grid">
+                <section class="panel soft">
+                    <div class="panel-header">
+                        <p class="section-label">Interactive Comparison</p>
+                        <h2 style="margin-top: 10px; font-size: 1.55rem;">Local call cost simulator</h2>
+                    </div>
+                    <div class="panel-body control-stack">
+                        <div class="slider-wrap">
+                            <div class="slider-header">
+                                <span class="section-label" style="letter-spacing: 0.14em;">Request Volume</span>
+                                <span class="slider-value" id="requestCountLabel">10,000 calls</span>
+                            </div>
+                            <input type="range" id="requestCount" min="1000" max="50000" step="1000" value="10000" />
+                        </div>
+                        <div class="callout" id="summaryBox">
+                            Loading transport summary...
+                        </div>
+                        <div class="transport-list" id="transportBars"></div>
+                    </div>
+                </section>
+
+                <section class="panel">
+                    <div class="panel-header">
+                        <p class="section-label">Default Recommendation</p>
+                        <h2 style="margin-top: 10px; font-size: 1.55rem;">What Liwiro should do</h2>
+                    </div>
+                    <div class="panel-body stack">
+                        <div class="chip-row">
+                            <span class="badge success">Linux / macOS → Unix socket</span>
+                            <span class="badge info">Windows → Named pipe</span>
+                            <span class="badge warning">Cross-tool fallback → HTTP</span>
+                        </div>
+                        <ol class="decision-list">
+                            <li>Detect the host from runtime OS signals, not the shell or terminal.</li>
+                            <li>Normalize impossible transport choices before startup reaches the interface layer.</li>
+                            <li>Cache detected platform and runtime tools only after a successful startup.</li>
+                            <li>Use local HTTP as the compatibility path when direct IPC is unavailable or intentionally bypassed.</li>
+                        </ol>
+                        <p class="footer-note">
+                            For Liwiro specifically, this means a Windows Git Bash session still needs Windows transport behavior,
+                            while Linux and macOS keep the Unix socket path as the lowest-overhead local option.
+                        </p>
+                    </div>
+                </section>
+            </div>
+        </section>
+
+        <section class="content-grid">
+            <article class="panel">
+                <div class="panel-header">
+                    <p class="section-label">Transport Matrix</p>
+                    <h2 style="margin-top: 10px; font-size: 1.7rem;">Capability, latency, and operator fit</h2>
+                    <p class="section-copy">
+                        These numbers are directional reference points for local same-host usage. They are best used for relative
+                        decision-making, not as benchmark guarantees.
+                    </p>
+                </div>
+                <div class="panel-body">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Transport</th>
+                                <th>Typical Local Cost</th>
+                                <th>Best Fit</th>
+                                <th>Operational Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <strong>Unix socket</strong><br>
+                                    <span class="badge success" style="margin-top: 8px;">Linux / macOS native</span>
+                                </td>
+                                <td><strong>~0.02 ms / call</strong></td>
+                                <td>Same-host control plane traffic with the least protocol overhead.</td>
+                                <td>Fastest option when the OS supports it and filesystem permissions are the intended boundary.</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <strong>Named pipe</strong><br>
+                                    <span class="badge info" style="margin-top: 8px;">Windows native</span>
+                                </td>
+                                <td><strong>~0.10 ms / call</strong></td>
+                                <td>Windows-local VDB access without falling back to a TCP port.</td>
+                                <td>Fits ACL-based host security well and avoids pretending Windows is Unix-like.</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <strong>HTTP over local IPC</strong><br>
+                                    <span class="badge warning" style="margin-top: 8px;">Protocol convenience</span>
+                                </td>
+                                <td><strong>~0.30 ms / call</strong></td>
+                                <td>Structured local services that still want HTTP semantics and tooling.</td>
+                                <td>Useful when standard request/response behavior matters more than absolute transport minimalism.</td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <strong>HTTP on localhost TCP</strong><br>
+                                    <span class="badge danger" style="margin-top: 8px;">Portable fallback</span>
+                                </td>
+                                <td><strong>~0.60 ms / call</strong></td>
+                                <td>Cross-platform development, remote tooling compatibility, and easy inspection.</td>
+                                <td>Simplest shared surface, but usually the slowest option for high-frequency same-machine traffic.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+
+            <aside class="stack">
+                <section class="panel soft">
+                    <div class="panel-header">
+                        <p class="section-label">Host Mapping</p>
+                        <h2 style="margin-top: 10px; font-size: 1.45rem;">Startup policy</h2>
+                    </div>
+                    <div class="panel-body">
+                        <ul class="note-list">
+                            <li><strong>Windows:</strong> prefer named pipes; if config says <code>unixsocket</code>, downgrade before startup.</li>
+                            <li><strong>Linux / macOS:</strong> prefer Unix sockets; if config says <code>namedpipe</code>, downgrade before startup.</li>
+                            <li><strong>HTTP:</strong> stay on HTTP when explicitly chosen or when tooling needs a portable fallback.</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section class="panel soft">
+                    <div class="panel-header">
+                        <p class="section-label">Design Takeaways</p>
+                        <h2 style="margin-top: 10px; font-size: 1.45rem;">What matters most</h2>
+                    </div>
+                    <div class="panel-body">
+                        <ul class="note-list">
+                            <li><strong>Correctness beats preference:</strong> the wrong IPC mechanism should never be attempted for a host.</li>
+                            <li><strong>Cache after success:</strong> detection results are useful when startup completed cleanly, not before.</li>
+                            <li><strong>Ports should adapt:</strong> local HTTP services should roll to the next free port automatically.</li>
+                            <li><strong>Operator clarity matters:</strong> resolved transport and URLs should be printed in one consistent UI.</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section class="panel soft">
+                    <div class="panel-header">
+                        <p class="section-label">Scope</p>
+                        <h2 style="margin-top: 10px; font-size: 1.45rem;">How to use this page</h2>
+                    </div>
+                    <div class="panel-body">
+                        <p class="section-copy" style="margin-top: 0;">
+                            Treat this as an operator reference for VDB interface selection and startup behavior, not a marketing benchmark sheet.
+                            If the platform behavior changes, update this page alongside the startup scripts and transport normalization rules.
+                        </p>
+                    </div>
+                </section>
+            </aside>
+        </section>
+    </main>
+
+    <script>
+        const transportProfiles = [
+            {
+                id: "uds",
+                label: "Unix socket",
+                latency: 0.02,
+                color: "linear-gradient(90deg, rgba(52,211,153,0.95), rgba(16,185,129,0.82))",
+            },
+            {
+                id: "pipe",
+                label: "Named pipe",
+                latency: 0.10,
+                color: "linear-gradient(90deg, rgba(56,189,248,0.95), rgba(14,165,233,0.82))",
+            },
+            {
+                id: "httpIpc",
+                label: "HTTP over local IPC",
+                latency: 0.30,
+                color: "linear-gradient(90deg, rgba(251,191,36,0.94), rgba(245,158,11,0.84))",
+            },
+            {
+                id: "tcp",
+                label: "HTTP localhost TCP",
+                latency: 0.60,
+                color: "linear-gradient(90deg, rgba(251,113,133,0.95), rgba(244,63,94,0.84))",
+            },
+        ];
+
+        const requestCountInput = document.getElementById("requestCount");
+        const requestCountLabel = document.getElementById("requestCountLabel");
+        const summaryBox = document.getElementById("summaryBox");
+        const transportBars = document.getElementById("transportBars");
+
+        function formatNumber(value) {
+            return Number(value).toLocaleString();
+        }
+
+        function formatMs(value) {
+            return `${Number(value).toFixed(2)} ms`;
+        }
+
+        function renderSimulation() {
+            const requestCount = Number(requestCountInput.value || 10000);
+            const totals = transportProfiles.map((profile) => ({
+                ...profile,
+                total: requestCount * profile.latency,
+            }));
+
+            const slowest = Math.max(...totals.map((item) => item.total));
+            const fastest = totals[0];
+            const slowestProfile = totals[totals.length - 1];
+            const savedMs = slowestProfile.total - fastest.total;
+
+            requestCountLabel.textContent = `${formatNumber(requestCount)} calls`;
+            summaryBox.innerHTML = `
+                <strong style="color:#f8fafc;">At ${formatNumber(requestCount)} local calls</strong><br>
+                choosing <strong>${fastest.label}</strong> instead of <strong>${slowestProfile.label}</strong>
+                avoids about <strong>${formatMs(savedMs)}</strong> of transport overhead.
+            `;
+
+            transportBars.innerHTML = totals.map((item) => {
+                const width = slowest <= 0 ? 0 : Math.max(4, (item.total / slowest) * 100);
+                return `
+                    <div class="transport-row">
+                        <div class="transport-name">${item.label}</div>
+                        <div class="bar-shell">
+                            <div class="bar-fill" style="width:${width}%; background:${item.color};"></div>
+                        </div>
+                        <div class="transport-total">${formatMs(item.total)}</div>
+                    </div>
+                `;
+            }).join("");
+        }
+
+        requestCountInput.addEventListener("input", renderSimulation);
+        renderSimulation();
+    </script>
+</body>
+</html>

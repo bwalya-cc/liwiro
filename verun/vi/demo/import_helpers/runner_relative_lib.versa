@@ -1,0 +1,13 @@
+# demo_role: support
+random import *;
+let RELATIVE_IMPORT_LABEL = "runner-relative-import-ok";
+
+func rel_add(a, b) {
+    return a + b;
+}
+
+
+let vals = [random.randint(0, 10) for _ in 1..2];
+print(vals[0] + " + " + vals[1] + ":");
+let result = rel_add(vals[0], vals[1]);
+print(result);

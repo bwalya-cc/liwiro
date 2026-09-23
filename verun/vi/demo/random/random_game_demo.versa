@@ -1,0 +1,21 @@
+random import *;
+
+print("=== random mini game ===");
+let secret = random.randint(1, 20);
+let guesses = [3, 8, 13, 18];
+
+for (g : guesses) {
+    if (g == secret) {
+        print("Hit!");
+        print(g);
+    } alt (g < secret) {
+        print("Too low:");
+        print(g);
+    } else {
+        print("Too high:");
+        print(g);
+    }
+}
+
+print("Secret was:");
+print(secret);

@@ -1,0 +1,55 @@
+# ======================================================================
+# closures.versa - Updated Closure Examples
+# ======================================================================
+
+func counter() {
+    let count = 0;
+    
+    return () => {
+        count += 1;
+        return count;
+    };
+}
+
+print("=== Counter Example ===");
+let increment = counter();
+print(increment());  # 1
+print(increment());  # 2
+
+# -----------------------------------------------------------
+
+func createAdder(x) {
+    return (y) => x + y;
+}
+
+print("\n=== Adder Factory Example ===");
+let add5 = createAdder(5);
+print("5 + 3 = " + add5(3));    # 8
+print("5 + 10 = " + add5(10));   # 15
+
+# -----------------------------------------------------------
+
+func createBankAccount(initialBalance) {
+    let balance = initialBalance;
+    
+    return {
+        deposit: func(amount) {
+            balance += amount;
+            return balance;
+        },
+        withdraw: func(amount) {
+            balance -= amount;
+            return balance;
+        },
+        check: func() {
+            return balance;
+        }
+    };
+}
+
+print("\n=== Bank Account Example ===");
+let account = createBankAccount(100);
+account.deposit(50);
+print("Balance after deposit: " + account.check());  # 150
+account.withdraw(75);
+print("Balance after withdrawal: " + account.check());  # 75

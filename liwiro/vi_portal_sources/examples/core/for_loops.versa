@@ -1,0 +1,22 @@
+print("using for-in syntax:");
+let numbers = [1, 2, 3, 4, 5];
+
+print("with 'let':");
+for (let n in numbers) {
+    print(n);
+}
+
+print("without 'let':");
+for (n in numbers) {
+    print(n);
+}
+
+print("Using for-each ':' syntax:");
+for (n : numbers) {
+    print(n);
+}
+
+print("Using for initializer;condition;incrementer syntax:");
+for (let i = 0; i < leng(numbers); i++) {
+    print(numbers[i]);
+}

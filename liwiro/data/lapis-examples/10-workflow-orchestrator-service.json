@@ -1,0 +1,356 @@
+{
+  "metadata": {
+    "apiName": "WorkflowOrchestratorService",
+    "basePath": "/api/workflows",
+    "version": "1.0.0",
+    "database": "orchestrator",
+    "rateLimiting": {
+      "enabled": true,
+      "limit": 90,
+      "timeframe": "minute"
+    },
+    "documentation": {
+      "enabled": true,
+      "key": "liwiroservicepass0!"
+    },
+    "developerNotes": "Managed by Liwiro Service Builder. Docs/help visibility and notes are synced from LAPIS metadata.",
+    "setupApiKey": "liwiroservicepass0!",
+    "seedData": {
+      "enabled": true,
+      "collections": {
+        "workflows": [
+          {
+            "workflowId": "wf-kalulu-onboarding-001",
+            "name": "Kalulu Kaumba",
+            "state": "active",
+            "context": {}
+          }
+        ]
+      }
+    }
+  },
+  "auth": {
+    "enabled": true,
+    "isAuthService": false,
+    "keyManagement": "auto",
+    "useAsymmetricJWT": true,
+    "customEndpoints": {
+      "enabled": false,
+      "signIn": "/signin",
+      "signOut": "/auth/signout",
+      "signUp": "/auth/signup"
+    },
+    "defaultSuperAdmin": {
+      "enabled": false,
+      "username": "superadmin",
+      "email": "superadmin@liwiro.local",
+      "password": "ChangeMeNow1!",
+      "role": "SUPER_ADMIN"
+    },
+    "authServiceName": "AuthCoreService"
+  },
+  "models": {
+    "m_flow": {
+      "name": "Workflow",
+      "collection": "workflows",
+      "fields": {
+        "f_flow_id": {
+          "id": "f_flow_id",
+          "name": "workflowId",
+          "type": "string",
+          "required": true,
+          "unique": true,
+          "default": false,
+          "defaultValue": "",
+          "embeddedFields": [],
+          "depth": 1
+        },
+        "f_flow_name": {
+          "id": "f_flow_name",
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "unique": false,
+          "default": false,
+          "defaultValue": "",
+          "embeddedFields": [],
+          "depth": 1
+        },
+        "f_flow_state": {
+          "id": "f_flow_state",
+          "name": "state",
+          "type": "string",
+          "required": true,
+          "unique": false,
+          "default": true,
+          "defaultValue": "CREATED",
+          "embeddedFields": [],
+          "depth": 1
+        },
+        "f_flow_context": {
+          "id": "f_flow_context",
+          "name": "context",
+          "type": "object",
+          "required": false,
+          "unique": false,
+          "default": false,
+          "defaultValue": "",
+          "objectTemplate": "{\"steps\":{},\"retries\":0}",
+          "embeddedFields": [],
+          "depth": 1
+        }
+      }
+    }
+  },
+  "endpoints": {
+    "ep_flow_create": {
+      "method": "POST",
+      "path": "/",
+      "operationType": "crud",
+      "crudOperation": "create",
+      "linkedModel": "Workflow",
+      "requiresAuth": true,
+      "defaultParameters": {
+        "data": {
+          "enabled": true,
+          "name": "data"
+        },
+        "query": {
+          "enabled": false,
+          "name": "query",
+          "operator": "$eq"
+        }
+      },
+      "developerNotes": "crud endpoint for /; requiresAuth=True.",
+      "exampleParams": {
+        "query": {
+          "scenario": "kalulu-onboarding-flow"
+        },
+        "body": {
+          "workflowId": "wf-validation-001",
+          "name": "Validation Workflow",
+          "state": "active",
+          "context": {}
+        },
+        "headers": {
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "POST / create operation for Workflow",
+        "description": "Generated documentation for the WorkflowOrchestratorService example service. Override `endpoint.documentation` if this endpoint needs service-specific wording.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Bearer authentication is required before the handler runs."
+          },
+          {
+            "title": "Request Contract",
+            "body": "The request examples below are copied from the LAPIS endpoint definition and are the default values used by the interactive docs.\n\nExample query JSON:\n{\n  \"scenario\": \"kalulu-onboarding-flow\"\n}\n\nExample body JSON:\n{\n  \"workflowId\": \"wf-kalulu-onboarding-001\",\n  \"name\": \"Kalulu Kaumba\",\n  \"state\": \"active\",\n  \"context\": {}\n}\n\nExample headers:\n{\n  \"X-Trace-Id\": \"demo-trace-001\"\n}"
+          },
+          {
+            "title": "Parameters",
+            "body": "No explicit parameter list was declared for this endpoint. Use the example query/body payloads as the contract."
+          },
+          {
+            "title": "Responses",
+            "body": "Successful requests return `201 Created` with insert metadata. Validation and persistence failures return `400` or `500`."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "crud endpoint for /; requiresAuth=True."
+          }
+        ]
+      }
+    },
+    "ep_flow_read": {
+      "method": "GET",
+      "path": "/",
+      "operationType": "crud",
+      "crudOperation": "read",
+      "linkedModel": "Workflow",
+      "requiresAuth": true,
+      "defaultParameters": {
+        "data": {
+          "enabled": false,
+          "name": "data"
+        },
+        "query": {
+          "enabled": true,
+          "name": "workflowId",
+          "operator": "$eq"
+        }
+      },
+      "developerNotes": "crud endpoint for /; requiresAuth=True.",
+      "exampleParams": {
+        "query": {
+          "workflowId": "wf-kalulu-onboarding-001"
+        },
+        "headers": {
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "GET / read operation for Workflow",
+        "description": "Generated documentation for the WorkflowOrchestratorService example service. Override `endpoint.documentation` if this endpoint needs service-specific wording.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Bearer authentication is required before the handler runs."
+          },
+          {
+            "title": "Request Contract",
+            "body": "The request examples below are copied from the LAPIS endpoint definition and are the default values used by the interactive docs.\n\nExample query JSON:\n{\n  \"workflowId\": \"wf-kalulu-onboarding-001\"\n}\n\nExample body JSON:\n{}\n\nExample headers:\n{\n  \"X-Trace-Id\": \"demo-trace-001\"\n}"
+          },
+          {
+            "title": "Parameters",
+            "body": "No explicit parameter list was declared for this endpoint. Use the example query/body payloads as the contract."
+          },
+          {
+            "title": "Responses",
+            "body": "Successful requests return `200 OK` with every matching record. Empty query objects such as `{}` mean “match all records”."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "crud endpoint for /; requiresAuth=True."
+          }
+        ]
+      }
+    },
+    "ep_flow_start": {
+      "method": "POST",
+      "path": "/start",
+      "operationType": "script",
+      "requiresAuth": true,
+      "versaScript": "json_xml import *;\nvdb import *;\nhttp import *;\nemail import *;\ncrypto import *;\njwt import *;\ntime import *;\ndatetime import *;\n\nlet req = params;\nlet body = req.body ?? {};\nlet authCtx = req.auth ?? {};\nlet actor = str(authCtx.username ?? authCtx.sub ?? \"system\").trim();\nif (actor == \"\") {\n  actor = \"system\";\n}\nlet dryRun = body.dryRun == true || req.dryRun == true;\nlet workflowId = str(body.workflowId ?? req.workflowId ?? \"\").trim();\n\nlet workflows = vdb.collection(\"workflows\");\nlet rows = [];\nif (workflowId != \"\") {\n  let lookup = workflows.find({workflowId: {$eq: workflowId}}, 1);\n  rows = lookup.data ?? [];\n}\nif (leng(rows) == 0) {\n  let fallback = workflows.find({}, 1);\n  rows = fallback.data ?? [];\n}\nif (leng(rows) == 0) {\n  return {ok: false, statusCode: 404, reason: \"No workflow is available for transition\"};\n}\n\nlet workflow = rows[0];\nworkflowId = str(workflow.workflowId ?? workflowId).trim();\nlet previousState = str(workflow.state ?? \"CREATED\").upper();\nlet allowedStates = [\"ACTIVE\",\"CREATED\",\"PENDING\",\"PAUSED\"];\nlet allowed = false;\nfor (state : allowedStates) {\n  if (str(state ?? \"\").trim().upper() == previousState) {\n    allowed = true;\n  }\n}\nif (!allowed) {\n  return {ok: false, statusCode: 409, reason: \"Workflow is not in a startable state\", workflowId: workflowId, state: previousState};\n}\n\nlet context = type(workflow.context) == \"object\" ? workflow.context : {};\nlet retries = context.retries ?? 0;\nif (retries == \"\") {\n  retries = 0;\n}\nlet steps = type(context.steps) == \"object\" ? context.steps : {};\nlet nowTs = datetime.now().isoformat();\nlet nextContext = {\n  steps: steps,\n  retries: retries,\n  lastTransition: {\n    action: \"start\",\n    previousState: previousState,\n    nextState: \"RUNNING\",\n    actor: actor,\n    at: nowTs\n  }\n};\nlet updatePayload = {\n  state: \"RUNNING\",\n  context: nextContext\n};\n\nif (dryRun) {\n  return {ok: true, dryRun: true, workflowId: workflowId, previousState: previousState, nextState: \"RUNNING\", update: updatePayload};\n}\n\nlet updateRes = workflows.update({workflowId: {$eq: workflowId}}, updatePayload);\nif (updateRes.ok == false) {\n  return {ok: false, statusCode: 500, reason: updateRes.error ?? \"Failed to persist workflow transition\", workflowId: workflowId, result: updateRes};\n}\n\nlet events = vdb.collection(\"workflow_transition_events\");\nlet eventId = crypto.uuid();\nlet eventRes = events.insert({\n  eventId: eventId,\n  workflowId: workflowId,\n  action: \"start\",\n  previousState: previousState,\n  nextState: \"RUNNING\",\n  actor: actor,\n  createdAt: nowTs\n});\n\nreturn {ok: true, workflowId: workflowId, previousState: previousState, nextState: \"RUNNING\", eventId: eventId, eventRecorded: eventRes.ok ?? false, updated: true};",
+      "developerNotes": "Transitions a real workflow into RUNNING, persists updated context plus a workflow_transition_events audit row, and supports dryRun previews.",
+      "exampleParams": {
+        "query": {
+          "scenario": "kalulu-onboarding-flow"
+        },
+        "body": {
+          "dryRun": true
+        },
+        "headers": {
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "POST /start script operation",
+        "description": "Generated documentation for the WorkflowOrchestratorService example service. Override `endpoint.documentation` if this endpoint needs service-specific wording.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Bearer authentication is required before the handler runs."
+          },
+          {
+            "title": "Request Contract",
+            "body": "The request examples below are copied from the LAPIS endpoint definition and are the default values used by the interactive docs.\n\nExample query JSON:\n{\n  \"scenario\": \"kalulu-onboarding-flow\"\n}\n\nExample body JSON:\n{\n  \"dryRun\": true\n}\n\nExample headers:\n{\n  \"X-Trace-Id\": \"demo-trace-001\"\n}"
+          },
+          {
+            "title": "Parameters",
+            "body": "No explicit parameter list was declared for this endpoint. Use the example query/body payloads as the contract."
+          },
+          {
+            "title": "Responses",
+            "body": "Successful requests return JSON. Script-level `statusCode` values are promoted to the HTTP response automatically."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "Transitions a real workflow into RUNNING, persists updated context plus a workflow_transition_events audit row, and supports dryRun previews."
+          }
+        ]
+      }
+    },
+    "ep_flow_pause": {
+      "method": "POST",
+      "path": "/pause",
+      "operationType": "script",
+      "requiresAuth": true,
+      "versaScript": "json_xml import *;\nvdb import *;\nhttp import *;\nemail import *;\ncrypto import *;\njwt import *;\ntime import *;\ndatetime import *;\n\nlet req = params;\nlet body = req.body ?? {};\nlet authCtx = req.auth ?? {};\nlet actor = str(authCtx.username ?? authCtx.sub ?? \"system\").trim();\nif (actor == \"\") {\n  actor = \"system\";\n}\nlet dryRun = body.dryRun == true || req.dryRun == true;\nlet workflowId = str(body.workflowId ?? req.workflowId ?? \"\").trim();\n\nlet workflows = vdb.collection(\"workflows\");\nlet rows = [];\nif (workflowId != \"\") {\n  let lookup = workflows.find({workflowId: {$eq: workflowId}}, 1);\n  rows = lookup.data ?? [];\n}\nif (leng(rows) == 0) {\n  let fallback = workflows.find({}, 1);\n  rows = fallback.data ?? [];\n}\nif (leng(rows) == 0) {\n  return {ok: false, statusCode: 404, reason: \"No workflow is available for transition\"};\n}\n\nlet workflow = rows[0];\nworkflowId = str(workflow.workflowId ?? workflowId).trim();\nlet previousState = str(workflow.state ?? \"CREATED\").upper();\nlet allowedStates = [\"RUNNING\",\"ACTIVE\"];\nlet allowed = false;\nfor (state : allowedStates) {\n  if (str(state ?? \"\").trim().upper() == previousState) {\n    allowed = true;\n  }\n}\nif (!allowed) {\n  return {ok: false, statusCode: 409, reason: \"Only running workflows can be paused\", workflowId: workflowId, state: previousState};\n}\n\nlet context = type(workflow.context) == \"object\" ? workflow.context : {};\nlet retries = context.retries ?? 0;\nif (retries == \"\") {\n  retries = 0;\n}\nlet steps = type(context.steps) == \"object\" ? context.steps : {};\nlet nowTs = datetime.now().isoformat();\nlet nextContext = {\n  steps: steps,\n  retries: retries,\n  lastTransition: {\n    action: \"pause\",\n    previousState: previousState,\n    nextState: \"PAUSED\",\n    actor: actor,\n    at: nowTs\n  }\n};\nlet updatePayload = {\n  state: \"PAUSED\",\n  context: nextContext\n};\n\nif (dryRun) {\n  return {ok: true, dryRun: true, workflowId: workflowId, previousState: previousState, nextState: \"PAUSED\", update: updatePayload};\n}\n\nlet updateRes = workflows.update({workflowId: {$eq: workflowId}}, updatePayload);\nif (updateRes.ok == false) {\n  return {ok: false, statusCode: 500, reason: updateRes.error ?? \"Failed to persist workflow transition\", workflowId: workflowId, result: updateRes};\n}\n\nlet events = vdb.collection(\"workflow_transition_events\");\nlet eventId = crypto.uuid();\nlet eventRes = events.insert({\n  eventId: eventId,\n  workflowId: workflowId,\n  action: \"pause\",\n  previousState: previousState,\n  nextState: \"PAUSED\",\n  actor: actor,\n  createdAt: nowTs\n});\n\nreturn {ok: true, workflowId: workflowId, previousState: previousState, nextState: \"PAUSED\", eventId: eventId, eventRecorded: eventRes.ok ?? false, updated: true};",
+      "developerNotes": "Transitions a real workflow into PAUSED, persists updated context plus a workflow_transition_events audit row, and supports dryRun previews.",
+      "exampleParams": {
+        "query": {
+          "scenario": "kalulu-onboarding-flow"
+        },
+        "body": {
+          "dryRun": true
+        },
+        "headers": {
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "POST /pause script operation",
+        "description": "Generated documentation for the WorkflowOrchestratorService example service. Override `endpoint.documentation` if this endpoint needs service-specific wording.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Bearer authentication is required before the handler runs."
+          },
+          {
+            "title": "Request Contract",
+            "body": "The request examples below are copied from the LAPIS endpoint definition and are the default values used by the interactive docs.\n\nExample query JSON:\n{\n  \"scenario\": \"kalulu-onboarding-flow\"\n}\n\nExample body JSON:\n{\n  \"dryRun\": true\n}\n\nExample headers:\n{\n  \"X-Trace-Id\": \"demo-trace-001\"\n}"
+          },
+          {
+            "title": "Parameters",
+            "body": "No explicit parameter list was declared for this endpoint. Use the example query/body payloads as the contract."
+          },
+          {
+            "title": "Responses",
+            "body": "Successful requests return JSON. Script-level `statusCode` values are promoted to the HTTP response automatically."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "Transitions a real workflow into PAUSED, persists updated context plus a workflow_transition_events audit row, and supports dryRun previews."
+          }
+        ]
+      }
+    },
+    "ep_flow_resume": {
+      "method": "POST",
+      "path": "/resume",
+      "operationType": "script",
+      "requiresAuth": true,
+      "versaScript": "json_xml import *;\nvdb import *;\nhttp import *;\nemail import *;\ncrypto import *;\njwt import *;\ntime import *;\ndatetime import *;\n\nlet req = params;\nlet body = req.body ?? {};\nlet authCtx = req.auth ?? {};\nlet actor = str(authCtx.username ?? authCtx.sub ?? \"system\").trim();\nif (actor == \"\") {\n  actor = \"system\";\n}\nlet dryRun = body.dryRun == true || req.dryRun == true;\nlet workflowId = str(body.workflowId ?? req.workflowId ?? \"\").trim();\n\nlet workflows = vdb.collection(\"workflows\");\nlet rows = [];\nif (workflowId != \"\") {\n  let lookup = workflows.find({workflowId: {$eq: workflowId}}, 1);\n  rows = lookup.data ?? [];\n}\nif (leng(rows) == 0) {\n  let fallback = workflows.find({}, 1);\n  rows = fallback.data ?? [];\n}\nif (leng(rows) == 0) {\n  return {ok: false, statusCode: 404, reason: \"No workflow is available for transition\"};\n}\n\nlet workflow = rows[0];\nworkflowId = str(workflow.workflowId ?? workflowId).trim();\nlet previousState = str(workflow.state ?? \"CREATED\").upper();\nlet allowedStates = [\"PAUSED\"];\nlet allowed = false;\nfor (state : allowedStates) {\n  if (str(state ?? \"\").trim().upper() == previousState) {\n    allowed = true;\n  }\n}\nif (!allowed) {\n  return {ok: false, statusCode: 409, reason: \"Only paused workflows can be resumed\", workflowId: workflowId, state: previousState};\n}\n\nlet context = type(workflow.context) == \"object\" ? workflow.context : {};\nlet retries = context.retries ?? 0;\nif (retries == \"\") {\n  retries = 0;\n}\nlet steps = type(context.steps) == \"object\" ? context.steps : {};\nlet nowTs = datetime.now().isoformat();\nlet nextContext = {\n  steps: steps,\n  retries: retries,\n  lastTransition: {\n    action: \"resume\",\n    previousState: previousState,\n    nextState: \"RUNNING\",\n    actor: actor,\n    at: nowTs\n  }\n};\nlet updatePayload = {\n  state: \"RUNNING\",\n  context: nextContext\n};\n\nif (dryRun) {\n  return {ok: true, dryRun: true, workflowId: workflowId, previousState: previousState, nextState: \"RUNNING\", update: updatePayload};\n}\n\nlet updateRes = workflows.update({workflowId: {$eq: workflowId}}, updatePayload);\nif (updateRes.ok == false) {\n  return {ok: false, statusCode: 500, reason: updateRes.error ?? \"Failed to persist workflow transition\", workflowId: workflowId, result: updateRes};\n}\n\nlet events = vdb.collection(\"workflow_transition_events\");\nlet eventId = crypto.uuid();\nlet eventRes = events.insert({\n  eventId: eventId,\n  workflowId: workflowId,\n  action: \"resume\",\n  previousState: previousState,\n  nextState: \"RUNNING\",\n  actor: actor,\n  createdAt: nowTs\n});\n\nreturn {ok: true, workflowId: workflowId, previousState: previousState, nextState: \"RUNNING\", eventId: eventId, eventRecorded: eventRes.ok ?? false, updated: true};",
+      "developerNotes": "Transitions a real workflow back to RUNNING, persists updated context plus a workflow_transition_events audit row, and supports dryRun previews.",
+      "exampleParams": {
+        "query": {
+          "scenario": "kalulu-onboarding-flow"
+        },
+        "body": {
+          "dryRun": true
+        },
+        "headers": {
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "POST /resume script operation",
+        "description": "Generated documentation for the WorkflowOrchestratorService example service. Override `endpoint.documentation` if this endpoint needs service-specific wording.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Bearer authentication is required before the handler runs."
+          },
+          {
+            "title": "Request Contract",
+            "body": "The request examples below are copied from the LAPIS endpoint definition and are the default values used by the interactive docs.\n\nExample query JSON:\n{\n  \"scenario\": \"kalulu-onboarding-flow\"\n}\n\nExample body JSON:\n{\n  \"dryRun\": true\n}\n\nExample headers:\n{\n  \"X-Trace-Id\": \"demo-trace-001\"\n}"
+          },
+          {
+            "title": "Parameters",
+            "body": "No explicit parameter list was declared for this endpoint. Use the example query/body payloads as the contract."
+          },
+          {
+            "title": "Responses",
+            "body": "Successful requests return JSON. Script-level `statusCode` values are promoted to the HTTP response automatically."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "Transitions a real workflow back to RUNNING, persists updated context plus a workflow_transition_events audit row, and supports dryRun previews."
+          }
+        ]
+      }
+    }
+  }
+}

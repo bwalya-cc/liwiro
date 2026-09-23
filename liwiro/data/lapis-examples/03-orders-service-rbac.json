@@ -1,0 +1,461 @@
+{
+  "metadata": {
+    "apiName": "OrdersService",
+    "basePath": "/api/orders",
+    "version": "1.0.0",
+    "database": "sales",
+    "rateLimiting": {
+      "enabled": true,
+      "limit": 150,
+      "timeframe": "minute"
+    },
+    "documentation": {
+      "enabled": true,
+      "key": "liwiroservicepass0!"
+    },
+    "developerNotes": "Managed by Liwiro Service Builder. Docs/help visibility and notes are synced from LAPIS metadata.",
+    "setupApiKey": "liwiroservicepass0!",
+    "seedData": {
+      "enabled": true,
+      "collections": {
+        "orders": [
+          {
+            "orderId": "ORD-2026-0001",
+            "customerId": "CUST-260-0001",
+            "status": "active",
+            "total": 1,
+            "shipping": {}
+          }
+        ]
+      }
+    }
+  },
+  "auth": {
+    "enabled": true,
+    "isAuthService": false,
+    "keyManagement": "auto",
+    "useAsymmetricJWT": true,
+    "customEndpoints": {
+      "enabled": false,
+      "signIn": "/signin",
+      "signOut": "/auth/signout",
+      "signUp": "/auth/signup"
+    },
+    "defaultSuperAdmin": {
+      "enabled": false,
+      "username": "superadmin",
+      "email": "superadmin@liwiro.local",
+      "password": "ChangeMeNow1!",
+      "role": "SUPER_ADMIN"
+    },
+    "authServiceName": "AuthCoreService"
+  },
+  "models": {
+    "m_order": {
+      "name": "Order",
+      "collection": "orders",
+      "fields": {
+        "f_order_id": {
+          "id": "f_order_id",
+          "name": "orderId",
+          "type": "string",
+          "required": true,
+          "unique": true,
+          "default": false,
+          "defaultValue": "",
+          "embeddedFields": [],
+          "depth": 1
+        },
+        "f_customer_id": {
+          "id": "f_customer_id",
+          "name": "customerId",
+          "type": "string",
+          "required": true,
+          "unique": false,
+          "default": false,
+          "defaultValue": "",
+          "embeddedFields": [],
+          "depth": 1
+        },
+        "f_status": {
+          "id": "f_status",
+          "name": "status",
+          "type": "string",
+          "required": true,
+          "unique": false,
+          "default": true,
+          "defaultValue": "PENDING",
+          "embeddedFields": [],
+          "depth": 1
+        },
+        "f_total": {
+          "id": "f_total",
+          "name": "total",
+          "type": "number",
+          "required": true,
+          "unique": false,
+          "default": true,
+          "defaultValue": "0",
+          "embeddedFields": [],
+          "depth": 1
+        },
+        "f_shipping": {
+          "id": "f_shipping",
+          "name": "shipping",
+          "type": "object",
+          "required": false,
+          "unique": false,
+          "default": false,
+          "defaultValue": "",
+          "embeddedFields": [
+            {
+              "id": "f_ship_city",
+              "name": "city",
+              "type": "string",
+              "required": false,
+              "unique": false,
+              "default": false,
+              "defaultValue": "",
+              "embeddedFields": [],
+              "depth": 2
+            },
+            {
+              "id": "f_ship_postal",
+              "name": "postalCode",
+              "type": "string",
+              "required": false,
+              "unique": false,
+              "default": false,
+              "defaultValue": "",
+              "embeddedFields": [],
+              "depth": 2
+            }
+          ],
+          "depth": 1
+        }
+      }
+    }
+  },
+  "endpoints": {
+    "ep_order_create": {
+      "method": "POST",
+      "path": "/",
+      "operationType": "crud",
+      "crudOperation": "create",
+      "linkedModel": "Order",
+      "requiresAuth": true,
+      "defaultParameters": {
+        "data": {
+          "enabled": true,
+          "name": "data"
+        },
+        "query": {
+          "enabled": false,
+          "name": "query",
+          "operator": "$eq"
+        }
+      },
+      "developerNotes": "crud endpoint for /; requiresAuth=True.",
+      "exampleParams": {
+        "query": {
+          "scenario": "kalulu-onboarding-flow"
+        },
+        "body": {
+          "orderId": "ORD-2026-9001",
+          "customerId": "CUST-260-9001",
+          "status": "active",
+          "total": 2,
+          "shipping": {}
+        },
+        "headers": {
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "POST / create operation for Order",
+        "description": "Generated documentation for the OrdersService example service. Override `endpoint.documentation` if this endpoint needs service-specific wording.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Bearer authentication is required before the handler runs."
+          },
+          {
+            "title": "Request Contract",
+            "body": "The request examples below are copied from the LAPIS endpoint definition and are the default values used by the interactive docs.\n\nExample query JSON:\n{\n  \"scenario\": \"kalulu-onboarding-flow\"\n}\n\nExample body JSON:\n{\n  \"orderId\": \"ORD-2026-0001\",\n  \"customerId\": \"CUST-260-0001\",\n  \"status\": \"active\",\n  \"total\": 1,\n  \"shipping\": {}\n}\n\nExample headers:\n{\n  \"X-Trace-Id\": \"demo-trace-001\"\n}"
+          },
+          {
+            "title": "Parameters",
+            "body": "No explicit parameter list was declared for this endpoint. Use the example query/body payloads as the contract."
+          },
+          {
+            "title": "Responses",
+            "body": "Successful requests return `201 Created` with insert metadata. Validation and persistence failures return `400` or `500`."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "crud endpoint for /; requiresAuth=True."
+          }
+        ]
+      }
+    },
+    "ep_order_read": {
+      "method": "GET",
+      "path": "/",
+      "operationType": "crud",
+      "crudOperation": "read",
+      "linkedModel": "Order",
+      "requiresAuth": true,
+      "defaultParameters": {
+        "data": {
+          "enabled": false,
+          "name": "data"
+        },
+        "query": {
+          "enabled": true,
+          "name": "orderId",
+          "operator": "$eq"
+        }
+      },
+      "developerNotes": "crud endpoint for /; requiresAuth=True.",
+      "exampleParams": {
+        "query": {
+          "orderId": "ORD-2026-0001"
+        },
+        "headers": {
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "GET / read operation for Order",
+        "description": "Generated documentation for the OrdersService example service. Override `endpoint.documentation` if this endpoint needs service-specific wording.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Bearer authentication is required before the handler runs."
+          },
+          {
+            "title": "Request Contract",
+            "body": "The request examples below are copied from the LAPIS endpoint definition and are the default values used by the interactive docs.\n\nExample query JSON:\n{\n  \"orderId\": \"ORD-2026-0001\"\n}\n\nExample body JSON:\n{}\n\nExample headers:\n{\n  \"X-Trace-Id\": \"demo-trace-001\"\n}"
+          },
+          {
+            "title": "Parameters",
+            "body": "No explicit parameter list was declared for this endpoint. Use the example query/body payloads as the contract."
+          },
+          {
+            "title": "Responses",
+            "body": "Successful requests return `200 OK` with every matching record. Empty query objects such as `{}` mean “match all records”."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "crud endpoint for /; requiresAuth=True."
+          }
+        ]
+      }
+    },
+    "ep_order_update": {
+      "method": "PUT",
+      "path": "/",
+      "operationType": "crud",
+      "crudOperation": "update",
+      "linkedModel": "Order",
+      "requiresAuth": true,
+      "defaultParameters": {
+        "data": {
+          "enabled": true,
+          "name": "data"
+        },
+        "query": {
+          "enabled": true,
+          "name": "orderId",
+          "operator": "$eq"
+        }
+      },
+      "developerNotes": "crud endpoint for /; requiresAuth=True.",
+      "exampleParams": {
+        "query": {
+          "orderId": "ORD-2026-0001"
+        },
+        "body": {
+          "orderId": "ORD-2026-0001",
+          "customerId": "CUST-260-0001",
+          "status": "active",
+          "total": 1,
+          "shipping": {}
+        },
+        "headers": {
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "PUT / update operation for Order",
+        "description": "Generated documentation for the OrdersService example service. Override `endpoint.documentation` if this endpoint needs service-specific wording.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Bearer authentication is required before the handler runs."
+          },
+          {
+            "title": "Request Contract",
+            "body": "The request examples below are copied from the LAPIS endpoint definition and are the default values used by the interactive docs.\n\nExample query JSON:\n{\n  \"orderId\": \"ORD-2026-0001\"\n}\n\nExample body JSON:\n{\n  \"orderId\": \"ORD-2026-0001\",\n  \"customerId\": \"CUST-260-0001\",\n  \"status\": \"active\",\n  \"total\": 1,\n  \"shipping\": {}\n}\n\nExample headers:\n{\n  \"X-Trace-Id\": \"demo-trace-001\"\n}"
+          },
+          {
+            "title": "Parameters",
+            "body": "No explicit parameter list was declared for this endpoint. Use the example query/body payloads as the contract."
+          },
+          {
+            "title": "Responses",
+            "body": "Successful requests return `200 OK` with update metadata. `404` is returned when no records match the supplied query."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "crud endpoint for /; requiresAuth=True."
+          }
+        ]
+      }
+    },
+    "ep_order_delete": {
+      "method": "DELETE",
+      "path": "/",
+      "operationType": "crud",
+      "crudOperation": "delete",
+      "linkedModel": "Order",
+      "requiresAuth": true,
+      "defaultParameters": {
+        "data": {
+          "enabled": false,
+          "name": "data"
+        },
+        "query": {
+          "enabled": true,
+          "name": "orderId",
+          "operator": "$eq"
+        }
+      },
+      "developerNotes": "crud endpoint for /; requiresAuth=True.",
+      "exampleParams": {
+        "query": {
+          "orderId": "ORD-2026-0001"
+        },
+        "headers": {
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "DELETE / delete operation for Order",
+        "description": "Generated documentation for the OrdersService example service. Override `endpoint.documentation` if this endpoint needs service-specific wording.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Bearer authentication is required before the handler runs."
+          },
+          {
+            "title": "Request Contract",
+            "body": "The request examples below are copied from the LAPIS endpoint definition and are the default values used by the interactive docs.\n\nExample query JSON:\n{\n  \"orderId\": \"ORD-2026-0001\"\n}\n\nExample body JSON:\n{}\n\nExample headers:\n{\n  \"X-Trace-Id\": \"demo-trace-001\"\n}"
+          },
+          {
+            "title": "Parameters",
+            "body": "No explicit parameter list was declared for this endpoint. Use the example query/body payloads as the contract."
+          },
+          {
+            "title": "Responses",
+            "body": "Successful requests return `200 OK` with delete metadata. `404` is returned when no records match the supplied query."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "crud endpoint for /; requiresAuth=True."
+          }
+        ]
+      }
+    },
+    "ep_order_pending": {
+      "method": "POST",
+      "path": "/pending",
+      "operationType": "custom",
+      "requiresAuth": true,
+      "vqlQuery": "read collection orders where status == \"PENDING\" limit 50;",
+      "developerNotes": "custom endpoint for /pending; requiresAuth=True.",
+      "exampleParams": {
+        "query": {
+          "scenario": "kalulu-onboarding-flow"
+        },
+        "body": {
+          "dryRun": true
+        },
+        "headers": {
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "POST /pending custom operation",
+        "description": "Generated documentation for the OrdersService example service. Override `endpoint.documentation` if this endpoint needs service-specific wording.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Bearer authentication is required before the handler runs."
+          },
+          {
+            "title": "Request Contract",
+            "body": "The request examples below are copied from the LAPIS endpoint definition and are the default values used by the interactive docs.\n\nExample query JSON:\n{\n  \"scenario\": \"kalulu-onboarding-flow\"\n}\n\nExample body JSON:\n{\n  \"dryRun\": true\n}\n\nExample headers:\n{\n  \"X-Trace-Id\": \"demo-trace-001\"\n}"
+          },
+          {
+            "title": "Parameters",
+            "body": "No explicit parameter list was declared for this endpoint. Use the example query/body payloads as the contract."
+          },
+          {
+            "title": "Responses",
+            "body": "Successful requests return JSON. Script-level `statusCode` values are promoted to the HTTP response automatically."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "custom endpoint for /pending; requiresAuth=True."
+          }
+        ]
+      }
+    },
+    "ep_order_finalize": {
+      "method": "POST",
+      "path": "/finalize",
+      "operationType": "script",
+      "requiresAuth": true,
+      "versaScript": "json_xml import *;\nvdb import *;\nhttp import *;\nemail import *;\ncrypto import *;\njwt import *;\ntime import *;\ndatetime import *;\n\nlet req = params;\nlet body = req.body ?? {};\nlet authCtx = req.auth ?? {};\nlet actor = str(authCtx.username ?? authCtx.sub ?? \"system\").trim();\nif (actor == \"\") {\n  actor = \"system\";\n}\nlet dryRun = body.dryRun == true || req.dryRun == true;\nlet orderId = str(body.orderId ?? req.orderId ?? \"\").trim();\n\nlet orders = vdb.collection(\"orders\");\nlet rows = [];\nif (orderId != \"\") {\n  let lookup = orders.find({orderId: {$eq: orderId}}, 1);\n  rows = lookup.data ?? [];\n}\nif (leng(rows) == 0) {\n  let fallback = orders.find({}, 1);\n  rows = fallback.data ?? [];\n}\nif (leng(rows) == 0) {\n  return {ok: false, statusCode: 404, reason: \"No order is available to finalize\"};\n}\n\nlet order = rows[0];\norderId = str(order.orderId ?? orderId).trim();\nlet previousStatus = str(order.status ?? \"PENDING\").upper();\nif (previousStatus == \"FINALIZED\" || previousStatus == \"COMPLETED\") {\n  return {ok: true, orderId: orderId, updated: false, alreadyFinalized: true, status: previousStatus};\n}\nif (previousStatus == \"CANCELLED\") {\n  return {ok: false, statusCode: 409, reason: \"Cancelled orders cannot be finalized\", orderId: orderId, status: previousStatus};\n}\n\nlet nowTs = datetime.now().isoformat();\nlet shipping = type(order.shipping) == \"object\" ? order.shipping : {};\nlet nextShipping = {\n  city: shipping.city ?? \"\",\n  postalCode: shipping.postalCode ?? \"\",\n  finalizedAt: nowTs,\n  finalizedBy: actor\n};\nlet updatePayload = {\n  status: \"FINALIZED\",\n  shipping: nextShipping,\n  finalizedAt: nowTs,\n  finalizedBy: actor\n};\n\nif (dryRun) {\n  return {ok: true, dryRun: true, orderId: orderId, previousStatus: previousStatus, nextStatus: \"FINALIZED\", update: updatePayload};\n}\n\nlet updateRes = orders.update({orderId: {$eq: orderId}}, updatePayload);\nif (updateRes.ok == false) {\n  return {ok: false, statusCode: 500, reason: updateRes.error ?? \"Failed to finalize order\", orderId: orderId, result: updateRes};\n}\n\nlet events = vdb.collection(\"order_events\");\nlet eventId = crypto.uuid();\nlet eventRes = events.insert({\n  eventId: eventId,\n  orderId: orderId,\n  action: \"finalize\",\n  previousStatus: previousStatus,\n  nextStatus: \"FINALIZED\",\n  actor: actor,\n  createdAt: nowTs\n});\n\nreturn {\n  ok: true,\n  orderId: orderId,\n  previousStatus: previousStatus,\n  nextStatus: \"FINALIZED\",\n  updated: true,\n  finalizedAt: nowTs,\n  eventId: eventId,\n  eventRecorded: eventRes.ok ?? false,\n  result: updateRes\n};",
+      "developerNotes": "Finalizes a real order record from the orders collection, writes an order_events audit entry, and supports dryRun previews.",
+      "exampleParams": {
+        "query": {
+          "scenario": "kalulu-onboarding-flow"
+        },
+        "body": {
+          "dryRun": true
+        },
+        "headers": {
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "POST /finalize script operation",
+        "description": "Generated documentation for the OrdersService example service. Override `endpoint.documentation` if this endpoint needs service-specific wording.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Bearer authentication is required before the handler runs."
+          },
+          {
+            "title": "Request Contract",
+            "body": "The request examples below are copied from the LAPIS endpoint definition and are the default values used by the interactive docs.\n\nExample query JSON:\n{\n  \"scenario\": \"kalulu-onboarding-flow\"\n}\n\nExample body JSON:\n{\n  \"dryRun\": true\n}\n\nExample headers:\n{\n  \"X-Trace-Id\": \"demo-trace-001\"\n}"
+          },
+          {
+            "title": "Parameters",
+            "body": "No explicit parameter list was declared for this endpoint. Use the example query/body payloads as the contract."
+          },
+          {
+            "title": "Responses",
+            "body": "Successful requests return JSON. Script-level `statusCode` values are promoted to the HTTP response automatically."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "Finalizes a real order record from the orders collection, writes an order_events audit entry, and supports dryRun previews."
+          }
+        ]
+      }
+    }
+  }
+}

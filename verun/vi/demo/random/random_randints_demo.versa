@@ -1,0 +1,8 @@
+random import *;
+
+print("=== random.randints demo ===");
+random.seed(12345);
+
+let values = random.randints(10, 20, 8);
+print("randints(10, 20, 8):");
+print(values);

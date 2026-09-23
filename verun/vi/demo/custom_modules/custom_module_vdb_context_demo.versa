@@ -1,0 +1,9 @@
+json_xml import *;
+vdb import *;
+import mediacloud;
+
+print(json_xml.to_json({
+  note: "Use the same import syntax for custom modules inside VDB-backed Versa scripts.",
+  module: "mediacloud",
+  status: mediacloud.status()
+}));

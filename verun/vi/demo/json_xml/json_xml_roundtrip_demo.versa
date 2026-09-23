@@ -1,0 +1,13 @@
+json_xml import *;
+
+print("=== json_xml roundtrip demo ===");
+let obj = {app: "liwiro", features: ["vi", "vdb"], ok: true};
+let jsonText = json_xml.obj_to_json(obj, true);
+print(jsonText);
+
+let parsed = json_xml.parse_json(jsonText);
+print(parsed);
+
+let xmlText = json_xml.obj_to_xml(obj, "root");
+print(xmlText);
+print(json_xml.xml_to_json(xmlText));

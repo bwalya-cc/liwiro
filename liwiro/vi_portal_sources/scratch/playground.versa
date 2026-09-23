@@ -1,0 +1,6 @@
+print("Hello from VI file");
+let nums = [1, 2, 3];
+print(nums);
+
+let name: str = input("What is your name? ");
+print(`Nice to meet you {name}!`);

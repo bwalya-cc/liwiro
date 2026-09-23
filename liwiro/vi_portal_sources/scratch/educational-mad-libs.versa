@@ -1,0 +1,33 @@
+# Educational Mad Libs with Definitions
+
+# Define the parts of speech with educational context
+let terms = [
+    { "type": "Noun", "def": "A person, place, thing, or idea.", "ex": "cat, mountain, freedom" },
+    { "type": "Verb", "def": "An action or state of being.", "ex": "run, jump, think" },
+    { "type": "Adjective", "def": "A word that describes a noun.", "ex": "blue, fast, happy" },
+    { "type": "Adverb", "def": "A word that modifies a verb, adjective, or another adverb.", "ex": "quickly, very, loudly" }
+];
+
+# In the VI Portal, we define inputs before the logic runs.
+# Change these values to customize your story.
+let answers = {
+    "Noun": "architect",
+    "Verb": "design",
+    "Adjective": "maintainable",
+    "Adverb": "strategically"
+};
+
+print("--- Educational Reference ---");
+
+for (term : terms) {
+    print(`{term.type}: {term.def}`);
+    print(`Examples: {term.ex}`);
+    print("----------------------------");
+}
+
+print("\n--- Your Generated Story ---");
+
+# Construct the story using backtick interpolation
+let story = `The {answers.Adjective} {answers.Noun} decided to {answers.Verb} {answers.Adverb} through the system.`;
+
+print(story);

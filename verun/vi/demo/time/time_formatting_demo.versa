@@ -1,0 +1,9 @@
+time import *;
+
+print("=== time formatting demo ===");
+let local = time.localtime();
+print(local);
+print(time.strftime("%Y-%m-%d %H:%M:%S", local));
+print(time.ctime());
+print(time.ctime(null, "iso"));
+print(time.ctime(null, "custom", "%A %d %B %Y"));

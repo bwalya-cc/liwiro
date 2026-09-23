@@ -1,0 +1,894 @@
+{
+  "metadata": {
+    "apiName": "AuthCoreService",
+    "basePath": "/api/auth",
+    "version": "1.0.0",
+    "database": "main",
+    "rateLimiting": {
+      "enabled": true,
+      "limit": 120,
+      "timeframe": "minute"
+    },
+    "documentation": {
+      "enabled": true,
+      "key": "liwiroservicepass0!"
+    },
+    "developerNotes": "Managed by Liwiro Service Builder. Docs/help visibility and notes are synced from LAPIS metadata.",
+    "setupApiKey": "liwiroservicepass0!",
+    "env": {
+      "EMAIL_SMTP_HOST": "smtp.gmail.com",
+      "EMAIL_SMTP_PORT": 587,
+      "EMAIL_SMTP_STARTTLS": true,
+      "EMAIL_SMTP_SSL": false,
+      "EMAIL_SMTP_AUTH": true,
+      "EMAIL_SMTP_USERNAME": "replace-with-smtp-username@example.com",
+      "EMAIL_SMTP_PASSWORD": "replace-with-smtp-password",
+      "EMAIL_FROM": "replace-with-from@example.com",
+      "EMAIL_TO": "replace-with-to@example.com",
+      "PASSWORD_RESET_URL": "http://127.0.0.1:5001/api/auth/reset-password"
+    },
+    "seedData": {
+      "enabled": true,
+      "collections": {
+        "auth_users": [
+          {
+            "username": "jelita.mulenga",
+            "email": "jelita.mulenga@zmail.com",
+            "seedPassword": "SystemRoot#ZM1969",
+            "role": "ADMIN",
+            "profile": {
+              "fullName": "Jelita Mulenga",
+              "phone": "+260-111-5566",
+              "timezone": "Africa/Lusaka"
+            },
+            "rbac": {
+              "scopes": [
+                "ADMIN",
+                "USER_MANAGE",
+                "USER_READ",
+                "USER_WRITE"
+              ],
+              "abilities": [
+                "auth.manage",
+                "auth.read",
+                "auth.write"
+              ]
+            }
+          },
+          {
+            "username": "kalulu.kaumba",
+            "email": "kalulu.kaumba@zmail.com",
+            "seedPassword": "AfricaPatriotic#2026",
+            "role": "SUPER_ADMIN",
+            "profile": {
+              "fullName": "Kalulu Kaumba",
+              "phone": "+260-111-3344",
+              "timezone": "Africa/Lusaka"
+            },
+            "rbac": {
+              "scopes": [
+                "SUPER_ADMIN",
+                "ADMIN",
+                "USER_MANAGE",
+                "USER_READ",
+                "USER_WRITE"
+              ],
+              "abilities": [
+                "auth.manage",
+                "auth.read",
+                "auth.write"
+              ]
+            }
+          },
+          {
+            "username": "kalumbi.banda",
+            "email": "kalumbi.banda@zmail.com",
+            "seedPassword": "AfricaPatriotic#2026",
+            "role": "USER",
+            "profile": {
+              "fullName": "Kalumbi Banda",
+              "phone": "+260-111-2233",
+              "timezone": "Africa/Lusaka"
+            },
+            "rbac": {
+              "scopes": [
+                "USER"
+              ],
+              "abilities": [
+                "auth.self.read",
+                "auth.self.update"
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "auth": {
+    "enabled": true,
+    "isAuthService": true,
+    "keyManagement": "auto",
+    "useAsymmetricJWT": true,
+    "authModel": "AuthUser",
+    "customEndpoints": {
+      "enabled": true,
+      "signIn": "/signin",
+      "signOut": "/signout",
+      "signUp": "/signup",
+      "register": "/register",
+      "me": "/me",
+      "forgotPassword": "/forgot-password",
+      "resetPassword": "/reset-password"
+    },
+    "defaultSuperAdmin": {
+      "enabled": true,
+      "username": "kalulu.kaumba",
+      "email": "kalulu.kaumba@zmail.com",
+      "password": "SystemRoot#ZM1969",
+      "role": "SUPER_ADMIN"
+    },
+    "passwordResetPage": {
+      "enabled": true,
+      "title": "AuthCoreService Password Reset",
+      "description": "Use the emailed reset link or paste the reset token to set a new password.",
+      "submitLabel": "Reset Password",
+      "loadingMessage": "Submitting password reset request...",
+      "successMessage": "Password reset completed.",
+      "failureMessage": "Password reset failed."
+    }
+  },
+  "models": {
+    "m_auth_user": {
+      "name": "AuthUser",
+      "collection": "auth_users",
+      "fields": {
+        "f_username": {
+          "id": "f_username",
+          "name": "username",
+          "type": "string",
+          "required": true,
+          "unique": true,
+          "default": false,
+          "defaultValue": "",
+          "embeddedFields": [],
+          "depth": 1
+        },
+        "f_email": {
+          "id": "f_email",
+          "name": "email",
+          "type": "string",
+          "required": true,
+          "unique": true,
+          "default": false,
+          "defaultValue": "",
+          "embeddedFields": [],
+          "depth": 1
+        },
+        "f_password": {
+          "id": "f_password",
+          "name": "password",
+          "type": "string",
+          "required": false,
+          "unique": false,
+          "default": false,
+          "defaultValue": "",
+          "embeddedFields": [],
+          "depth": 1
+        },
+        "f_role": {
+          "id": "f_role",
+          "name": "role",
+          "type": "string",
+          "required": true,
+          "unique": false,
+          "default": true,
+          "defaultValue": "APPLICATION",
+          "embeddedFields": [],
+          "depth": 1
+        },
+        "f_profile": {
+          "id": "f_profile",
+          "name": "profile",
+          "type": "object",
+          "required": false,
+          "unique": false,
+          "default": false,
+          "defaultValue": "",
+          "objectTemplate": "{\"fullName\":\"\",\"phone\":\"\",\"timezone\":\"UTC\"}",
+          "embeddedFields": [
+            {
+              "id": "f_profile_name",
+              "name": "fullName",
+              "type": "string",
+              "required": false,
+              "unique": false,
+              "default": false,
+              "defaultValue": "",
+              "embeddedFields": [],
+              "depth": 2
+            },
+            {
+              "id": "f_profile_phone",
+              "name": "phone",
+              "type": "string",
+              "required": false,
+              "unique": false,
+              "default": false,
+              "defaultValue": "",
+              "embeddedFields": [],
+              "depth": 2
+            }
+          ],
+          "depth": 1
+        }
+      }
+    },
+    "m_auth_session_control": {
+      "name": "AuthSessionControl",
+      "collection": "auth_session_controls",
+      "fields": {
+        "f_sc_username": {
+          "id": "f_sc_username",
+          "name": "username",
+          "type": "string",
+          "required": true,
+          "unique": true,
+          "default": false,
+          "defaultValue": "",
+          "embeddedFields": [],
+          "depth": 1
+        },
+        "f_sc_session_version": {
+          "id": "f_sc_session_version",
+          "name": "sessionVersion",
+          "type": "number",
+          "required": true,
+          "unique": false,
+          "default": true,
+          "defaultValue": 1,
+          "embeddedFields": [],
+          "depth": 1
+        },
+        "f_sc_revoke_all": {
+          "id": "f_sc_revoke_all",
+          "name": "revokeAll",
+          "type": "boolean",
+          "required": false,
+          "unique": false,
+          "default": true,
+          "defaultValue": false,
+          "embeddedFields": [],
+          "depth": 1
+        },
+        "f_sc_revoked_at": {
+          "id": "f_sc_revoked_at",
+          "name": "revokedAt",
+          "type": "string",
+          "required": false,
+          "unique": false,
+          "default": false,
+          "defaultValue": "",
+          "embeddedFields": [],
+          "depth": 1
+        },
+        "f_sc_excluded_hash": {
+          "id": "f_sc_excluded_hash",
+          "name": "excludedTokenHash",
+          "type": "string",
+          "required": false,
+          "unique": false,
+          "default": false,
+          "defaultValue": "",
+          "embeddedFields": [],
+          "depth": 1
+        }
+      }
+    },
+    "m_auth_password_reset_token": {
+      "name": "AuthPasswordResetToken",
+      "collection": "auth_password_reset_tokens",
+      "fields": {
+        "f_prt_jti": {
+          "id": "f_prt_jti",
+          "name": "jti",
+          "type": "string",
+          "required": true,
+          "unique": true,
+          "default": false,
+          "defaultValue": "",
+          "embeddedFields": [],
+          "depth": 1
+        },
+        "f_prt_username": {
+          "id": "f_prt_username",
+          "name": "username",
+          "type": "string",
+          "required": true,
+          "unique": false,
+          "default": false,
+          "defaultValue": "",
+          "embeddedFields": [],
+          "depth": 1
+        },
+        "f_prt_token_hash": {
+          "id": "f_prt_token_hash",
+          "name": "tokenHash",
+          "type": "string",
+          "required": true,
+          "unique": false,
+          "default": false,
+          "defaultValue": "",
+          "embeddedFields": [],
+          "depth": 1
+        },
+        "f_prt_status": {
+          "id": "f_prt_status",
+          "name": "status",
+          "type": "string",
+          "required": true,
+          "unique": false,
+          "default": true,
+          "defaultValue": "issued",
+          "embeddedFields": [],
+          "depth": 1
+        },
+        "f_prt_expires_at": {
+          "id": "f_prt_expires_at",
+          "name": "expiresAt",
+          "type": "number",
+          "required": true,
+          "unique": false,
+          "default": false,
+          "defaultValue": 0,
+          "embeddedFields": [],
+          "depth": 1
+        },
+        "f_prt_created_at": {
+          "id": "f_prt_created_at",
+          "name": "createdAt",
+          "type": "string",
+          "required": true,
+          "unique": false,
+          "default": false,
+          "defaultValue": "",
+          "embeddedFields": [],
+          "depth": 1
+        },
+        "f_prt_used_at": {
+          "id": "f_prt_used_at",
+          "name": "usedAt",
+          "type": "string",
+          "required": false,
+          "unique": false,
+          "default": false,
+          "defaultValue": "",
+          "embeddedFields": [],
+          "depth": 1
+        },
+        "f_prt_recipient": {
+          "id": "f_prt_recipient",
+          "name": "recipient",
+          "type": "string",
+          "required": false,
+          "unique": false,
+          "default": false,
+          "defaultValue": "",
+          "embeddedFields": [],
+          "depth": 1
+        }
+      }
+    }
+  },
+  "endpoints": {
+    "ep_signup": {
+      "method": "POST",
+      "path": "/signup",
+      "operationType": "script",
+      "requiresAuth": false,
+      "defaultParameters": {
+        "data": {
+          "enabled": true,
+          "name": "data"
+        },
+        "query": {
+          "enabled": false,
+          "name": "query",
+          "operator": "$eq"
+        }
+      },
+      "versaScript": "json_xml import *;\nvdb import *;\nhttp import *;\nemail import *;\ncrypto import *;\njwt import *;\ntime import *;\ndatetime import *;\n\nlet req = params;\nlet username = req.username ?? \"\";\nlet email = req.email ?? \"\";\nlet password = req.password ?? \"\";\nlet profile = req.profile ?? {};\nif (username == \"\" || email == \"\" || password == \"\") {\n  return {created: false, statusCode: 400, reason: \"username, email and password are required\"};\n} else {\n  let users = vdb.collection(\"auth_users\");\n  let lookup = users.find({username: {$eq: username}}, 1);\n  let rows = lookup.data ?? [];\n  if (leng(rows) > 0) {\n    return {created: false, statusCode: 409, reason: \"User already exists\", username: username};\n  } else {\n    let nowTs = datetime.now().isoformat();\n    let storedHash = crypto.sha256(password);\n    let defaultRbac = {scopes: [\"USER\"], abilities: [\"auth.self.read\", \"auth.self.update\"]};\n    let created = users.insert({username: username, email: email, passwordHash: storedHash, role: \"USER\", profile: profile, rbac: defaultRbac, createdAt: nowTs, updatedAt: nowTs});\n    return {created: created.ok ?? false, statusCode: created.ok == false ? 500 : 201, reason: created.ok == false ? (created.error ?? \"Failed to create user\") : \"User created\", username: username, role: \"USER\", inserted: created.data ?? created, authModel: \"AuthUser\"};\n  }\n}",
+      "developerNotes": "Signup creates only regular USER accounts. Role and RBAC are fixed to least-privilege defaults and cannot be elevated from request payload.",
+      "exampleParams": {
+        "query": {},
+        "body": {
+          "username": "new.signup.kalumbi",
+          "email": "new.signup.kalumbi@zmail.com",
+          "password": "AfricaPatriotic#2026",
+          "profile": {
+            "fullName": "Kalumbi Banda",
+            "phone": "+260-111-2233"
+          }
+        },
+        "headers": {
+          "Authorization": "Bearer <captured-token>",
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "Create a new least-privilege USER account through the public signup flow.",
+        "description": "This is the public self-service account creation route for the auth example. The handler ignores any attempt to elevate the role beyond USER.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Public route. No bearer token is required."
+          },
+          {
+            "title": "Request Contract",
+            "body": "Supply `username`, `email`, and `password`. Optional `profile` data is stored with the created user. The role and RBAC grants are fixed to USER-safe defaults regardless of client input."
+          },
+          {
+            "title": "Responses",
+            "body": "Returns `201` on success, `409` when the username already exists, and `400` when required fields are missing."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "Passwords are hashed before storage and the created account is persisted into `auth_users`."
+          }
+        ]
+      }
+    },
+    "ep_signin": {
+      "method": "POST",
+      "path": "/signin",
+      "operationType": "script",
+      "requiresAuth": false,
+      "versaScript": "json_xml import *;\nvdb import *;\nhttp import *;\nemail import *;\ncrypto import *;\njwt import *;\ntime import *;\ndatetime import *;\n\nlet req = params;\nlet body = req.body ?? {};\nlet identifier = str(body.identifier ?? body.login ?? req.identifier ?? req.login ?? \"\").trim();\nlet username = str(body.username ?? req.username ?? \"\").trim();\nlet email = str(body.email ?? req.email ?? \"\").trim();\nlet password = str(body.password ?? req.password ?? \"\").trim();\nif (username == \"\" && email == \"\" && identifier != \"\") {\n  if (identifier.contains(\"@\")) {\n    email = identifier;\n  } else {\n    username = identifier;\n  }\n}\nif ((username == \"\" && email == \"\") || password == \"\") {\n  return {authenticated: false, tokenType: \"Bearer\", accessToken: \"\", statusCode: 400, reason: \"username or email and password are required\"};\n} else {\n  let users = vdb.collection(\"auth_users\");\n  let rows = [];\n  if (username != \"\") {\n    let usernameLookup = users.find({username: {$eq: username}}, 1);\n    rows = usernameLookup.data ?? [];\n  }\n  if (leng(rows) == 0 && email != \"\") {\n    let emailLookup = users.find({email: {$eq: email}}, 1);\n    rows = emailLookup.data ?? [];\n  }\n  if (leng(rows) == 0) {\n    return {authenticated: false, tokenType: \"Bearer\", accessToken: \"\", statusCode: 401, reason: \"Invalid credentials\"};\n  } else {\n    let user = rows[0];\n    let storedHash = user.passwordHash ?? \"\";\n    let incomingHash = crypto.sha256(password);\n    if (storedHash == \"\" || incomingHash != storedHash) {\n      return {authenticated: false, tokenType: \"Bearer\", accessToken: \"\", statusCode: 401, reason: \"Invalid credentials\"};\n    } else {\n      let controls = vdb.collection(\"auth_session_controls\");\n      let controlLookup = controls.find({username: {$eq: user.username ?? username}}, 1);\n      let controlRows = controlLookup.data ?? [];\n      let sessionVersion = 1;\n      if (leng(controlRows) > 0) {\n        let currentVersion = controlRows[0].sessionVersion ?? 1;\n        if (currentVersion != \"\") {\n          sessionVersion = currentVersion;\n        }\n      }\n      let claims = {\n        sub: user.username ?? username,\n        purpose: \"access\",\n        token_use: \"bearer\",\n        username: user.username ?? username,\n        email: user.email ?? email,\n        role: user.role ?? \"USER\",\n        rbac: user.rbac ?? {scopes: [\"USER\"]},\n        sessionVersion: sessionVersion\n      };\n      let token = jwt.sign(claims, req.jwtSecret ?? \"AuthCoreService::liwiro\", {algorithm: \"HS256\", issuer: \"AuthCoreService\", audience: body.audience ?? req.audience ?? \"liwiro\", expiresInSeconds: body.expiresInSeconds ?? req.expiresInSeconds ?? 3600});\n      return {authenticated: true, algorithm: \"HS256\", tokenType: \"Bearer\", token: token, accessToken: token, tokenOnly: token, claims: claims, reason: \"OK\"};\n    }\n  }\n}",
+      "developerNotes": "Production-ready signin script: accepts username or email, verifies hashed credentials, and issues bearer tokens with sessionVersion for global revocation control.",
+      "exampleParams": {
+        "query": {},
+        "body": {
+          "username": "kalumbi.banda",
+          "password": "AfricaPatriotic#2026",
+          "audience": "liwiro",
+          "expiresInSeconds": 3600
+        },
+        "headers": {
+          "Authorization": "Bearer <captured-token>",
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "Authenticate with username or email and receive a bearer token.",
+        "description": "The auth example accepts either a username or an email address and returns a JWT plus the resolved claim set.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Public route. No bearer token is required."
+          },
+          {
+            "title": "Request Contract",
+            "body": "Provide `username` or `email` and `password`. `identifier`/`login` can be used as a single-field alias and are resolved into username or email automatically."
+          },
+          {
+            "title": "Responses",
+            "body": "Returns `200` with `token`, `accessToken`, and JWT claims on success. Invalid credentials return `401`."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "The script reads the session control record and embeds `sessionVersion` so sign-out-all and password resets can revoke older tokens globally."
+          }
+        ]
+      }
+    },
+    "ep_me": {
+      "method": "GET",
+      "path": "/me",
+      "operationType": "script",
+      "requiresAuth": true,
+      "versaScript": "json_xml import *;\nvdb import *;\nhttp import *;\nemail import *;\ncrypto import *;\njwt import *;\ntime import *;\ndatetime import *;\n\nlet req = params;\nlet authCtx = req.auth ?? {};\nlet username = str(authCtx.username ?? authCtx.sub ?? \"\").trim();\nif (username == \"\") {\n  return {ok: false, statusCode: 401, reason: \"Missing authenticated user context\"};\n}\n\nlet users = vdb.collection(\"auth_users\");\nlet userLookup = users.find({username: {$eq: username}}, 1);\nlet userRows = userLookup.data ?? [];\nif (leng(userRows) == 0) {\n  return {ok: false, statusCode: 404, reason: \"Authenticated user no longer exists\", username: username};\n}\n\nlet dbUser = userRows[0];\nlet controls = vdb.collection(\"auth_session_controls\");\nlet controlLookup = controls.find({username: {$eq: username}}, 1);\nlet controlRows = controlLookup.data ?? [];\nlet sessionControl = leng(controlRows) > 0 ? controlRows[0] : {};\nlet effectiveRbac = type(dbUser.rbac) == \"object\" ? dbUser.rbac : (type(authCtx.rbac) == \"object\" ? authCtx.rbac : {scopes: [\"USER\"]});\nlet effectiveSessionVersion = sessionControl.sessionVersion ?? authCtx.sessionVersion ?? 1;\n\nlet userPayload = {\n  username: username,\n  email: str(dbUser.email ?? authCtx.email ?? \"\").trim(),\n  role: str(dbUser.role ?? authCtx.role ?? \"USER\").upper(),\n  profile: dbUser.profile ?? {},\n  rbac: effectiveRbac,\n  sessionVersion: effectiveSessionVersion,\n  createdAt: dbUser.createdAt ?? \"\",\n  updatedAt: dbUser.updatedAt ?? \"\",\n  updatedBy: dbUser.updatedBy ?? \"\"\n};\n\nreturn {ok: true, user: userPayload};",
+      "developerNotes": "Loads the authenticated user from auth_users, checks auth_session_controls for the effective session version, and returns the current user profile only.",
+      "exampleParams": {
+        "query": {},
+        "headers": {
+          "Authorization": "Bearer <captured-token>",
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "Return the currently authenticated user profile.",
+        "description": "This protected auth example route returns the normalized user profile for the current authenticated subject.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Bearer authentication is required."
+          },
+          {
+            "title": "Request Contract",
+            "body": "No request body or query parameters are required. The route reads the authenticated subject from `params.auth`."
+          },
+          {
+            "title": "Responses",
+            "body": "Returns the normalized user profile merged from `auth_users` for the current authenticated subject."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "Reads auth_session_controls to resolve the effective session version before returning the current authenticated user profile."
+          }
+        ]
+      }
+    },
+    "ep_forgot_password": {
+      "method": "POST",
+      "path": "/forgot-password",
+      "operationType": "script",
+      "requiresAuth": false,
+      "versaScript": "json_xml import *;\nvdb import *;\nhttp import *;\nemail import *;\ncrypto import *;\njwt import *;\ntime import *;\ndatetime import *;\n\nlet req = params;\nlet username = str(req.username ?? req.userame ?? \"\").trim();\nlet identifier = str(req.identifier ?? req.login ?? \"\").trim();\nlet emailRaw = str(req.email ?? \"\").trim();\nlet emailInput = emailRaw.lower();\nif (username == \"\" && emailInput == \"\" && identifier != \"\") {\n  if (identifier.contains(\"@\")) {\n    emailRaw = identifier;\n    emailInput = identifier.lower();\n  } else {\n    username = identifier;\n  }\n}\nif (username == \"\" && emailInput == \"\") {\n  return {ok: false, statusCode: 400, reason: \"username or email is required\"};\n} else {\n  let users = vdb.collection(\"auth_users\");\n  let rows = [];\n  if (username != \"\") {\n    let usernameLookup = users.find({username: {$eq: username}}, 1);\n    rows = usernameLookup.data ?? [];\n  }\n  if (leng(rows) == 0 && emailRaw != \"\") {\n    let emailLookup = users.find({email: {$eq: emailRaw}}, 1);\n    rows = emailLookup.data ?? [];\n  }\n  if (leng(rows) == 0 && emailInput != \"\" && emailInput != emailRaw) {\n    let emailLookupLower = users.find({email: {$eq: emailInput}}, 1);\n    rows = emailLookupLower.data ?? [];\n  }\n  if (leng(rows) == 0) {\n    return {ok: false, statusCode: 404, reason: \"User not found\"};\n  } else {\n    let user = rows[0];\n    let recipient = str(user.email ?? emailRaw ?? emailInput).trim();\n    if (recipient == \"\") {\n      return {ok: false, statusCode: 400, reason: \"User has no email\"};\n    } else {\n      let expiresInSeconds = req.expiresInSeconds ?? 900;\n      if (expiresInSeconds == \"\") {\n        expiresInSeconds = 900;\n      }\n      let tokenId = crypto.uuid();\n      let resetToken = jwt.sign({sub: user.username ?? \"\", email: recipient, jti: tokenId, purpose: \"password_reset\", token_use: \"password_reset\"}, req.jwtSecret ?? \"AuthCoreService::liwiro\", {algorithm: \"HS256\", issuer: \"AuthCoreService\", audience: \"password-reset\", expiresInSeconds: expiresInSeconds});\n      let tokenStore = vdb.collection(\"auth_password_reset_tokens\");\n      let nowInfo = datetime.now();\n      let nowTs = nowInfo.isoformat();\n      let tokenHash = crypto.sha256(resetToken);\n      let expiresAt = (nowInfo.timestamp ?? 0) + expiresInSeconds;\n      let tokenDoc = {\n        jti: tokenId,\n        username: user.username ?? \"\",\n        recipient: recipient,\n        tokenHash: tokenHash,\n        status: \"issued\",\n        expiresAt: expiresAt,\n        createdAt: nowTs,\n        usedAt: \"\"\n      };\n      let tokenSave = tokenStore.insert(tokenDoc);\n      if (tokenSave.ok == false) {\n        return {ok: false, statusCode: 500, reason: tokenSave.error ?? \"Failed to persist reset token\", result: tokenSave};\n      }\n      let configuredReset = service.env.PASSWORD_RESET_URL ?? \"\";\n      let localBase = \"http://127.0.0.1:\" + str(service.env.PORT ?? \"\") + service.basePath + \"/reset-password\";\n      let baseReset = configuredReset != \"\" ? configuredReset : localBase;\n      let sep = baseReset.contains(\"?\") ? \"&\" : \"?\";\n      let resetLink = baseReset + sep + \"token=\" + resetToken;\n      let smtpHost = str(service.env.EMAIL_SMTP_HOST ?? \"\").trim();\n      let smtpUser = str(service.env.EMAIL_SMTP_USERNAME ?? \"\").trim();\n      let smtpPass = str(service.env.EMAIL_SMTP_PASSWORD ?? \"\").trim();\n      if (smtpHost == \"\" || smtpUser == \"\" || smtpPass == \"\") {\n        return {ok: true, status: \"skipped\", reason: \"SMTP not configured; reset link generated\", recipient: recipient, resetLink: resetLink, resetTokenId: tokenId, expiresInSeconds: expiresInSeconds};\n      }\n      let emailResult = email.send({host: smtpHost, port: service.env.EMAIL_SMTP_PORT ?? 587, startTls: service.env.EMAIL_SMTP_STARTTLS ?? true, ssl: service.env.EMAIL_SMTP_SSL ?? false, auth: service.env.EMAIL_SMTP_AUTH ?? true, username: smtpUser, password: smtpPass, from: service.env.EMAIL_FROM, to: [recipient], subject: \"Password Reset Request\", body: \"Reset link: \" + resetLink});\n      return {ok: emailResult.ok == true, status: emailResult.status, reason: emailResult.ok == true ? \"Reset email sent\" : (emailResult.error ?? \"Failed to send reset email\"), recipient: recipient, resetLink: resetLink, resetTokenId: tokenId, expiresInSeconds: expiresInSeconds, email: emailResult};\n    }\n  }\n}",
+      "developerNotes": "Forgot-password flow using jwt + email VI modules. Every issued reset token is persisted with its expiry and can only be used once.",
+      "exampleParams": {
+        "query": {},
+        "body": {
+          "username": "kalumbi.banda",
+          "email": "kalumbi.banda@zmail.com",
+          "expiresInSeconds": 900
+        },
+        "headers": {
+          "Authorization": "Bearer <captured-token>",
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "Generate a password-reset token and email a reset link to the matching user.",
+        "description": "This route resolves the target user by username, email, or a combined `identifier` field, then signs a short-lived reset token.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Public route. No bearer token is required."
+          },
+          {
+            "title": "Request Contract",
+            "body": "Provide either `username`, `email`, or `identifier`. When SMTP is configured, the service sends an email; otherwise it still returns the generated reset link for testing. Each generated token is recorded server-side with a strict expiry."
+          },
+          {
+            "title": "Responses",
+            "body": "Returns `200` with the generated `resetLink` when a matching user exists. Missing users return a route-level error payload."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "The reset link now lands on a browser-safe GET page at `/reset-password?token=...`, which posts the new password back to the same endpoint. The token is stored as a one-time credential and is consumed after a successful reset."
+          }
+        ]
+      }
+    },
+    "ep_reset_password": {
+      "method": "POST",
+      "path": "/reset-password",
+      "operationType": "script",
+      "requiresAuth": false,
+      "versaScript": "json_xml import *;\nvdb import *;\nhttp import *;\nemail import *;\ncrypto import *;\njwt import *;\ntime import *;\ndatetime import *;\n\nlet req = params;\nlet body = req.body ?? {};\nlet token = str(body.token ?? req.token ?? \"\").trim();\nlet newPassword = str(body.newPassword ?? req.newPassword ?? \"\").trim();\nif (token == \"\" || newPassword == \"\") {\n  return {ok: false, statusCode: 400, reason: \"token and newPassword are required\"};\n} else {\n  let verified = jwt.verify(token, req.jwtSecret ?? \"AuthCoreService::liwiro\", {algorithm: \"HS256\", issuer: \"AuthCoreService\", audience: \"password-reset\"});\n  if (!(verified.valid ?? false)) {\n    return {ok: false, statusCode: 400, reason: verified.error ?? \"Invalid reset token\"};\n  } else {\n    let claims = verified.payload ?? {};\n    let purpose = str(claims.purpose ?? claims.token_use ?? \"\").lower();\n    if (purpose != \"password_reset\" && purpose != \"password-reset\") {\n      return {ok: false, statusCode: 400, reason: \"Invalid reset token purpose\"};\n    }\n    let subject = str(claims.sub ?? \"\").trim();\n    let tokenId = str(claims.jti ?? \"\").trim();\n    if (subject == \"\" || tokenId == \"\") {\n      return {ok: false, statusCode: 400, reason: \"Invalid reset token\"};\n    }\n    let tokenStore = vdb.collection(\"auth_password_reset_tokens\");\n    let tokenLookup = tokenStore.find({jti: {$eq: tokenId}}, 1);\n    let tokenRows = tokenLookup.data ?? [];\n    if (leng(tokenRows) == 0) {\n      return {ok: false, statusCode: 400, reason: \"Reset token already used or unknown\"};\n    }\n    let tokenDoc = tokenRows[0];\n    let tokenStatus = str(tokenDoc.status ?? \"issued\").lower();\n    if (tokenStatus != \"issued\" || str(tokenDoc.usedAt ?? \"\").trim() != \"\") {\n      return {ok: false, statusCode: 400, reason: \"Reset token has already been used\"};\n    }\n    let storedHash = str(tokenDoc.tokenHash ?? \"\").trim();\n    let incomingHash = crypto.sha256(token);\n    if (storedHash == \"\" || storedHash != incomingHash) {\n      return {ok: false, statusCode: 400, reason: \"Reset token mismatch\"};\n    }\n    let nowInfo = datetime.now();\n    let nowEpoch = nowInfo.timestamp ?? 0;\n    let expiresAt = tokenDoc.expiresAt ?? 0;\n    if (expiresAt != \"\" && expiresAt < nowEpoch) {\n      let expireRes = tokenStore.update({jti: {$eq: tokenId}}, {status: \"expired\"});\n      return {ok: false, statusCode: 400, reason: \"Reset token expired\", expireResult: expireRes};\n    }\n    let nowTs = nowInfo.isoformat();\n    let consumeRes = tokenStore.update({jti: {$eq: tokenId}}, {status: \"used\", usedAt: nowTs, tokenHash: \"\"});\n    if (consumeRes.ok == false) {\n      return {ok: false, statusCode: 500, reason: consumeRes.error ?? \"Failed to consume reset token\", result: consumeRes};\n    }\n    let users = vdb.collection(\"auth_users\");\n    let lookup = users.find({username: {$eq: subject}}, 1);\n    let rows = lookup.data ?? [];\n    if (leng(rows) == 0) {\n      return {ok: false, notFound: true, statusCode: 404, reason: \"User not found\"};\n    } else {\n      let passwordHash = crypto.sha256(newPassword);\n      let updateRes = users.update({username: {$eq: subject}}, {passwordHash: passwordHash, password: \"\", updatedAt: nowTs, passwordResetAt: nowTs});\n      if (!(updateRes.ok ?? false)) {\n        return {ok: false, statusCode: 400, reason: updateRes.error ?? \"Password reset failed\", result: updateRes};\n      }\n      let controls = vdb.collection(\"auth_session_controls\");\n      let existing = controls.find({username: {$eq: subject}}, 1);\n      let controlRows = existing.data ?? [];\n      let nextSessionVersion = 1;\n      if (leng(controlRows) > 0) {\n        let currentVersion = controlRows[0].sessionVersion ?? 1;\n        if (currentVersion != \"\") {\n          nextSessionVersion = currentVersion + 1;\n        }\n      }\n      let revokePayload = {username: subject, sessionVersion: nextSessionVersion, revokeAll: true, revokedAt: nowTs, excludeCurrentSession: false, excludedTokenHash: \"\", updatedAt: nowTs, updatedBy: subject, reason: \"password_reset\"};\n      let revokeSave = {};\n      if (leng(controlRows) > 0) {\n        revokeSave = controls.update({username: {$eq: subject}}, revokePayload);\n      } else {\n        revokeSave = controls.insert(revokePayload);\n      }\n      return {ok: true, reason: \"Password reset successful\", username: subject, resetTokenId: tokenId, tokenConsumed: true, sessionsRevoked: revokeSave.ok ?? true, sessionVersion: nextSessionVersion, result: updateRes, revokeResult: revokeSave};\n    }\n  }\n}",
+      "developerNotes": "Reset route validates password-reset JWTs, requires a matching stored one-time token record, consumes it, updates the password hash, and revokes every existing bearer token for that user.",
+      "exampleParams": {
+        "query": {},
+        "body": {
+          "token": "<reset-token>",
+          "newPassword": "NewStrongPass1!"
+        },
+        "headers": {
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "Validate the password-reset token, change the password, and revoke all existing bearer sessions.",
+        "description": "The auth example supports both a browser GET form and the POST JSON API for completing password resets.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Public route. A password-reset token is required instead of a bearer token."
+          },
+          {
+            "title": "Request Contract",
+            "body": "Submit `token` and `newPassword`. Browser users can open the emailed GET link, paste or keep the token, and submit the new password from the built-in form."
+          },
+          {
+            "title": "Responses",
+            "body": "Returns `200` when the password hash is updated and the user session version is incremented. Invalid, expired, mismatched, or already-used reset tokens return `400` and missing users return `404`."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "Successful resets consume the stored one-time token, update `passwordHash`, blank any legacy plaintext password, and revoke every previous bearer token by rotating `sessionVersion`."
+          }
+        ]
+      }
+    },
+    "ep_users_read": {
+      "method": "GET",
+      "path": "/users",
+      "operationType": "script",
+      "requiresAuth": true,
+      "defaultParameters": {
+        "data": {
+          "enabled": false,
+          "name": "data"
+        },
+        "query": {
+          "enabled": true,
+          "name": "username",
+          "operator": "$eq"
+        }
+      },
+      "versaScript": "json_xml import *;\nvdb import *;\nhttp import *;\nemail import *;\ncrypto import *;\njwt import *;\ntime import *;\ndatetime import *;\n\nfunc normalize_eq(value) {\n  if (type(value) == \"object\") {\n    return str(value[\"$eq\"] ?? \"\").trim();\n  }\n  return str(value ?? \"\").trim();\n}\n\nfunc own_query_allowed(query, actor, actorEmail) {\n  if (type(query) != \"object\") {\n    return false;\n  }\n  if (leng(query.keys()) == 0) {\n    return false;\n  }\n  let usernameEq = normalize_eq(query.username ?? \"\");\n  if (usernameEq != \"\" && usernameEq == actor) {\n    return true;\n  }\n  let emailEq = normalize_eq(query.email ?? \"\");\n  if (emailEq != \"\" && actorEmail != \"\" && emailEq.lower() == actorEmail.lower()) {\n    return true;\n  }\n  return false;\n}\n\nfunc sanitize_user(row) {\n  let safeUser = {\n    username: row.username ?? \"\",\n    email: row.email ?? \"\",\n    role: row.role ?? \"USER\",\n    profile: row.profile ?? {},\n    rbac: row.rbac ?? {scopes: [\"USER\"]},\n    createdAt: row.createdAt ?? \"\",\n    updatedAt: row.updatedAt ?? \"\"\n  };\n  return safeUser;\n}\n\nlet req = params;\nlet authCtx = req.auth ?? {};\nlet actor = str(authCtx.username ?? authCtx.sub ?? \"\").trim();\nif (actor == \"\") {\n  return {ok: false, authorized: false, statusCode: 401, reason: \"Missing authenticated user context\"};\n}\nlet actorEmail = str(authCtx.email ?? \"\").trim();\nlet actorRole = str(authCtx.role ?? \"USER\").upper();\nlet isPrivileged = actorRole == \"SUPER_ADMIN\" || actorRole == \"ADMIN\";\nlet query = req.query ?? {};\nif (type(query) != \"object\") {\n  return {ok: false, statusCode: 400, reason: \"Query must be a JSON object\"};\n}\nif (!isPrivileged && !own_query_allowed(query, actor, actorEmail)) {\n  return {ok: false, authorized: false, statusCode: 403, reason: \"Regular users must query their own username or email explicitly\"};\n}\nlet users = vdb.collection(\"auth_users\");\nlet lookup = users.find(query, req.limit ?? 200);\nlet rows = lookup.data ?? [];\nif (leng(rows) == 0 && leng(query.keys()) > 0) {\n  return {ok: false, notFound: true, statusCode: 404, reason: \"No users matched the supplied query\", query: query};\n}\nlet usersOut = [];\nlet ownOnly = true;\nfor (row : rows) {\n  let sanitized = sanitize_user(row ?? {});\n  usersOut.add(sanitized);\n  if (str(sanitized.username ?? \"\").trim() != actor) {\n    ownOnly = false;\n  }\n}\nlet primary = leng(usersOut) > 0 ? usersOut[0] : {};\nreturn {ok: true, users: usersOut, user: primary, count: leng(usersOut), ownView: ownOnly, query: query, requestedBy: actor, privileged: isPrivileged};",
+      "developerNotes": "Read route forwards the supplied VDB query as-is. `{}` therefore means all users for privileged callers, while regular users must explicitly query their own username or email.",
+      "exampleParams": {
+        "query": {},
+        "headers": {
+          "Authorization": "Bearer <captured-token>",
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "Read auth user records using the supplied VDB query object.",
+        "description": "The query object is forwarded to VDB as-is. `{}` therefore means “match all users”, not “current user only”.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Bearer authentication is required. ADMIN and SUPER_ADMIN can query any matching users. Regular USER accounts must explicitly target their own username or email in the query."
+          },
+          {
+            "title": "Query Behavior",
+            "body": "The route uses `req.query` directly. Empty query objects such as `{}` return every matching user only for privileged actors. Regular users receive `403` unless the query explicitly scopes to their own username or email."
+          },
+          {
+            "title": "Responses",
+            "body": "Returns `200` with `users`, `count`, `query`, and `requestedBy`. If a non-empty query matches nothing the route returns `404`."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "The response always includes an array so list and filtered lookups use the same shape. When exactly one record matches, `user` is also populated with the first entry for convenience."
+          }
+        ]
+      }
+    },
+    "ep_users_update": {
+      "method": "PUT",
+      "path": "/users",
+      "operationType": "script",
+      "requiresAuth": true,
+      "defaultParameters": {
+        "data": {
+          "enabled": true,
+          "name": "data"
+        },
+        "query": {
+          "enabled": true,
+          "name": "username",
+          "operator": "$eq"
+        }
+      },
+      "versaScript": "json_xml import *;\nvdb import *;\nhttp import *;\nemail import *;\ncrypto import *;\njwt import *;\ntime import *;\ndatetime import *;\n\nfunc normalize_eq(value) {\n  if (type(value) == \"object\") {\n    return str(value[\"$eq\"] ?? \"\").trim();\n  }\n  return str(value ?? \"\").trim();\n}\n\nfunc own_query_allowed(query, actor, actorEmail) {\n  if (type(query) != \"object\") {\n    return false;\n  }\n  if (leng(query.keys()) == 0) {\n    return false;\n  }\n  let usernameEq = normalize_eq(query.username ?? \"\");\n  if (usernameEq != \"\" && usernameEq == actor) {\n    return true;\n  }\n  let emailEq = normalize_eq(query.email ?? \"\");\n  if (emailEq != \"\" && actorEmail != \"\" && emailEq.lower() == actorEmail.lower()) {\n    return true;\n  }\n  return false;\n}\n\nfunc sanitize_user(row, updates) {\n  let safeUser = {\n    username: row.username ?? \"\",\n    email: updates.email ?? row.email ?? \"\",\n    role: updates.role ?? row.role ?? \"USER\",\n    profile: updates.profile ?? row.profile ?? {},\n    rbac: updates.rbac ?? row.rbac ?? {scopes: [\"USER\"]},\n    updatedAt: updates.updatedAt ?? row.updatedAt ?? \"\",\n    updatedBy: updates.updatedBy ?? row.updatedBy ?? \"\"\n  };\n  return safeUser;\n}\n\nlet req = params;\nlet authCtx = req.auth ?? {};\nlet actor = str(authCtx.username ?? authCtx.sub ?? \"\").trim();\nif (actor == \"\") {\n  return {updated: false, authorized: false, statusCode: 401, reason: \"Missing authenticated user context\"};\n}\nlet actorEmail = str(authCtx.email ?? \"\").trim();\nlet actorRole = str(authCtx.role ?? \"USER\").upper();\nlet isPrivileged = actorRole == \"SUPER_ADMIN\" || actorRole == \"ADMIN\";\nlet query = req.query ?? {};\nif (type(query) != \"object\") {\n  return {updated: false, statusCode: 400, reason: \"Query must be a JSON object\"};\n}\nif (!isPrivileged && !own_query_allowed(query, actor, actorEmail)) {\n  return {updated: false, authorized: false, statusCode: 403, reason: \"Regular users must query their own username or email explicitly\"};\n}\nlet body = req.body ?? {};\nlet bodyUsername = str(body.username ?? \"\").trim();\nif (bodyUsername != \"\") {\n  return {updated: false, statusCode: 400, reason: \"username cannot be changed through this route; use the query object to select records\"};\n}\nlet requestedRole = str(body.role ?? \"\").upper();\nif (requestedRole == \"APP\") {\n  requestedRole = \"APPLICATION\";\n}\nlet requestedRbac = body.rbac ?? \"\";\nlet emailPatch = str(body.email ?? \"\").trim();\nlet profilePatch = body.profile ?? \"\";\nlet newPassword = str(body.password ?? body.newPassword ?? \"\").trim();\nif (actorRole == \"USER\" && requestedRole != \"\") {\n  return {updated: false, authorized: false, statusCode: 403, reason: \"Regular users cannot change roles\"};\n}\nif (actorRole == \"USER\" && requestedRbac != \"\") {\n  return {updated: false, authorized: false, statusCode: 403, reason: \"Regular users cannot change RBAC grants\"};\n}\nif (actorRole != \"SUPER_ADMIN\" && (requestedRole == \"ADMIN\" || requestedRole == \"SUPER_ADMIN\")) {\n  return {updated: false, authorized: false, statusCode: 403, reason: \"Only SUPER_ADMIN can assign ADMIN or SUPER_ADMIN roles\"};\n}\nlet users = vdb.collection(\"auth_users\");\nlet lookup = users.find(query, req.limit ?? 200);\nlet rows = lookup.data ?? [];\nif (leng(rows) == 0) {\n  return {updated: false, notFound: true, statusCode: 404, reason: \"No users matched the supplied query\", query: query};\n}\nfor (row : rows) {\n  let targetRole = str((row ?? {}).role ?? \"USER\").upper();\n  if (actorRole == \"ADMIN\" && targetRole == \"SUPER_ADMIN\") {\n    return {updated: false, authorized: false, statusCode: 403, reason: \"ADMIN users cannot edit SUPER_ADMIN accounts\"};\n  }\n}\nlet nowTs = datetime.now().isoformat();\nlet updates = {updatedAt: nowTs, updatedBy: actor};\nlet validUpdateCount = 0;\nif (emailPatch != \"\") {\n  updates.email = emailPatch;\n  validUpdateCount += 1;\n}\nif (profilePatch != \"\") {\n  updates.profile = profilePatch;\n  validUpdateCount += 1;\n}\nif (requestedRole != \"\") {\n  updates.role = requestedRole;\n  validUpdateCount += 1;\n}\nif (requestedRbac != \"\") {\n  updates.rbac = requestedRbac;\n  validUpdateCount += 1;\n}\nlet passwordChanged = false;\nif (newPassword != \"\") {\n  updates.passwordHash = crypto.sha256(newPassword);\n  updates.password = \"\";\n  updates.passwordChangedAt = nowTs;\n  passwordChanged = true;\n  validUpdateCount += 1;\n}\nif (validUpdateCount == 0) {\n  return {updated: false, statusCode: 400, reason: \"No valid updates provided\"};\n}\nlet updateRes = users.update(query, updates);\nif (!(updateRes.ok ?? false)) {\n  return {updated: false, statusCode: 400, reason: updateRes.error ?? \"Update failed\", result: updateRes};\n}\nlet revokedUsers = [];\nlet revokeFailures = [];\nif (passwordChanged) {\n  let controls = vdb.collection(\"auth_session_controls\");\n  for (row : rows) {\n    let targetUsername = str((row ?? {}).username ?? \"\").trim();\n    if (targetUsername == \"\") {\n      continue;\n    }\n    let existing = controls.find({username: {$eq: targetUsername}}, 1);\n    let controlRows = existing.data ?? [];\n    let sessionVersion = 1;\n    if (leng(controlRows) > 0) {\n      let currentVersion = controlRows[0].sessionVersion ?? 1;\n      if (currentVersion != \"\") {\n        sessionVersion = currentVersion + 1;\n      }\n    }\n    let revokePayload = {username: targetUsername, sessionVersion: sessionVersion, revokeAll: true, revokedAt: nowTs, excludeCurrentSession: false, excludedTokenHash: \"\", updatedAt: nowTs, updatedBy: actor, reason: \"password_changed\"};\n    let revokeSave = {};\n    if (leng(controlRows) > 0) {\n      revokeSave = controls.update({username: {$eq: targetUsername}}, revokePayload);\n    } else {\n      revokeSave = controls.insert(revokePayload);\n    }\n    if (revokeSave.ok == false) {\n      revokeFailures.add({username: targetUsername, result: revokeSave});\n    } else {\n      revokedUsers.add({username: targetUsername, sessionVersion: sessionVersion});\n    }\n  }\n}\nlet usersOut = [];\nlet ownOnly = true;\nfor (row : rows) {\n  let sanitized = sanitize_user(row ?? {}, updates);\n  usersOut.add(sanitized);\n  if (str(sanitized.username ?? \"\").trim() != actor) {\n    ownOnly = false;\n  }\n}\nlet statusCode = leng(revokeFailures) > 0 ? 500 : 200;\nreturn {updated: true, statusCode: statusCode, users: usersOut, count: leng(usersOut), ownUpdate: ownOnly, passwordChanged: passwordChanged, sessionsRevoked: passwordChanged ? leng(revokeFailures) == 0 : false, revokedUsers: revokedUsers, revokeFailures: revokeFailures, query: query, result: updateRes};",
+      "developerNotes": "Update route forwards the supplied VDB query as-is after RBAC validation. Regular users must explicitly target their own username or email; admins can update any matched users.",
+      "exampleParams": {
+        "query": {
+          "username": "jelita.mulenga"
+        },
+        "body": {
+          "email": "jelita.mulenga@zmail.com",
+          "password": "AfricaPatriotic#2026",
+          "profile": {
+            "fullName": "Jelita Mulenga",
+            "phone": "+260-111-5566",
+            "timezone": "Africa/Lusaka"
+          },
+          "rbac": {
+            "scopes": [
+              "ADMIN",
+              "USER_READ",
+              "USER_WRITE"
+            ],
+            "abilities": [
+              "auth.read",
+              "auth.write"
+            ]
+          }
+        },
+        "headers": {
+          "Authorization": "Bearer <captured-token>",
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "Update one or more auth user records using the supplied VDB query object.",
+        "description": "The query object is forwarded to VDB as-is after RBAC validation. Privileged users can update any matching users; regular users must explicitly target their own username or email.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Bearer authentication is required. Regular USER accounts can only change their own profile data and password. ADMIN cannot edit SUPER_ADMIN accounts, and only SUPER_ADMIN can assign ADMIN or SUPER_ADMIN roles."
+          },
+          {
+            "title": "Query Behavior",
+            "body": "The route no longer treats `{}` as an own-profile shortcut. `{}` means “all matching users”, so only privileged actors may use it. Use the query object to select records; `body.username` is rejected."
+          },
+          {
+            "title": "Mutation Rules",
+            "body": "Allowed body fields are `email`, `profile`, `password`/`newPassword`, `role`, and `rbac` subject to RBAC checks. Password changes rotate the session version for every matched user."
+          },
+          {
+            "title": "Responses",
+            "body": "Returns `200` with `users`, `count`, and the raw VDB update result when the update succeeds. No matches return `404` and revocation failures are surfaced as `500` after the data update has occurred."
+          }
+        ]
+      }
+    },
+    "ep_users_delete": {
+      "method": "DELETE",
+      "path": "/users",
+      "operationType": "script",
+      "requiresAuth": true,
+      "defaultParameters": {
+        "data": {
+          "enabled": false,
+          "name": "data"
+        },
+        "query": {
+          "enabled": true,
+          "name": "username",
+          "operator": "$eq"
+        }
+      },
+      "versaScript": "json_xml import *;\nvdb import *;\nhttp import *;\nemail import *;\ncrypto import *;\njwt import *;\ntime import *;\ndatetime import *;\n\nfunc normalize_eq(value) {\n  if (type(value) == \"object\") {\n    return str(value[\"$eq\"] ?? \"\").trim();\n  }\n  return str(value ?? \"\").trim();\n}\n\nfunc own_query_allowed(query, actor, actorEmail) {\n  if (type(query) != \"object\") {\n    return false;\n  }\n  if (leng(query.keys()) == 0) {\n    return false;\n  }\n  let usernameEq = normalize_eq(query.username ?? \"\");\n  if (usernameEq != \"\" && usernameEq == actor) {\n    return true;\n  }\n  let emailEq = normalize_eq(query.email ?? \"\");\n  if (emailEq != \"\" && actorEmail != \"\" && emailEq.lower() == actorEmail.lower()) {\n    return true;\n  }\n  return false;\n}\n\nlet req = params;\nlet authCtx = req.auth ?? {};\nlet actor = str(authCtx.username ?? authCtx.sub ?? \"\").trim();\nif (actor == \"\") {\n  return {deleted: false, authorized: false, statusCode: 401, reason: \"Missing authenticated user context\"};\n}\nlet actorEmail = str(authCtx.email ?? \"\").trim();\nlet actorRole = str(authCtx.role ?? \"USER\").upper();\nlet isPrivileged = actorRole == \"SUPER_ADMIN\" || actorRole == \"ADMIN\";\nlet query = req.query ?? {};\nif (type(query) != \"object\") {\n  return {deleted: false, statusCode: 400, reason: \"Query must be a JSON object\"};\n}\nif (!isPrivileged && !own_query_allowed(query, actor, actorEmail)) {\n  return {deleted: false, authorized: false, statusCode: 403, reason: \"Regular users must query their own username or email explicitly\"};\n}\nlet users = vdb.collection(\"auth_users\");\nlet lookup = users.find(query, req.limit ?? 200);\nlet rows = lookup.data ?? [];\nif (leng(rows) == 0) {\n  return {deleted: false, notFound: true, statusCode: 404, reason: \"No users matched the supplied query\", query: query};\n}\nfor (row : rows) {\n  let targetRole = str((row ?? {}).role ?? \"USER\").upper();\n  if (actorRole == \"ADMIN\" && targetRole == \"SUPER_ADMIN\") {\n    return {deleted: false, authorized: false, statusCode: 403, reason: \"ADMIN users cannot delete SUPER_ADMIN accounts\"};\n  }\n}\nlet nowTs = datetime.now().isoformat();\nlet controls = vdb.collection(\"auth_session_controls\");\nlet revokedUsers = [];\nlet revokeFailures = [];\nfor (row : rows) {\n  let targetUsername = str((row ?? {}).username ?? \"\").trim();\n  if (targetUsername == \"\") {\n    continue;\n  }\n  let existing = controls.find({username: {$eq: targetUsername}}, 1);\n  let controlRows = existing.data ?? [];\n  let sessionVersion = 1;\n  if (leng(controlRows) > 0) {\n    let currentVersion = controlRows[0].sessionVersion ?? 1;\n    if (currentVersion != \"\") {\n      sessionVersion = currentVersion + 1;\n    }\n  }\n  let revokePayload = {username: targetUsername, sessionVersion: sessionVersion, revokeAll: true, revokedAt: nowTs, excludeCurrentSession: false, excludedTokenHash: \"\", updatedAt: nowTs, updatedBy: actor, reason: \"account_deleted\"};\n  let revokeSave = {};\n  if (leng(controlRows) > 0) {\n    revokeSave = controls.update({username: {$eq: targetUsername}}, revokePayload);\n  } else {\n    revokeSave = controls.insert(revokePayload);\n  }\n  if (revokeSave.ok == false) {\n    revokeFailures.add({username: targetUsername, result: revokeSave});\n  } else {\n    revokedUsers.add({username: targetUsername, sessionVersion: sessionVersion});\n  }\n}\nif (leng(revokeFailures) > 0) {\n  return {deleted: false, statusCode: 500, reason: \"Failed to revoke all user sessions before delete\", revokeFailures: revokeFailures, revokedUsers: revokedUsers, query: query};\n}\nlet deleteRes = users.delete(query);\nif (!(deleteRes.ok ?? false)) {\n  return {deleted: false, statusCode: 400, reason: deleteRes.error ?? \"Delete failed\", result: deleteRes};\n}\nlet deletedUsers = [];\nlet ownOnly = true;\nfor (row : rows) {\n  let username = str((row ?? {}).username ?? \"\").trim();\n  if (username != \"\") {\n    deletedUsers.add(username);\n    if (username != actor) {\n      ownOnly = false;\n    }\n  }\n}\nreturn {deleted: true, usernames: deletedUsers, count: leng(deletedUsers), ownDelete: ownOnly, sessionsRevoked: true, revokedUsers: revokedUsers, query: query, result: deleteRes};",
+      "developerNotes": "Delete route forwards the supplied VDB query as-is after RBAC validation and pre-delete session revocation. Regular users must explicitly target themselves.",
+      "exampleParams": {
+        "query": {
+          "username": "kalumbi.banda"
+        },
+        "headers": {
+          "Authorization": "Bearer <captured-token>",
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "Delete auth user records selected by the supplied VDB query object.",
+        "description": "The query object is forwarded to VDB as-is after RBAC validation and pre-delete session revocation.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Bearer authentication is required. Regular USER accounts must explicitly target their own username or email. ADMIN cannot delete SUPER_ADMIN accounts."
+          },
+          {
+            "title": "Query Behavior",
+            "body": "`{}` means “delete all matching users” and is therefore reserved for privileged actors. The route first resolves every matched row, validates RBAC, revokes sessions, and only then runs the delete operation."
+          },
+          {
+            "title": "Responses",
+            "body": "Returns `200` with `usernames`, `count`, and revocation metadata when the delete succeeds. No matches return `404`, and any failed session revocation returns `500` before the delete runs."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "Every matched user has `auth_session_controls.sessionVersion` incremented so existing bearer tokens are invalidated before the user documents are removed."
+          }
+        ]
+      }
+    },
+    "ep_register_admin": {
+      "method": "POST",
+      "path": "/register",
+      "operationType": "script",
+      "requiresAuth": true,
+      "defaultParameters": {
+        "data": {
+          "enabled": true,
+          "name": "data"
+        },
+        "query": {
+          "enabled": false,
+          "name": "query",
+          "operator": "$eq"
+        }
+      },
+      "versaScript": "json_xml import *;\nvdb import *;\nhttp import *;\nemail import *;\ncrypto import *;\njwt import *;\ntime import *;\ndatetime import *;\n\nlet req = params;\nlet authCtx = req.auth ?? {};\nlet actor = str(authCtx.username ?? authCtx.sub ?? \"\").trim();\nlet actorRole = str(authCtx.role ?? \"\").upper();\nif (actorRole != \"SUPER_ADMIN\" && actorRole != \"ADMIN\") {\n  return {created: false, authorized: false, statusCode: 403, reason: \"Only SUPER_ADMIN or ADMIN can use register\"};\n}\nlet body = req.body ?? {};\nlet username = str(body.username ?? req.username ?? \"\").trim();\nlet email = str(body.email ?? req.email ?? \"\").trim();\nlet password = str(body.password ?? req.password ?? \"\").trim();\nlet profile = body.profile ?? {};\nlet requestedRole = str(body.role ?? req.role ?? \"USER\").upper();\nif (requestedRole == \"APP\") {\n  requestedRole = \"APPLICATION\";\n}\nif (username == \"\" || email == \"\" || password == \"\") {\n  return {created: false, statusCode: 400, reason: \"username, email and password are required\"};\n}\nif (requestedRole == \"SUPER_ADMIN\") {\n  return {created: false, authorized: false, statusCode: 403, reason: \"register route cannot create SUPER_ADMIN users\"};\n}\nif (actorRole == \"ADMIN\" && (requestedRole == \"ADMIN\" || requestedRole == \"SUPER_ADMIN\")) {\n  return {created: false, authorized: false, statusCode: 403, reason: \"ADMIN users can only create USER or APPLICATION accounts\"};\n}\nlet users = vdb.collection(\"auth_users\");\nlet lookup = users.find({username: {$eq: username}}, 1);\nlet rows = lookup.data ?? [];\nif (leng(rows) > 0) {\n  return {created: false, statusCode: 409, reason: \"User already exists\", username: username};\n}\nlet nowTs = datetime.now().isoformat();\nlet storedHash = crypto.sha256(password);\nlet defaultRbac = {scopes: [\"USER\"], abilities: [\"auth.self.read\", \"auth.self.update\"]};\nlet adminRbac = {scopes: [\"ADMIN\", \"USER_MANAGE\", \"USER_READ\", \"USER_WRITE\"], abilities: [\"auth.manage\", \"auth.read\", \"auth.write\"]};\nlet selectedRbac = requestedRole == \"ADMIN\" ? (body.rbac ?? req.rbac ?? adminRbac) : (body.rbac ?? req.rbac ?? defaultRbac);\nlet created = users.insert({username: username, email: email, passwordHash: storedHash, role: requestedRole, profile: profile, rbac: selectedRbac, createdAt: nowTs, updatedAt: nowTs, createdBy: actor});\nreturn {created: created.ok ?? false, username: username, role: requestedRole, inserted: created.data ?? created, createdBy: actor, authModel: \"AuthUser\"};",
+      "developerNotes": "Register route requires bearer auth. SUPER_ADMIN can create ADMIN/USER/APPLICATION; ADMIN is restricted to USER/APPLICATION and receives explicit 403/409 failure responses.",
+      "exampleParams": {
+        "query": {},
+        "body": {
+          "username": "jelita.mulenga",
+          "email": "jelita.mulenga@zmail.com",
+          "password": "AfricaPatriotic#2026",
+          "role": "ADMIN",
+          "profile": {
+            "fullName": "Jelita Mulenga",
+            "phone": "+260-111-5566",
+            "timezone": "Africa/Lusaka"
+          },
+          "rbac": {
+            "scopes": [
+              "ADMIN",
+              "USER_MANAGE",
+              "USER_READ",
+              "USER_WRITE"
+            ],
+            "abilities": [
+              "auth.manage",
+              "auth.read",
+              "auth.write"
+            ]
+          }
+        },
+        "headers": {
+          "Authorization": "Bearer <super-admin-token>",
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "Create ADMIN, USER, or APPLICATION accounts through the protected register route.",
+        "description": "The register route is intended for administrative provisioning, not public signup.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Bearer authentication is required. SUPER_ADMIN and ADMIN may call the route, but only SUPER_ADMIN may create ADMIN users. The route never creates SUPER_ADMIN accounts."
+          },
+          {
+            "title": "Request Contract",
+            "body": "Provide `username`, `email`, `password`, and optionally `profile`, `role`, and `rbac`. The default example in the docs now provisions an ADMIN account because that is the main administrative use-case."
+          },
+          {
+            "title": "Responses",
+            "body": "Returns `201` on success, `409` when the username already exists, and `403` when the requested role is not permitted for the caller."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "Passwords are hashed before storage and the created record is persisted into `auth_users` with `createdBy` set to the authenticated actor."
+          }
+        ]
+      }
+    },
+    "ep_signout_all": {
+      "method": "POST",
+      "path": "/signinout_all",
+      "operationType": "script",
+      "requiresAuth": true,
+      "defaultParameters": {
+        "data": {
+          "enabled": true,
+          "name": "data"
+        },
+        "query": {
+          "enabled": false,
+          "name": "query",
+          "operator": "$eq"
+        }
+      },
+      "versaScript": "json_xml import *;\nvdb import *;\nhttp import *;\nemail import *;\ncrypto import *;\njwt import *;\ntime import *;\ndatetime import *;\n\nlet req = params;\nlet authCtx = req.auth ?? {};\nlet username = str(authCtx.username ?? authCtx.sub ?? \"\").trim();\nif (username == \"\") {\n  return {ok: false, statusCode: 401, reason: \"Missing authenticated user context\"};\n}\nlet body = req.body ?? {};\nlet excludeCurrent = body.exclude_current_session == true || body.excludeCurrentSession == true || req.exclude_current_session == true || req.excludeCurrentSession == true;\nlet nowTs = datetime.now().isoformat();\nlet controls = vdb.collection(\"auth_session_controls\");\nlet currentToken = str(req.bearerToken ?? req.authToken ?? req.token ?? \"\").trim();\nlet tokenHash = currentToken != \"\" ? crypto.sha256(currentToken) : \"\";\nif (excludeCurrent && tokenHash == \"\") {\n  return {ok: false, statusCode: 400, reason: \"Current bearer token is required when exclude_current_session=true\"};\n}\nlet existing = controls.find({username: {$eq: username}}, 1);\nlet rows = existing.data ?? [];\nlet nextSessionVersion = 1;\nif (leng(rows) > 0) {\n  let currentVersion = rows[0].sessionVersion ?? 1;\n  if (currentVersion != \"\") {\n    nextSessionVersion = currentVersion + 1;\n  }\n}\nlet payload = {username: username, sessionVersion: nextSessionVersion, revokeAll: true, revokedAt: nowTs, updatedAt: nowTs, updatedBy: username, reason: \"signout_all\", excludeCurrentSession: excludeCurrent, excludedTokenHash: excludeCurrent ? tokenHash : \"\"};\nlet saveRes = {};\nif (leng(rows) > 0) {\n  saveRes = controls.update({username: {$eq: username}}, payload);\n} else {\n  saveRes = controls.insert(payload);\n}\nreturn {ok: saveRes.ok ?? true, statusCode: saveRes.ok == false ? 500 : 200, username: username, revokedAllSessions: true, exclude_current_session: excludeCurrent, sessionVersion: nextSessionVersion, updated: saveRes};",
+      "developerNotes": "Revokes all active sessions for the authenticated user by incrementing sessionVersion in auth_session_controls. `exclude_current_session=true` preserves only the current bearer token hash; every older token becomes invalid across protected services.",
+      "exampleParams": {
+        "query": {},
+        "body": {
+          "exclude_current_session": true
+        },
+        "headers": {
+          "Authorization": "Bearer <captured-token>",
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "Revoke every bearer token for the current authenticated user.",
+        "description": "This route increments the session version for the signed-in user and optionally excludes the current token.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Bearer authentication is required."
+          },
+          {
+            "title": "Request Contract",
+            "body": "Optional body flag `excludeCurrentSession`/`exclude_current_session=true` keeps the current token alive, but only when the current bearer token can be hashed and persisted."
+          },
+          {
+            "title": "Responses",
+            "body": "Returns `200` with the next session version and revocation metadata when the session-control record is saved successfully."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "Downstream services validate `sessionVersion`, so every previously-issued bearer token becomes invalid as soon as the control record is updated."
+          }
+        ]
+      }
+    }
+  }
+}

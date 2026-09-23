@@ -1,0 +1,17 @@
+# is_unset guard usage
+
+print("=== is_unset guards ===");
+
+let status;
+
+if (is_unset(status)) {
+    status = "pending";
+}
+
+print(status);
+
+status = "ready";
+
+if (!is_unset(status)) {
+    print(`status: {status}`);
+}

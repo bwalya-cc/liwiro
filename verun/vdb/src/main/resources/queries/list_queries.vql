@@ -1,0 +1,15 @@
+echo ""
+echo "=== LIST DOMAINS ==="
+read domains
+echo ""
+echo "=== LIST DBS ==="
+read dbs
+echo ""
+echo "=== LIST COLLECTIONS ==="
+read collections
+echo ""
+echo "=== LIST MODELS ==="
+read models
+echo ""
+echo "=== LIST SCRIPTS ==="
+read scripts

@@ -1,0 +1,30 @@
+print("=== range and .. demo ===");
+
+let a = 1;
+let b = 5;
+
+print("n..m with variables (inclusive):");
+print(a..b);
+
+print("[n..m] literal range list:");
+print([a..b]);
+
+print("Descending n..m:");
+print(5..1);
+
+print("range(n) starts at 0 and excludes end:");
+print(range(6));
+
+print("range(start, end) includes end:");
+print(range(2, 7));
+
+print("Range in list comprehension:");
+print([x * x for x in 1..6]);
+
+print("Range in dict comprehension:");
+print({x: x * 10 for x in 3..7});
+
+let start = 2;
+let stop = 6;
+print("Range with vars inside comprehension:");
+print([n for n in start..stop if n % 2 == 0]);

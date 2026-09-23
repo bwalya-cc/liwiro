@@ -1,0 +1,22 @@
+print("=== enum type demo ===");
+
+enum TicketState {
+    OPEN,
+    ACKNOWLEDGED = "acknowledged",
+    CLOSED
+};
+
+print(TicketState);
+print(TicketState.OPEN);
+print(TicketState.OPEN.name);
+print(TicketState.OPEN.ordinal);
+print(TicketState.ACKNOWLEDGED.value);
+print(TicketState.names());
+print(TicketState.values());
+print(type(TicketState));
+print(type(TicketState.OPEN));
+print(TicketState.OPEN == TicketState.OPEN);
+print(TicketState.OPEN != TicketState.CLOSED);
+
+let seen = set([TicketState.OPEN, TicketState.CLOSED, TicketState.OPEN]);
+print(seen);

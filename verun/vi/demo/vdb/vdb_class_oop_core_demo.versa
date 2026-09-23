@@ -1,0 +1,56 @@
+print("=== vdb_class_oop_core_demo ===");
+
+class Person(name: str, student: bool = true) {
+    static species() {
+        return "human";
+    }
+
+    init(name, student: bool = true) {
+        Person.name = name;
+        Person.student = student;
+        Person.tags = ["new"];
+    }
+
+    introduce() {
+        print(`Hi, I am {Person.name}, I am {!Person.student ? "not " : ""}a student`);
+    }
+
+    rename(next_name: str) {
+        Person.name = next_name;
+        return Person;
+    }
+}
+
+class Student(name: str, school: str) extends Person {
+    init(name, school: str) {
+        Student.name = name;
+        Student.student = true;
+        Student.school = school;
+        Student.tags = ["student"];
+    }
+
+    describe_school() {
+        print(`{Student.name} studies at {Student.school}`);
+    }
+}
+
+let p = Person("Cameron");
+p.introduce();
+p.rename("Cam");
+p.tags.add("updated");
+print(p.tags);
+print(Person.species());
+print(type(p));
+print(p.class_name);
+print(p.to_object());
+print(p.clone().to_object());
+print(p.get("missing", "fallback"));
+
+let s = Student("Ava", "Nkosi Primary School");
+s.introduce();
+s.describe_school();
+s.assign({city: "Lusaka", level: 3});
+print(s.to_object());
+
+let s2 = new Student("Lebo", "Zed Academy");
+s2.describe_school();

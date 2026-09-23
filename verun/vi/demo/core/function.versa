@@ -1,0 +1,7 @@
+func greet() {
+    let name: str = input("Hello, what is your name? : ");
+    print(`\nNice to meet you {name}`);
+}
+
+
+greet();

@@ -1,0 +1,7 @@
+# Basic list definition and iteration
+let numbers = [1, 2, 3, 4, 5];
+
+print("Numbers: ");
+for (let i = 0; i < 5; i++) {
+    print(`N{i + 1}: {numbers[i]}`);
+}

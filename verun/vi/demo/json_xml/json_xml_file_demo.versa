@@ -1,0 +1,32 @@
+json_xml import *;
+filer import *;
+
+print("=== json_xml file demo ===");
+
+let outDir = filer.join("tmp", "vi", "json_xml_demo");
+filer.ensure_dir(outDir);
+let jsonPath = filer.join(outDir, "sample.json");
+let xmlPath = filer.join(outDir, "sample.xml");
+let txtPath = filer.join(outDir, "note.txt");
+
+let payload = {
+    service: "vi",
+    version: 1,
+    enabled: true,
+    tags: ["json", "xml", "file"]
+};
+
+filer.write_json(jsonPath, payload, true);
+let jsonLoaded = filer.read_json(jsonPath);
+print(jsonLoaded.service);
+print(type(jsonLoaded.tags));
+print(leng(jsonLoaded.tags));
+
+let xml = json_xml.obj_to_xml(payload, "config");
+filer.write_xml(xmlPath, xml);
+let xmlLoaded = filer.read_xml(xmlPath);
+print(xmlLoaded.root.name);
+print(leng(xmlLoaded.root.children));
+
+filer.write_text(txtPath, "json_xml module is working with filer");
+print(filer.read_text(txtPath));

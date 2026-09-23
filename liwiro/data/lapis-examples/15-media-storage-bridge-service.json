@@ -1,0 +1,210 @@
+{
+  "metadata": {
+    "apiName": "MediaStorageBridgeService",
+    "basePath": "/api/media",
+    "version": "1.0.0",
+    "database": "media",
+    "rateLimiting": {
+      "enabled": true,
+      "limit": 120,
+      "timeframe": "minute"
+    },
+    "documentation": {
+      "enabled": true,
+      "key": "liwiroservicepass0!"
+    },
+    "developerNotes": "Media storage bridge service. Versa-script routes import the shared mediacloud VI module, upload to Cloudinary, and persist upload metadata into media_assets.",
+    "setupApiKey": "liwiroservicepass0!",
+    "env": {
+      "MEDIA_ASSET_COLLECTION": "media_assets",
+      "MEDIA_DEFAULT_PROVIDER": "cloudinary",
+      "CLOUDINARY_CLOUD_NAME": "replace-with-cloudinary-cloud-name",
+      "CLOUDINARY_API_KEY": "replace-with-cloudinary-api-key",
+      "CLOUDINARY_API_SECRET": "replace-with-cloudinary-api-secret",
+      "CLOUDINARY_FOLDER": "liwiro-demo"
+    },
+    "seedData": {
+      "enabled": false,
+      "collections": {}
+    }
+  },
+  "auth": {
+    "enabled": false,
+    "isAuthService": false,
+    "keyManagement": "auto",
+    "customEndpoints": {
+      "enabled": false,
+      "signIn": "/signin",
+      "signOut": "/auth/signout",
+      "signUp": "/auth/signup"
+    },
+    "defaultSuperAdmin": {
+      "enabled": false,
+      "username": "superadmin",
+      "email": "superadmin@liwiro.local",
+      "password": "ChangeMeNow1!",
+      "role": "SUPER_ADMIN"
+    }
+  },
+  "models": {
+    "m_media_asset": {
+      "name": "MediaAsset",
+      "collection": "media_assets",
+      "fields": {
+        "f_asset_id": {
+          "id": "f_asset_id",
+          "name": "assetId",
+          "type": "string",
+          "required": true,
+          "unique": true
+        },
+        "f_provider": {
+          "id": "f_provider",
+          "name": "provider",
+          "type": "string",
+          "required": true,
+          "unique": false
+        },
+        "f_provider_asset_id": {
+          "id": "f_provider_asset_id",
+          "name": "providerAssetId",
+          "type": "string",
+          "required": false,
+          "unique": false
+        },
+        "f_filename": {
+          "id": "f_filename",
+          "name": "filename",
+          "type": "string",
+          "required": false,
+          "unique": false
+        },
+        "f_mime_type": {
+          "id": "f_mime_type",
+          "name": "mimeType",
+          "type": "string",
+          "required": false,
+          "unique": false
+        },
+        "f_storage_bucket": {
+          "id": "f_storage_bucket",
+          "name": "storageBucket",
+          "type": "string",
+          "required": false,
+          "unique": false
+        },
+        "f_storage_path": {
+          "id": "f_storage_path",
+          "name": "storagePath",
+          "type": "string",
+          "required": false,
+          "unique": false
+        },
+        "f_public_url": {
+          "id": "f_public_url",
+          "name": "publicUrl",
+          "type": "string",
+          "required": false,
+          "unique": false
+        },
+        "f_secure_url": {
+          "id": "f_secure_url",
+          "name": "secureUrl",
+          "type": "string",
+          "required": false,
+          "unique": false
+        },
+        "f_size_bytes": {
+          "id": "f_size_bytes",
+          "name": "sizeBytes",
+          "type": "number",
+          "required": false,
+          "unique": false
+        },
+        "f_status": {
+          "id": "f_status",
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "unique": false
+        },
+        "f_created_at": {
+          "id": "f_created_at",
+          "name": "createdAt",
+          "type": "string",
+          "required": false,
+          "unique": false
+        },
+        "f_created_by": {
+          "id": "f_created_by",
+          "name": "createdBy",
+          "type": "string",
+          "required": false,
+          "unique": false
+        },
+        "f_request_summary": {
+          "id": "f_request_summary",
+          "name": "requestSummary",
+          "type": "object",
+          "required": false,
+          "unique": false,
+          "objectTemplate": "{\"sourceType\":\"\",\"providerRoute\":\"\"}"
+        },
+        "f_provider_response": {
+          "id": "f_provider_response",
+          "name": "providerResponse",
+          "type": "object",
+          "required": false,
+          "unique": false,
+          "objectTemplate": "{\"status\":\"\",\"id\":\"\"}"
+        }
+      }
+    }
+  },
+  "modules": [
+    {
+      "name": "mediacloud",
+      "config": {
+        "defaultProvider": "cloudinary"
+      }
+    }
+  ],
+  "endpoints": {
+    "ep_provider_status": {
+      "method": "POST",
+      "path": "/providers/status",
+      "operationType": "script",
+      "requiresAuth": false,
+      "versaScript": "import mediacloud;\nvdb import *;\n\nlet assetCollection = str(service.env.MEDIA_ASSET_COLLECTION ?? \"media_assets\").trim();\nlet assets = vdb.collection(assetCollection);\nlet recentLookup = assets.find({}, 5);\nlet recentAssets = recentLookup.data ?? [];\nreturn {\n  ok: true,\n  assetCollection: assetCollection,\n  recentAssetCount: leng(recentAssets),\n  mediaCloud: mediacloud.status()\n};",
+      "developerNotes": "Reports MediaCloud readiness and the collection that stores uploaded asset records.",
+      "exampleParams": {
+        "query": {},
+        "body": {},
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    },
+    "ep_upload_cloudinary": {
+      "method": "POST",
+      "path": "/upload/cloudinary",
+      "operationType": "script",
+      "requiresAuth": false,
+      "versaScript": "import mediacloud;\nvdb import *;\ncrypto import *;\ndatetime import *;\n\nlet req = params;\nlet upload = mediacloud.upload({provider: \"cloudinary\", body: req.body ?? {}, auth: req.auth ?? {}});\nif (!(upload.ok == true)) {\n  return upload;\n}\nlet assetCollection = str(service.env.MEDIA_ASSET_COLLECTION ?? \"media_assets\").trim();\nlet assets = vdb.collection(assetCollection);\nlet actor = str((req.auth ?? {}).username ?? (req.auth ?? {}).sub ?? \"system\").trim();\nif (actor == \"\") {\n  actor = \"system\";\n}\nlet assetId = crypto.uuid();\nlet nowTs = datetime.now().isoformat();\nlet record = {\n  assetId: assetId,\n  provider: upload.provider,\n  providerAssetId: str(upload.providerAssetId ?? \"\").trim(),\n  filename: str(upload.filename ?? \"\").trim(),\n  mimeType: str(upload.mimeType ?? \"\").trim(),\n  storageBucket: str(upload.storageBucket ?? \"\").trim(),\n  storagePath: str(upload.storagePath ?? \"\").trim(),\n  publicUrl: str(upload.publicUrl ?? \"\").trim(),\n  secureUrl: str(upload.secureUrl ?? upload.publicUrl ?? \"\").trim(),\n  sizeBytes: upload.sizeBytes ?? 0,\n  status: \"uploaded\",\n  createdAt: nowTs,\n  createdBy: actor,\n  requestSummary: {sourceType: \"mediacloud\", providerRoute: \"/upload/cloudinary\"},\n  providerResponse: upload.providerResponse ?? {}\n};\nlet saveRes = assets.insert(record);\nif (saveRes.ok == false) {\n  return {ok: false, statusCode: 500, reason: saveRes.error ?? \"Failed to persist uploaded media metadata\", upload: upload, record: record};\n}\nreturn {ok: true, statusCode: 201, assetId: assetId, provider: upload.provider, stored: true, upload: upload, record: record};",
+      "developerNotes": "Uses the shared mediacloud module to upload to Cloudinary and persist metadata into media_assets.",
+      "exampleParams": {
+        "query": {},
+        "body": {
+          "filename": "liwiro-sample.png",
+          "mimeType": "image/png",
+          "sourceUrl": "https://res.cloudinary.com/demo/image/upload/sample.jpg",
+          "publicId": "liwiro-sample",
+          "folder": "liwiro-demo"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        }
+      }
+    }
+  }
+}

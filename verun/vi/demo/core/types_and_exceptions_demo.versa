@@ -1,0 +1,70 @@
+print("=== types + exceptions demo ===");
+
+let a = 2;
+print(a);
+a = 34;
+print(a);
+a = "f";
+print(a);
+
+let b: int = 2;
+print(b);
+try {
+    b = "e";
+    print(b);
+} catch (e) {
+    print(`caught={e.type}`);
+    print(`message={e.message}`);
+}
+
+let c: str = "d";
+print(c);
+c = "r";
+print(c);
+try {
+    c = 9;
+    print(c);
+} catch (e) {
+    print(`caught={e.type}`);
+    print(`message={e.message}`);
+}
+
+try {
+    let name: str = 8;
+    print(name);
+} catch (e) {
+    print(`caught={e.type}`);
+    print(`message={e.message}`);
+}
+
+print(type(a));
+print(type(b));
+print(type(c));
+
+let g: str;
+print(type(g));
+print(g);
+g = "now set";
+print(g);
+print(is_type(g, "string"));
+
+let h: int;
+let i: float;
+let j: bool;
+let k: list;
+let m: dict;
+print(type(h));
+print(type(i));
+print(type(j));
+print(type(k));
+print(type(m));
+
+try {
+    let x = [1, 2];
+    print(x[10]);
+} catch (e) {
+    print(`caught={e.type}`);
+    print(`message={e.message}`);
+} complete {
+    print("complete block ran");
+}

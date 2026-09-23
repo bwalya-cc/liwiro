@@ -1,0 +1,6 @@
+jwt import *;
+
+print("=== jwt decode demo ===");
+let token = jwt.sign({sub: "abc", scope: ["read", "write"]}, "k");
+print(token);
+print(jwt.decode(token));

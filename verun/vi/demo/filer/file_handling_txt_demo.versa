@@ -1,0 +1,12 @@
+filer import *;
+
+print("=== filer txt demo ===");
+
+let outDir = filer.join("tmp", "vi", "filer_demo", "txt");
+filer.ensure_dir(outDir);
+let txtPath = filer.join(outDir, "note.txt");
+
+filer.write_text(txtPath, "Line 1\nLine 2\nLine 3");
+let content = filer.read_text(txtPath);
+print(content);
+print(`exists={filer.exists(txtPath)}`);

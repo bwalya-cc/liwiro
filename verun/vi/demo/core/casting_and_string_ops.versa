@@ -1,0 +1,24 @@
+print("=== Type casting ===");
+print(int(11 / 2), ", ", type(int(11 / 2)));      # 5, int
+print(int("9.8"), ", ", type(int("9.8")));        # 9, int
+print(float("7.25"), ", ", type(float("7.25")));  # 7.25, float
+print(str(456), ", ", type(str(456)));            # "456", string
+print(bool(0), ", ", type(bool(0)));              # false, bool
+print(bool("hello"), ", ", type(bool("hello")));  # true, bool
+
+print("\n=== String + and * ===");
+let s = "Li";
+print(s + "wiro");
+print("ver" + 2);
+print(3 + "db");
+print("ha" * 3);
+print(4 * "go");
+
+print("\n=== += for strings and numbers ===");
+let total = 10;
+total += 7;
+print(total);
+
+let name = "auth";
+name += "-core";
+print(name);

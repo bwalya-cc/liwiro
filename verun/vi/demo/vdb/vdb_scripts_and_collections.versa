@@ -1,0 +1,44 @@
+vdb import *;
+
+func section(title: str) {
+    print("\n=== " + title + " ===");
+}
+
+func showResult(label: str, res) {
+    print("\n[" + label + "]");
+    print("ok=" + str(res.ok) + " status=" + res.status + " op=" + res.operation);
+    print("message=" + res.message);
+    if (res.error != null) {
+        print("error=" + res.error);
+    }
+    print("context=" + str(res.context));
+    if (res.data != null) {
+        print("data=" + str(res.data));
+    }
+}
+
+try {
+section("Auth + Context");
+showResult("auth", vdb.auth({user: DEMO_VDB_USER, pass: DEMO_VDB_PASS}));
+showResult("set", vdb.set({domain: DEMO_VDB_DOMAIN, database: DEMO_VDB_DB}));
+
+section("Collection Operations");
+let logs = vdb.collection("logs_demo_2");
+showResult("insert INFO", logs.insert({level: "INFO", message: "boot"}));
+showResult("insert WARN", logs.insert({level: "WARN", message: "low memory"}));
+
+showResult("list collections", vdb.list_collections());
+showResult("find logs", logs.find({}, 50));
+
+section("Script Operations");
+showResult("save script", vdb.save_script("demo_script_2", "demo", "let nums = [1,2,3]; nums;"));
+showResult("load script", vdb.load_script("demo_script_2"));
+showResult("execute script", vdb.execute_script("demo_script_2", {collection: "logs_demo_2"}));
+showResult("list scripts", vdb.list_scripts());
+
+section("Cleanup");
+showResult("delete script", vdb.delete_script("demo_script_2"));
+showResult("drop collection", vdb.drop("logs_demo_2"));
+} catch (e) {
+    print("VDB demo skipped: " + e.message);
+}

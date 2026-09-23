@@ -1,0 +1,73 @@
+vdb import *;
+
+func section(title: str) {
+    print("\n=== " + title + " ===");
+}
+
+func showResult(label: str, res) {
+    print("\n[" + label + "]");
+    print("ok=" + str(res.ok) + " status=" + res.status + " op=" + res.operation);
+    print("message=" + res.message);
+    if (res.error != null) {
+        print("error=" + res.error);
+    }
+    if (res.data != null) {
+        print("data=" + str(res.data));
+    }
+}
+
+func scriptName(prefix: str, level: int) -> str {
+    return prefix + "_" + str(level);
+}
+
+func deleteChain(prefix: str, depth: int) {
+    let level = 1;
+    while (level <= depth) {
+        vdb.delete_script(scriptName(prefix, level));
+        level = level + 1;
+    }
+}
+
+func buildChain(prefix: str, depth: int) {
+    let level = depth;
+    while (level >= 1) {
+        let code = "vdb import *;\n\"chain leaf reached\";";
+        if (level < depth) {
+            let nextName = scriptName(prefix, level + 1);
+            code = "vdb import *;\nvdb.execute_script(\"" + nextName + "\", {});";
+        }
+        showResult("save " + scriptName(prefix, level), vdb.save_script(scriptName(prefix, level), "demo_depth_guard", code));
+        level = level - 1;
+    }
+}
+
+let prefix = "demo_vdb_depth_limit";
+let depth = 12;
+let caughtExpected = false;
+
+try {
+    section("Auth + Context");
+    showResult("auth", vdb.auth({user: DEMO_VDB_USER, pass: DEMO_VDB_PASS}));
+    showResult("set", vdb.set({domain: DEMO_VDB_DOMAIN, database: DEMO_VDB_DB}));
+
+    section("Build VDB Script Chain");
+    deleteChain(prefix, depth);
+    buildChain(prefix, depth);
+
+    section("Execute Root Script");
+    print("Expected: the default recursion guard should raise a dependency-depth exception before this chain completes.");
+    vdb.execute_script(scriptName(prefix, 1), {});
+    print("ERROR: the recursion guard did not fire.");
+} catch (e) {
+    print("Caught expected recursion guard.");
+    print("type=" + e.type);
+    print("message=" + e.message);
+    caughtExpected = true;
+} complete {
+    section("Cleanup");
+    deleteChain(prefix, depth);
+}
+
+if (!caughtExpected) {
+    throw "Expected recursion guard did not fire";
+}

@@ -1,0 +1,4 @@
+create script greet service utils code "print('hello from stored script');"
+read script greet
+run script greet params {}
+delete script greet

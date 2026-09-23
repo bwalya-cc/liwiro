@@ -1,0 +1,40 @@
+print("=== type() demo ===");
+
+let n = 42;
+let f = 3.14;
+let s = "hello";
+let ok = true;
+let none = null;
+let xs = [1, 2, 3];
+let obj = {name: "Alice", age: 30, active: true};
+
+class SampleType(label: str) {
+    init(label) {
+        SampleType.label = label;
+    }
+}
+
+print(type(n));
+print(type(f));
+print(type(s));
+print(type(ok));
+print(type(none));
+print(type(xs));
+print(type(obj));
+print(type("{\"service\":\"liwiro\"}"));
+print(type("<config><enabled>true</enabled></config>"));
+print(type(SampleType));
+print(type(SampleType("demo")));
+
+print("\nObject access checks:");
+print(obj.name);
+print(obj["age"]);
+
+print("\n=== is_type() checks ===");
+print(is_type(n, "int"));
+print(is_type(f, "number"));
+print(is_type(xs, "array"));
+print(is_type(obj, "json"));
+print(is_type("<root/>", "xml"));
+print(is_type("plain-text", "json"));
+print(is_type(SampleType, "class"));

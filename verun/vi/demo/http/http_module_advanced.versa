@@ -1,0 +1,45 @@
+http import *;
+
+print("=== HTTP advanced request demo ===");
+
+try {
+    let response = http.request("PATCH", "https://httpbin.org/patch", {
+        query: { id: 42, env: "demo" },
+        headers: {
+            "Content-Type": "application/json",
+            "X-VI-Demo": "advanced-http"
+        },
+        body: {
+            action: "partial-update",
+            enabled: true,
+            score: 98.6
+        },
+        timeoutSeconds: 15
+    });
+
+    print(`status={response.status} ok={response.ok} method={response.method}`);
+    print(response.body);
+} catch (e) {
+    print("PATCH request failed (network might be unavailable): " + e.message);
+}
+
+try {
+    let bearerResp = http.get("https://httpbin.org/anything", {
+        authBearer: "demo-bearer-token",
+        timeoutSeconds: 15
+    });
+    print(`bearer status={bearerResp.status} ok={bearerResp.ok}`);
+} catch (e) {
+    print("Bearer auth request failed (network might be unavailable): " + e.message);
+}
+
+try {
+    let apiKeyResp = http.get("https://httpbin.org/get", {
+        authApiKey: { name: "X-API-Key", value: "demo-key-123" },
+        query: { mode: "api-key" },
+        timeoutSeconds: 15
+    });
+    print(`api-key status={apiKeyResp.status} ok={apiKeyResp.ok}`);
+} catch (e) {
+    print("API key request failed (network might be unavailable): " + e.message);
+}

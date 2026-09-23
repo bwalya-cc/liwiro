@@ -1,0 +1,29 @@
+print("=== bfs graph ===");
+let graph = {
+    A: ["B", "C"],
+    B: ["D", "E"],
+    C: ["F"],
+    D: [],
+    E: ["F"],
+    F: []
+};
+
+func bfs(g, start) {
+    let visited = [];
+    let queue = [start];
+
+    while (leng(queue) > 0) {
+        let node = queue.pop(0);
+        if (!visited.contains(node)) {
+            visited.add(node);
+            for (next : g[node]) {
+                if (!visited.contains(next)) {
+                    queue.add(next);
+                }
+            }
+        }
+    }
+    return visited;
+}
+
+print(bfs(graph, "A"));

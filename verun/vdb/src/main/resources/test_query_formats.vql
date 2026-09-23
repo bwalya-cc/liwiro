@@ -1,0 +1,16 @@
+create domain test_domain;
+create database test_db;
+use domain test_domain;
+use database test_db;
+create collection products schema { name: string, price: number };
+create in products = { name: "Widget", price: 10 };
+read collection products;
+update collection products where name == "Widget" { price = 12; };
+aggregate products by name { count(); };
+create index products.name;
+read indexes on products;
+drop index products.name;
+delete from products where name == "Widget";
+drop collection products;
+drop database test_db;
+drop domain test_domain;

@@ -1,0 +1,4 @@
+echo "=== DOCUMENT DELETE ==="
+delete users where name="TestUser"
+echo "=== COLLECTION DELETE ==="
+drop collection users

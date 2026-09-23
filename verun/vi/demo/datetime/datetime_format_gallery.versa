@@ -1,0 +1,16 @@
+datetime import *;
+time import *;
+
+print("=== datetime format gallery ===");
+let now = datetime.now();
+
+print(now.human("default"));
+print(now.human("iso"));
+print(now.human("full"));
+print(now.human("%A, %d %B %Y %H:%M:%S"));
+
+let d = datetime.date.today();
+print(d.human("%Y/%m/%d"));
+
+let t = datetime.time.from_components(23, 5, 7, 120000);
+print(t.human("%I:%M:%S %p"));

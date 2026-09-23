@@ -1,0 +1,27 @@
+json_xml import *;
+import mediacloud;
+
+let service_module_config = {
+  defaultProvider: "cloudinary"
+};
+
+let service_env = {
+  CLOUDINARY_CLOUD_NAME: "replace-with-cloudinary-cloud-name",
+  CLOUDINARY_API_KEY: "replace-with-cloudinary-api-key",
+  CLOUDINARY_API_SECRET: "replace-with-cloudinary-api-secret",
+  CLOUDINARY_FOLDER: "liwiro-demo"
+};
+
+let runtime_config = {
+  defaultProvider: service_module_config.defaultProvider,
+  cloudName: service_env.CLOUDINARY_CLOUD_NAME,
+  apiKey: service_env.CLOUDINARY_API_KEY,
+  apiSecret: service_env.CLOUDINARY_API_SECRET,
+  folder: service_env.CLOUDINARY_FOLDER
+};
+
+print(json_xml.to_json({
+  moduleConfig: service_module_config,
+  serviceEnv: service_env,
+  status: mediacloud.status(runtime_config)
+}));

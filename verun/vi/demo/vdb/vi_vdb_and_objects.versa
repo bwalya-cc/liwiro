@@ -1,0 +1,79 @@
+# VI object access + VDB workflow demo
+
+vdb import *;
+
+let user = {
+  id: "u_1001",
+  "name": "Mist",
+  role: "manager"
+};
+let authUser = "CHANGE_ME_VDB_USER";
+let authPass = "CHANGE_ME_VDB_PASSWORD";
+let demoDomain = "vi_demos";
+let demoDb = "main";
+
+func normalizeRows(value) {
+  if (type(value) == "list") {
+    return value;
+  }
+  if (type(value) == "object" && value["rows"] != null && type(value["rows"]) == "list") {
+    return value["rows"];
+  }
+  return [];
+}
+
+try {
+  authUser = DEMO_VDB_USER;
+  authPass = DEMO_VDB_PASS;
+  demoDomain = DEMO_VDB_DOMAIN;
+  demoDb = DEMO_VDB_DB;
+} catch (err) {
+}
+
+print("Dot access:");
+print(user.name);
+
+print("Bracket access:");
+print(user["role"]);
+print(user[role]);
+
+let profileKey = "name";
+print(user[profileKey]);
+
+user.region = "IN-ZM";
+print(user["region"]);
+
+let items = [
+  {sku: "A-1", qty: 4},
+  {sku: "B-2", qty: 7}
+];
+
+print(items[0].sku);
+print(items[0][sku]);
+print(type(items));
+
+try {
+  # This is a safe best-effort VDB workflow. If VDB is not running or auth is missing,
+  # the catch block keeps this demo error-free.
+  let authResult = vdb.auth({user: authUser, pass: authPass});
+  print("VDB auth result: " + authResult);
+  vdb.set({domain: demoDomain, db: demoDb});
+  try {
+    vdb.drop("vi_demo");
+  } catch (dropErr) {
+  }
+  vdb.collection("vi_demo");
+  vdb.insert("vi_demo", {event: "hello", owner: user.name});
+  let rowsResult = vdb.find("vi_demo", {owner: {"$eq": user.name}}, 5);
+  let rows = normalizeRows(rowsResult.data);
+  if (leng(rows) == 0) {
+    rows = [{owner: user.name}];
+  }
+  print(type(rows));
+  print(rows[0]["owner"]);
+  print(rows[0]['owner']);
+  print(rows[0][owner]);
+  vdb.drop("vi_demo");
+} catch (err) {
+  print("VDB demo skipped: " + err.message);
+}

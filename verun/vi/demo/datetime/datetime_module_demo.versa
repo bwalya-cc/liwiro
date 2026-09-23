@@ -1,0 +1,36 @@
+datetime import *;
+time import *;
+
+print("=== datetime module demo ===");
+
+let now = datetime.now();
+print("now.human():");
+print(now.human());
+print("now.human(%Y-%m-%d %H:%M:%S):");
+print(now.human("%Y-%m-%d %H:%M:%S"));
+
+let today = datetime.date.today();
+print("today.human():");
+print(today.human());
+
+let t = datetime.time.from_components(9, 30, 15);
+print("time.human():");
+print(t.human());
+
+let delta = datetime.timedelta({days: 1, hours: 2, minutes: 30});
+print("timedelta.human():");
+print(delta.human());
+
+let later = now.add(delta);
+print("later.human():");
+print(later.human());
+
+let tz = datetime.timezone("+02:00");
+print("timezone:");
+print(tz);
+print("timezone.human():");
+print(tz.human());
+
+let format: dtf = "%A, %d %B %Y %H:%M:%S";
+print("custom dtf (datetime format):");
+print(datetime.now().human(format));

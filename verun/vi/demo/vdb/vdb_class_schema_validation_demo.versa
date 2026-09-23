@@ -1,0 +1,38 @@
+print("=== vdb_class_schema_validation_demo ===");
+
+class Device(id: str, online: bool = false) {
+    schema() {
+        return {
+            id: {type: "string", required: true},
+            online: {type: "bool", default: false},
+            count: {type: "int"},
+            meta: {type: "object"}
+        };
+    }
+
+    init(id, online: bool = false) {
+        Device.id = id;
+        Device.online = online;
+        Device.props_from_schema();
+    }
+}
+
+let d = Device("router-01");
+print(d.to_object());
+print(d.validate());
+
+try {
+    d.assign({count: "wrong-type"});
+    print(d.validate());
+} catch (e) {
+    print(`caught={e.type} ${e.message}`);
+}
+
+let fixed = d.assign({count: 2, meta: {site: "HQ"}});
+print(fixed.validate());
+
+try {
+    d.count = "again-wrong";
+} catch (e) {
+    print(`auto_validate={e.type} ${e.message}`);
+}

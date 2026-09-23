@@ -1,0 +1,6 @@
+echo "=== BASIC READ ==="
+read collection users;
+echo "=== FILTERED READ ==="
+read collection users where age > 20;
+echo "=== PROJECTION READ ==="
+read collection users select name;

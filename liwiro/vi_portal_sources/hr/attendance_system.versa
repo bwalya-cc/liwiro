@@ -1,0 +1,94 @@
+# HR Check-in and Attendance System
+# Domain: hr | Collections: users, staff_logs
+
+import vdb;
+import env;
+
+# Authenticate using saved environment variables
+vdb.authenticate(env.VDB_USER, env.VDB_PASS);
+
+# Ensure the HR domain and collections exist
+func initialize_system() {
+    vdb.use("hr");
+    # Check if collections exist by attempting a list or just creating if missing
+    # VDB create is idempotent if the collection already exists with the same schema
+    vdb.create("users", {
+        "id": {"type": "string", "required": true},
+        "name": {"type": "string", "required": true},
+        "role": {"type": "string", "default": "employee"}
+    });
+    
+    vdb.create("staff_logs", {
+        "user_id": {"type": "string", "required": true},
+        "type": {"type": "string", "required": true},
+        "timestamp": {"type": "date", "required": true}
+    });
+}
+
+func register_user(id, name) {
+    let user = {
+        "id": id,
+        "name": name,
+        "role": "employee",
+        "created_at": now()
+    };
+    vdb.collection("users").insert(user);
+    print(`User {name} (ID: {id}) registered successfully.`);
+}
+
+func check_in(id) {
+    let log = {
+        "user_id": id,
+        "type": "IN",
+        "timestamp": now()
+    };
+    vdb.collection("staff_logs").insert(log);
+    print(`User {id} checked IN at {log.timestamp}.`);
+}
+
+func check_out(id) {
+    let log = {
+        "user_id": id,
+        "type": "OUT",
+        "timestamp": now()
+    };
+    vdb.collection("staff_logs").insert(log);
+    print(`User {id} checked OUT at {log.timestamp}.`);
+}
+
+func show_summary(id) {
+    print(`--- Monthly Summary for User {id} ---`);
+    let logs = vdb.collection("staff_logs").find({"user_id": id});
+    for (entry : logs) {
+        print(`{entry.type} | {entry.timestamp}`);
+    }
+}
+
+func main_menu() {
+    initialize_system();
+    
+    print("\n=== HR ATTENDANCE SYSTEM ===");
+    print("1. Register User");
+    print("2. Check In");
+    print("3. Check Out");
+    print("4. Monthly Summary");
+    print("5. Exit");
+    
+    # Simulation of menu choice for the VI Portal environment
+    let choice = "4"; 
+    let test_id = "EMP001";
+
+    if (choice == "1") {
+        register_user(test_id, "John Doe");
+    } alt (choice == "2") {
+        check_in(test_id);
+    } alt (choice == "3") {
+        check_out(test_id);
+    } alt (choice == "4") {
+        show_summary(test_id);
+    } else {
+        print("Exiting system.");
+    }
+}
+
+main_menu();

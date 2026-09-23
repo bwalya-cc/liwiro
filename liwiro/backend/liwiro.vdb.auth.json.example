@@ -1,0 +1,41 @@
+{
+  "vdb_transport": "unixsocket",
+  "vdb_server_url": "http://127.0.0.1:1957",
+  "vdb_unix_socket_path": "/tmp/vdb.sock",
+  "vdb_named_pipe_path": "\\\\.\\pipe\\verun_vdb",
+  "vdb_username": "liwiro",
+  "liwiro_domain": "liwiro",
+  "liwiro_db": "config",
+  "created_at": "2026-03-26T00:00:00Z",
+  "vdb_super_admin_username": "change_me_super_admin",
+  "users": [
+    {
+      "username": "change_me_liwiro_admin",
+      "password_hash": "<generated-at-runtime>",
+      "role": "admin",
+      "service_access": [
+        "*"
+      ],
+      "permissions": [],
+      "liwiro_rbac": {
+        "role": "LIWIRO_SUPER_ADMIN",
+        "abilities": [
+          "MANAGE_LIWIRO_USERS",
+          "MANAGE_LIWIRO_SERVICES",
+          "MANAGE_VDB_DOMAINS",
+          "MANAGE_PLATFORM_SETTINGS"
+        ]
+      },
+      "is_super_admin": true,
+      "created_at": "2026-03-26T00:00:00Z"
+    }
+  ],
+  "settings": {
+    "productionMode": false,
+    "startServicesOnStartup": false,
+    "autoRefreshServiceStatus": true,
+    "deleteDataWithServiceByDefault": true,
+    "startServicesAfterGenerationByDefault": true,
+    "retryFailedBatchOpsByDefault": true
+  }
+}

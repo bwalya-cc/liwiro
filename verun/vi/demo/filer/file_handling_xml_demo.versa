@@ -1,0 +1,91 @@
+filer import *;
+json_xml import *;
+
+print("=== filer xml cascaded-tree demo ===");
+
+let outDir = filer.join("tmp", "vi", "filer_demo", "xml");
+filer.ensure_dir(outDir);
+let xmlPath = filer.join(outDir, "catalog_tree.xml");
+
+let xmlText = "<catalog>"
+    + "<book id=\"b-100\" genre=\"tech\">"
+    + "<title>VersaDB Handbook</title>"
+    + "<author><name>Alice</name><contact><email>alice@example.com</email></contact></author>"
+    + "<chapters>"
+    + "<chapter index=\"1\"><title>Intro</title></chapter>"
+    + "<chapter index=\"2\"><title>Indexes</title><sections><section id=\"2.1\">Hash Index</section></sections></chapter>"
+    + "</chapters>"
+    + "</book>"
+    + "</catalog>";
+
+filer.write_xml(xmlPath, xmlText);
+let loaded = filer.read_xml(xmlPath);
+
+func print_tree(node, depth) {
+    let pad = "  " * depth;
+    if (node == null) {
+        return null;
+    }
+    let label = pad + "- " + node.name;
+    if (node.text != null && str(node.text) != "") {
+        label = label + " => " + str(node.text);
+    }
+    print(label);
+    if (node.children != null) {
+        for (child in node.children) {
+            print_tree(child, depth + 1);
+        }
+    }
+}
+
+func find_first(node, wanted) {
+    if (node == null) {
+        return null;
+    }
+    if (node.name == wanted) {
+        return node;
+    }
+    if (node.children == null) {
+        return null;
+    }
+    for (child in node.children) {
+        let hit = find_first(child, wanted);
+        if (hit != null) {
+            return hit;
+        }
+    }
+    return null;
+}
+
+print("Root type: " + type(loaded));
+print("Root node: " + loaded.root.name);
+print("Original tree:");
+print_tree(loaded.root, 0);
+
+let firstTitle = find_first(loaded.root, "title");
+if (firstTitle != null) {
+    firstTitle.text = "VersaDB Handbook (Second Edition)";
+}
+
+let chapters = find_first(loaded.root, "chapters");
+if (chapters != null) {
+    chapters.children.add({
+        name: "chapter",
+        attributes: {index: "3"},
+        text: "",
+        children: [
+            {name: "title", attributes: {}, text: "Transactions", children: []},
+            {name: "sections", attributes: {}, text: "", children: [
+                {name: "section", attributes: {id: "3.1"}, text: "ACID Basics", children: []}
+            ]}
+        ]
+    });
+}
+
+print("Updated tree:");
+print_tree(loaded.root, 0);
+
+let serialized = json_xml.obj_to_xml(loaded.root, loaded.root.name);
+let rewrittenPath = filer.join(outDir, "catalog_tree_updated.xml");
+filer.write_xml(rewrittenPath, serialized);
+print("Updated XML written to: " + rewrittenPath);

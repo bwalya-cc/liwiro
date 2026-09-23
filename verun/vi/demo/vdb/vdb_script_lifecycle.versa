@@ -1,0 +1,32 @@
+vdb import *;
+
+func section(title: str) {
+    print("\n=== " + title + " ===");
+}
+
+func showResult(label: str, res) {
+    print("\n[" + label + "]");
+    print("ok=" + str(res.ok) + " status=" + res.status + " op=" + res.operation);
+    print("message=" + res.message);
+    if (res.error != null) {
+        print("error=" + res.error);
+    }
+    print("context=" + str(res.context));
+    if (res.data != null) {
+        print("data=" + str(res.data));
+    }
+}
+
+try {
+    section("Auth + Context");
+    showResult("auth", vdb.auth({user: DEMO_VDB_USER, pass: DEMO_VDB_PASS}));
+    showResult("set", vdb.set({domain: DEMO_VDB_DOMAIN, database: DEMO_VDB_DB}));
+
+    section("Script Save/Load/Execute/Delete");
+    showResult("save script", vdb.save_script("adder_script", "calc", "let a = params.a; let b = params.b; a + b;"));
+    showResult("load script", vdb.load_script("adder_script"));
+    showResult("execute script", vdb.execute_script("adder_script", {a: 5, b: 7}));
+    showResult("delete script", vdb.delete_script("adder_script"));
+} catch (e) {
+    print("VDB demo skipped: " + e.message);
+}

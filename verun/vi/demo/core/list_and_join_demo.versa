@@ -1,0 +1,67 @@
+# list_demo.versa
+
+# Basic list definition and iteration
+let numbers = [1, 2, 3, 4, 5];
+print("Original numbers:");
+for (let num in numbers) {
+    print(`- {num}`);
+}
+
+# Using add method
+numbers.add(6);
+print("\nAfter adding 6:");
+print(numbers);
+
+# Using pop method
+let last = numbers.pop();
+print(`\nPopped last element: {last}`);
+print("Remaining numbers:");
+print(numbers);
+
+# Using insert method
+numbers.insert(99, 2);
+print("\nAfter inserting 99 at index 2:");
+print(numbers);
+
+# Using remove method
+numbers.remove(99);
+print("\nAfter removing 99:");
+print(numbers);
+
+# String splitting and joining
+let sentence = "Hello World from Versa";
+let words = sentence.split(" ");
+print("\nSplit words: " + join(", ", words));
+
+# List comprehension - squares
+let squares = [num * num for num in numbers];
+print(`\nSquared numbers: {squares}`);
+
+# List comprehension with condition - even numbers
+let evens = [num for num in numbers if num % 2 == 0];
+print(`Even numbers: {evens}`);
+
+# Nested list comprehension
+let matrix = [[1, 2], [3, 4], [5, 6]];
+let flattened = [num for row in matrix for num in row];
+print(`\nFlattened matrix: {flattened}`);
+
+# List operations with strings
+let csv_data = "apple,banana,cherry";
+let fruits = csv_data.split(",");
+print("\nFruits:");
+print(join("\n", fruits));
+
+# Modified list comprehension with string operations
+let uppercase_fruits = [fruit.upper() for fruit in fruits];
+print(`Uppercase fruits: {uppercase_fruits}`);
+
+# Complex comprehension with multiple sources
+let pairs = [`{x}-{y}` for x in ["a", "b"] for y in [1, 2]];
+print(`\nAll combinations: {pairs}`);
+
+# List comprehension in `` string
+print(`\nAll Combinations of 5 first Integers and Letters: {[`{x}-{y}` for x in ['a', 'b', 'c', 'd', 'e'] for y in [0, 1, 2, 3, 4]]}`);
+
+# Logic with ternary operator in multi source list comprehension
+print([((z == "*") ? x * y : z*y) for x in ["a", "b"] for y in [1, 2] for z in ["*", "#"]]);

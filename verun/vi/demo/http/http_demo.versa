@@ -1,0 +1,32 @@
+# Real HTTP module demo (works against external APIs when network is available).
+http import *;
+
+print("=== HTTP module demo ===");
+
+try {
+    let getResp = http.get("https://httpbin.org/get", {
+        query: { source: "vi", mode: "demo" },
+        headers: { Accept: "application/json" },
+        timeoutSeconds: 12
+    });
+    print(`GET ok={getResp.ok} status={getResp.status}`);
+    print(`GET body size={leng(getResp.body)}`);
+} catch (e) {
+    print("GET failed (network might be unavailable): " + e.message);
+}
+
+try {
+    let postResp = http.post("https://httpbin.org/post", {
+        headers: { "Content-Type": "application/json" },
+        body: {
+            title: "Hello from VI",
+            tags: ["http", "demo"],
+            active: true
+        },
+        timeoutSeconds: 12
+    });
+    print(`POST ok={postResp.ok} status={postResp.status}`);
+    print(postResp.body);
+} catch (e) {
+    print("POST failed (network might be unavailable): " + e.message);
+}

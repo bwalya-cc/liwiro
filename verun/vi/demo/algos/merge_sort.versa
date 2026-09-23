@@ -1,0 +1,44 @@
+print("=== merge sort ===");
+let arr = [38, 27, 43, 3, 9, 82, 10];
+
+func merge(left, right) {
+    let out = [];
+    let i = 0;
+    let j = 0;
+    while (i < leng(left) && j < leng(right)) {
+        if (left[i] <= right[j]) {
+            out.add(left[i]);
+            i = i + 1;
+        } else {
+            out.add(right[j]);
+            j = j + 1;
+        }
+    }
+    while (i < leng(left)) {
+        out.add(left[i]);
+        i = i + 1;
+    }
+    while (j < leng(right)) {
+        out.add(right[j]);
+        j = j + 1;
+    }
+    return out;
+}
+
+func merge_sort(a) {
+    if (leng(a) <= 1) {
+        return a;
+    }
+    let mid = int(leng(a) / 2);
+    let left = [];
+    let right = [];
+    for (idx in 0..(mid - 1)) {
+        left.add(a[idx]);
+    }
+    for (idx in mid..(leng(a) - 1)) {
+        right.add(a[idx]);
+    }
+    return merge(merge_sort(left), merge_sort(right));
+}
+
+print(merge_sort(arr));

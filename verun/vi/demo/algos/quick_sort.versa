@@ -1,0 +1,26 @@
+print("=== quick sort ===");
+let arr = [10, 7, 8, 9, 1, 5];
+
+func quick_sort(a) {
+    if (leng(a) <= 1) {
+        return a;
+    }
+    let pivot = a[leng(a) - 1];
+    let left = [];
+    let right = [];
+    for (i in 0..(leng(a) - 2)) {
+        if (a[i] <= pivot) {
+            left.add(a[i]);
+        } else {
+            right.add(a[i]);
+        }
+    }
+    let sorted = quick_sort(left);
+    sorted.add(pivot);
+    for (x : quick_sort(right)) {
+        sorted.add(x);
+    }
+    return sorted;
+}
+
+print(quick_sort(arr));

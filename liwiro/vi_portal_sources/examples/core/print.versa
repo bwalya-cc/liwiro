@@ -1,0 +1,3 @@
+print("Dulce et decorum est pro patria mori!");
+print(`He lived... in our future... in {117649} years, Caspian is here, Maddie is there... she will not miss her future`);
+print('No one shall expell us from the paradise that Cantor has created for us!');

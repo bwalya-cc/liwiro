@@ -1,0 +1,1016 @@
+{
+  "schema_version": 3,
+  "help": {
+    "General": {
+      "summary": "Discover commands and inspect the active authenticated VDB session.",
+      "commands": [
+        {
+          "name": "help",
+          "action": "help",
+          "summary": "Open the topic index, a paged section, or one command entry.",
+          "parameters": {
+            "topic": "Optional topic or command name; matching is case-insensitive.",
+            "page": "Optional positive page number.",
+            "page_size": "Optional server/VQL page size from 1 to 5."
+          },
+          "examples": [
+            "help",
+            "help topic \"Documents\"",
+            "help topic \"Documents.find\" page 1"
+          ],
+          "console_examples": [
+            "help",
+            "help documents",
+            "help documents 2",
+            "help find",
+            "help all 2"
+          ],
+          "notes": [
+            "help all is paginated and never returns the entire manual in one response."
+          ]
+        },
+        {
+          "name": "context",
+          "action": "context",
+          "summary": "Show the active domain and database.",
+          "parameters": {},
+          "examples": [
+            "context"
+          ]
+        },
+        {
+          "name": "whoami",
+          "action": "whoami",
+          "summary": "Show the authenticated identity, role, and owned domains.",
+          "parameters": {},
+          "examples": [
+            "whoami"
+          ]
+        },
+        {
+          "name": "echo",
+          "action": "echo",
+          "summary": "Return and print a supplied string; useful for connection checks.",
+          "parameters": {
+            "value": "String to echo."
+          },
+          "examples": [
+            "echo value \"hello\""
+          ]
+        },
+        {
+          "name": "list_users",
+          "action": "list",
+          "aliases": [
+            "users",
+            "user"
+          ],
+          "summary": "List usernames known to VDB.",
+          "parameters": {
+            "resource": "users"
+          },
+          "examples": [
+            "read users"
+          ]
+        },
+        {
+          "name": "batch",
+          "surface": "vql",
+          "aliases": [
+            "commands"
+          ],
+          "summary": "Run commands separated by semicolons or newlines as one transaction.",
+          "parameters": {
+            "statements": "Readable VDB statements separated by semicolons or newlines."
+          },
+          "examples": [
+            "context;\nread collections"
+          ],
+          "notes": [
+            "A failed item aborts the batch. JSON command envelopes are not accepted."
+          ]
+        }
+      ]
+    },
+    "Console": {
+      "summary": "Commands handled locally by the interactive console rather than VQL.",
+      "commands": [
+        {
+          "name": "clear",
+          "surface": "console",
+          "aliases": [
+            "cls",
+            "ctrl-l"
+          ],
+          "summary": "Clear the visible terminal and its scrollback buffer when the terminal supports ANSI erase-saved-lines.",
+          "parameters": {},
+          "examples": [
+            "clear",
+            "cls",
+            "Ctrl-L"
+          ]
+        },
+        {
+          "name": "exit",
+          "surface": "console",
+          "aliases": [
+            "quit"
+          ],
+          "summary": "Close the interactive VDB console.",
+          "parameters": {},
+          "examples": [
+            "exit",
+            "quit"
+          ]
+        },
+        {
+          "name": "license",
+          "surface": "console",
+          "aliases": [
+            "licence"
+          ],
+          "summary": "Print the runtime license disclosure.",
+          "parameters": {},
+          "examples": [
+            "license",
+            "licence"
+          ]
+        }
+      ]
+    },
+    "Server": {
+      "summary": "Authenticate and use the VDB HTTP server, including its paginated help endpoint.",
+      "commands": [
+        {
+          "name": "server_auth",
+          "surface": "server",
+          "summary": "Create a VDB session with HTTP Basic authentication.",
+          "parameters": {
+            "method": "POST",
+            "path": "/auth",
+            "authorization": "Basic username:password"
+          },
+          "examples": [
+            "curl -X POST http://127.0.0.1:1957/auth --user username:password"
+          ]
+        },
+        {
+          "name": "server_vql",
+          "surface": "server",
+          "summary": "Submit a flat action or batch to the authenticated VQL endpoint.",
+          "parameters": {
+            "method": "POST",
+            "path": "/vql",
+            "X-Session-Id": "Session ID returned by /auth."
+          },
+          "examples": [
+            "curl -X POST http://127.0.0.1:1957/vql -H 'X-Session-Id: <SESSION_ID>' -H 'Content-Type: text/plain' --data 'context'"
+          ]
+        },
+        {
+          "name": "server_help",
+          "surface": "server",
+          "summary": "Browse help topics, pages, or individual commands without downloading the whole catalog.",
+          "parameters": {
+            "method": "GET or POST",
+            "path": "/help",
+            "topic": "Optional topic/command.",
+            "page": "Positive integer.",
+            "page_size": "1 through 5.",
+            "X-Session-Id": "Required session ID."
+          },
+          "examples": [
+            "curl 'http://127.0.0.1:1957/help?topic=Documents&page=2&page_size=2' -H 'X-Session-Id: <SESSION_ID>'",
+            "curl -X POST http://127.0.0.1:1957/help -H 'X-Session-Id: <SESSION_ID>' -d '{\"action\":\"help\",\"topic\":\"find\"}'"
+          ]
+        },
+        {
+          "name": "server_health",
+          "surface": "server",
+          "summary": "Check whether the HTTP server is running.",
+          "parameters": {
+            "method": "GET",
+            "path": "/health"
+          },
+          "examples": [
+            "curl http://127.0.0.1:1957/health"
+          ]
+        },
+        {
+          "name": "server_license",
+          "surface": "server",
+          "summary": "Read the server's license disclosure.",
+          "parameters": {
+            "method": "GET",
+            "path": "/license"
+          },
+          "examples": [
+            "curl http://127.0.0.1:1957/license"
+          ]
+        }
+      ]
+    },
+    "Domains": {
+      "summary": "Create, select, inspect, list, suspend, resume, and remove domains.",
+      "commands": [
+        {
+          "name": "define_domain",
+          "action": "define",
+          "aliases": [
+            "define"
+          ],
+          "summary": "Create a domain with its default main database.",
+          "parameters": {
+            "resource": "domain",
+            "name": "New domain name."
+          },
+          "examples": [
+            "create domain \"engineering\""
+          ],
+          "notes": [
+            "The authenticated creator becomes an owner of the domain."
+          ]
+        },
+        {
+          "name": "define_domain_database",
+          "action": "define",
+          "aliases": [
+            "define_domain_db"
+          ],
+          "summary": "Create a domain and choose its initial database in one command.",
+          "parameters": {
+            "resource": "db",
+            "domain": "New domain name.",
+            "name": "Initial database name."
+          },
+          "examples": [
+            "create domain engineering = { database: analytics };"
+          ]
+        },
+        {
+          "name": "use_domain",
+          "action": "use",
+          "aliases": [
+            "use"
+          ],
+          "summary": "Switch the session to another visible, active domain.",
+          "parameters": {
+            "domain": "Existing domain name."
+          },
+          "examples": [
+            "use domain \"engineering\""
+          ]
+        },
+        {
+          "name": "list_domains",
+          "action": "list",
+          "aliases": [
+            "domains"
+          ],
+          "summary": "List domains visible to the current user.",
+          "parameters": {
+            "resource": "domains"
+          },
+          "examples": [
+            "read domains"
+          ]
+        },
+        {
+          "name": "list_domains_and_owners",
+          "action": "list",
+          "aliases": [
+            "domain_owners"
+          ],
+          "summary": "List visible domains together with ownership metadata.",
+          "parameters": {
+            "resource": "domains_and_owners"
+          },
+          "examples": [
+            "read domains with owners;"
+          ]
+        },
+        {
+          "name": "list_all_domains",
+          "action": "list",
+          "aliases": [
+            "all_domains"
+          ],
+          "summary": "List every domain, ignoring ordinary visibility filtering.",
+          "access": "super_admin",
+          "parameters": {
+            "resource": "all_domains"
+          },
+          "examples": [
+            "read all domains;"
+          ]
+        },
+        {
+          "name": "drop_domain",
+          "action": "drop_domain",
+          "summary": "Permanently remove a domain and its stored databases.",
+          "access": "domain_owner",
+          "parameters": {
+            "domain": "Domain to remove."
+          },
+          "examples": [
+            "drop domain \"engineering\""
+          ]
+        },
+        {
+          "name": "domain_status",
+          "action": "domain_status",
+          "summary": "Read or change a domain's active or suspended lifecycle state.",
+          "parameters": {
+            "domain": "Domain to inspect.",
+            "operation": "Optional get|status|suspend|resume|activate; default get."
+          },
+          "examples": [
+            "status domain \"engineering\"",
+            "status domain \"engineering\" operation \"suspend\"",
+            "status domain \"engineering\" operation \"resume\""
+          ]
+        },
+        {
+          "name": "domain_suspend",
+          "action": "domain_suspend",
+          "summary": "Suspend a domain so ordinary users cannot select it.",
+          "access": "domain_owner",
+          "parameters": {
+            "domain": "Domain to suspend."
+          },
+          "examples": [
+            "suspend domain \"engineering\""
+          ]
+        },
+        {
+          "name": "domain_resume",
+          "action": "domain_resume",
+          "aliases": [
+            "domain_activate"
+          ],
+          "summary": "Return a suspended domain to active service.",
+          "access": "domain_owner",
+          "parameters": {
+            "domain": "Domain to resume."
+          },
+          "examples": [
+            "resume domain \"engineering\""
+          ]
+        }
+      ]
+    },
+    "Databases": {
+      "summary": "Create, select, list, and remove databases inside the active domain.",
+      "commands": [
+        {
+          "name": "define_database",
+          "action": "define",
+          "aliases": [
+            "define_db"
+          ],
+          "summary": "Create a database in the active domain.",
+          "parameters": {
+            "resource": "db",
+            "name": "New database name."
+          },
+          "examples": [
+            "create database analytics;"
+          ]
+        },
+        {
+          "name": "use_database",
+          "action": "use",
+          "aliases": [
+            "use_db"
+          ],
+          "summary": "Switch the session to a database in the active domain.",
+          "parameters": {
+            "db": "Existing database name."
+          },
+          "examples": [
+            "use db \"analytics\""
+          ]
+        },
+        {
+          "name": "list_databases",
+          "action": "list",
+          "aliases": [
+            "list_dbs",
+            "dbs"
+          ],
+          "summary": "List databases visible in the active domain.",
+          "parameters": {
+            "resource": "dbs"
+          },
+          "examples": [
+            "read dbs"
+          ]
+        },
+        {
+          "name": "drop_db",
+          "action": "drop_db",
+          "aliases": [
+            "drop_database"
+          ],
+          "summary": "Permanently remove a database from the active domain.",
+          "parameters": {
+            "db": "Database to remove."
+          },
+          "examples": [
+            "drop db \"analytics\""
+          ]
+        }
+      ]
+    },
+    "Collections": {
+      "summary": "Create, list, and remove schema-aware or schemaless collections.",
+      "commands": [
+        {
+          "name": "create_collection",
+          "action": "create_collection",
+          "summary": "Create an empty collection, optionally with a field schema.",
+          "parameters": {
+            "collection": "New collection name.",
+            "schema": "Optional object of field definitions."
+          },
+          "examples": [
+            "create collection \"events\"",
+            "create collection \"products\" schema {\"sku\":{\"type\":\"string\",\"required\":true},\"price\":{\"type\":\"number\"}}"
+          ]
+        },
+        {
+          "name": "list_collections",
+          "action": "list",
+          "aliases": [
+            "collections"
+          ],
+          "summary": "List collections visible in the active database.",
+          "parameters": {
+            "resource": "collections"
+          },
+          "examples": [
+            "read collections"
+          ]
+        },
+        {
+          "name": "drop_collection",
+          "action": "drop_collection",
+          "summary": "Permanently remove a collection, its model, and its documents.",
+          "parameters": {
+            "collection": "Collection to remove."
+          },
+          "examples": [
+            "drop collection \"events\""
+          ]
+        },
+        {
+          "name": "drop",
+          "action": "drop",
+          "aliases": [
+            "drop_collection_short"
+          ],
+          "summary": "Remove a collection using the generic drop action.",
+          "parameters": {
+            "collection": "Collection to remove."
+          },
+          "examples": [
+            "drop collection \"events\""
+          ]
+        }
+      ]
+    },
+    "Indexes": {
+      "summary": "Create, inspect, rebuild, and remove collection indexes.",
+      "commands": [
+        {
+          "name": "create_index",
+          "action": "create_index",
+          "summary": "Create an index for a field, including a dotted nested field.",
+          "parameters": {
+            "collection": "Target collection.",
+            "field": "Field path.",
+            "unique": "Optional boolean.",
+            "sparse": "Optional boolean."
+          },
+          "examples": [
+            "create index collection \"users\" field \"email\" unique true sparse false"
+          ]
+        },
+        {
+          "name": "list_indexes",
+          "action": "list_indexes",
+          "summary": "List index definitions for a collection.",
+          "parameters": {
+            "collection": "Target collection."
+          },
+          "examples": [
+            "list indexes collection \"users\""
+          ]
+        },
+        {
+          "name": "rebuild_indexes",
+          "action": "rebuild_indexes",
+          "summary": "Rebuild all persisted indexes for a collection.",
+          "parameters": {
+            "collection": "Target collection."
+          },
+          "examples": [
+            "rebuild indexes collection \"users\""
+          ]
+        },
+        {
+          "name": "drop_index",
+          "action": "drop_index",
+          "summary": "Remove one field index from a collection.",
+          "parameters": {
+            "collection": "Target collection.",
+            "field": "Indexed field path."
+          },
+          "examples": [
+            "drop index collection \"users\" field \"email\""
+          ]
+        }
+      ]
+    },
+    "Models": {
+      "summary": "List, inspect, and remove collection schema models.",
+      "commands": [
+        {
+          "name": "list_models",
+          "action": "list",
+          "aliases": [
+            "models"
+          ],
+          "summary": "List registered models in the active database.",
+          "parameters": {
+            "resource": "models"
+          },
+          "examples": [
+            "read models"
+          ]
+        },
+        {
+          "name": "model_get",
+          "action": "model_get",
+          "summary": "Read the stored schema model for a collection.",
+          "parameters": {
+            "model": "Collection/model name."
+          },
+          "examples": [
+            "read model model \"users\""
+          ]
+        },
+        {
+          "name": "model_delete",
+          "action": "model_delete",
+          "summary": "Delete a schema model while leaving collection documents available schemaless.",
+          "parameters": {
+            "model": "Collection/model name."
+          },
+          "examples": [
+            "delete model model \"users\""
+          ]
+        }
+      ]
+    },
+    "Documents": {
+      "summary": "Insert, find, update, delete, and aggregate JSON documents.",
+      "commands": [
+        {
+          "name": "insert",
+          "action": "insert",
+          "summary": "Insert one document, creating a schemaless collection when needed.",
+          "parameters": {
+            "collection": "Target collection.",
+            "document": "JSON object to store."
+          },
+          "examples": [
+            "create in users = { name: \"Alice\", active: true };"
+          ]
+        },
+        {
+          "name": "create",
+          "action": "create",
+          "aliases": [
+            "create_document"
+          ],
+          "summary": "Alias of insert for creating one document.",
+          "parameters": {
+            "collection": "Target collection.",
+            "document": "JSON object to store."
+          },
+          "examples": [
+            "create in users = { name: \"Alice\" };"
+          ]
+        },
+        {
+          "name": "find",
+          "action": "find",
+          "summary": "Find documents matching a where object, with optional limit and projection.",
+          "parameters": {
+            "collection": "Target collection.",
+            "where": "Optional equality/operator query object.",
+            "limit": "Optional maximum rows; default 100.",
+            "projection": "Optional field-to-boolean object."
+          },
+          "examples": [
+            "read collection users where active == true select name, email limit 20;"
+          ]
+        },
+        {
+          "name": "read",
+          "action": "read",
+          "aliases": [
+            "read_documents"
+          ],
+          "summary": "Alias of find for reading matching documents.",
+          "parameters": {
+            "collection": "Target collection.",
+            "where": "Optional query object.",
+            "limit": "Optional maximum rows."
+          },
+          "examples": [
+            "read collection users where role == \"admin\" limit 10;"
+          ]
+        },
+        {
+          "name": "update",
+          "action": "update",
+          "summary": "Update every matching document with set, inc, or unset objects.",
+          "parameters": {
+            "collection": "Target collection.",
+            "where": "Match query.",
+            "set": "Fields or $set expression.",
+            "inc": "Numeric increments.",
+            "unset": "Fields to remove."
+          },
+          "examples": [
+            "update collection users where email == \"alice@example.com\" { active = true; logins += 1; };"
+          ]
+        },
+        {
+          "name": "delete",
+          "action": "delete",
+          "summary": "Delete every document matching a where object.",
+          "parameters": {
+            "collection": "Target collection.",
+            "where": "Match query; use carefully when empty."
+          },
+          "examples": [
+            "delete from users where role == \"temporary\";"
+          ]
+        },
+        {
+          "name": "aggregate",
+          "action": "aggregate",
+          "summary": "Run a pipeline containing supported match, sort, limit, and project stages.",
+          "parameters": {
+            "collection": "Target collection.",
+            "pipeline": "Array of aggregation stage objects."
+          },
+          "examples": [
+            "aggregate collection \"events\" pipeline [{\"$match\":{\"kind\":\"audit\"}},{\"$sort\":{\"created_at\":-1}},{\"$limit\":10}]"
+          ]
+        }
+      ]
+    },
+    "Scripts": {
+      "summary": "Create, inspect, execute, list, and remove stored scripts.",
+      "commands": [
+        {
+          "name": "script_create",
+          "action": "script_create",
+          "summary": "Save a named script in the active scope.",
+          "parameters": {
+            "name": "Script name.",
+            "service": "Optional service label.",
+            "code": "Script source string."
+          },
+          "examples": [
+            "create script name \"greet\" service \"utils\" code \"print('hello');\""
+          ]
+        },
+        {
+          "name": "script_read",
+          "action": "script_read",
+          "summary": "Read one stored script.",
+          "parameters": {
+            "name": "Script name."
+          },
+          "examples": [
+            "read script name \"greet\""
+          ]
+        },
+        {
+          "name": "script_execute",
+          "action": "script_execute",
+          "summary": "Execute a stored script with optional named parameters.",
+          "parameters": {
+            "name": "Script name.",
+            "params": "Optional parameter object."
+          },
+          "examples": [
+            "run script name \"greet\" params {\"username\":\"alice\"}"
+          ]
+        },
+        {
+          "name": "script_delete",
+          "action": "script_delete",
+          "summary": "Remove one stored script.",
+          "parameters": {
+            "name": "Script name."
+          },
+          "examples": [
+            "delete script name \"greet\""
+          ]
+        },
+        {
+          "name": "script_list",
+          "action": "script_list",
+          "summary": "List stored scripts through the dedicated script action.",
+          "parameters": {},
+          "examples": [
+            "read scripts"
+          ]
+        },
+        {
+          "name": "list_scripts",
+          "action": "list",
+          "aliases": [
+            "scripts"
+          ],
+          "summary": "List stored scripts through the generic list action.",
+          "parameters": {
+            "resource": "scripts"
+          },
+          "examples": [
+            "read scripts"
+          ]
+        }
+      ]
+    },
+    "Transactions": {
+      "summary": "Control an explicit VDB transaction for subsequent commands.",
+      "commands": [
+        {
+          "name": "transaction_begin",
+          "action": "transaction_begin",
+          "summary": "Start a transaction snapshot.",
+          "parameters": {},
+          "examples": [
+            "begin transaction"
+          ]
+        },
+        {
+          "name": "transaction_commit",
+          "action": "transaction_commit",
+          "summary": "Commit the active transaction.",
+          "parameters": {},
+          "examples": [
+            "commit transaction"
+          ]
+        },
+        {
+          "name": "transaction_abort",
+          "action": "transaction_abort",
+          "aliases": [
+            "transaction_rollback"
+          ],
+          "summary": "Abort the active transaction and restore its snapshot.",
+          "parameters": {},
+          "examples": [
+            "abort transaction"
+          ]
+        }
+      ]
+    },
+    "Export": {
+      "summary": "Package accessible domains as a zip archive in a writable directory.",
+      "commands": [
+        {
+          "name": "export",
+          "action": "export",
+          "summary": "Export one, several, or every accessible domain to a zip file.",
+          "parameters": {
+            "domains": "Domain string, array, or *; omitted means all accessible domains.",
+            "out_dir": "Required writable destination directory.",
+            "package": "Optional safe archive prefix.",
+            "zip": "Optional; only true is supported."
+          },
+          "examples": [
+            "export domains [\"engineering\"] out_dir \"/tmp/vdb-exports\" package \"engineering-backup\"",
+            "export domains \"*\" out_dir \"/tmp/vdb-exports\""
+          ],
+          "notes": [
+            "DATA_EXPORT is required unless the user is super admin or owns the requested domain."
+          ]
+        }
+      ]
+    },
+    "Tumi": {
+      "summary": "Administer users, custom roles, ownership, and scoped permissions.",
+      "commands": [
+        {
+          "name": "tumi_create",
+          "action": "tumi",
+          "operation": "create",
+          "aliases": [
+            "create_user",
+            "create_role"
+          ],
+          "summary": "Create an ADMIN/APPLICATION user or a scoped custom role.",
+          "access": "super_admin",
+          "parameters": {
+            "username": "New user name.",
+            "email": "User email.",
+            "password": "Initial password.",
+            "role": "ADMIN, APPLICATION, APP, or a custom-role payload."
+          },
+          "examples": [
+            "create user report_bot = { email: \"bot@example.com\", password: \"StrongPass1!\", role: application };",
+            "create user payload {\"role\":{\"name\":\"REPORT_VIEWER\",\"scope\":{\"domain\":\"engineering\",\"db\":\"main\"},\"permissions\":[\"READ\"]}}"
+          ]
+        },
+        {
+          "name": "tumi_read",
+          "action": "tumi",
+          "operation": "read",
+          "aliases": [
+            "read_role"
+          ],
+          "summary": "Read a built-in or custom role definition.",
+          "access": "super_admin",
+          "parameters": {
+            "role": "Role name."
+          },
+          "examples": [
+            "read role role \"REPORT_VIEWER\""
+          ]
+        },
+        {
+          "name": "tumi_update",
+          "action": "tumi",
+          "operation": "update",
+          "aliases": [
+            "update_role"
+          ],
+          "summary": "Replace the scope and permissions of a custom role.",
+          "access": "super_admin",
+          "parameters": {
+            "payload.role": "Role object with name, scope, and permissions."
+          },
+          "examples": [
+            "update user payload {\"role\":{\"name\":\"REPORT_VIEWER\",\"scope\":{\"domain\":\"engineering\",\"db\":\"main\"},\"permissions\":[\"READ\",\"DATA_ACCESS\"]}}"
+          ]
+        },
+        {
+          "name": "tumi_delete",
+          "action": "tumi",
+          "operation": "delete",
+          "aliases": [
+            "delete_user",
+            "delete_role"
+          ],
+          "summary": "Delete a non-super-admin user or a non-system custom role.",
+          "access": "super_admin",
+          "parameters": {
+            "username": "User to delete.",
+            "role": "Alternatively, custom role to delete."
+          },
+          "examples": [
+            "delete user username \"report_bot\"",
+            "delete user role \"REPORT_VIEWER\""
+          ]
+        },
+        {
+          "name": "tumi_grant",
+          "action": "tumi",
+          "operation": "grant",
+          "aliases": [
+            "grant",
+            "grant_permission",
+            "grant_role"
+          ],
+          "summary": "Grant ownership, database/collection permissions, or a custom role to a user.",
+          "access": "domain_owner",
+          "parameters": {
+            "username": "Target user.",
+            "domain": "Managed domain.",
+            "db": "Optional database.",
+            "collection": "Optional collection.",
+            "permissions": "Permission string or array.",
+            "role": "Alternatively, custom role name."
+          },
+          "examples": [
+            "grant [read, write] on engineering.main to alex;",
+            "grant role REPORT_VIEWER to alex;"
+          ]
+        },
+        {
+          "name": "tumi_revoke",
+          "action": "tumi",
+          "operation": "revoke",
+          "aliases": [
+            "revoke",
+            "revoke_permission",
+            "revoke_role"
+          ],
+          "summary": "Revoke ownership, scoped permissions, or a custom role from a user.",
+          "access": "domain_owner",
+          "parameters": {
+            "username": "Target user.",
+            "domain": "Managed domain.",
+            "db": "Optional database.",
+            "collection": "Optional collection.",
+            "permissions": "Permission string or array.",
+            "role": "Alternatively, custom role name."
+          },
+          "examples": [
+            "revoke username \"alex\" domain \"engineering\" db \"main\" permissions [\"WRITE\"]",
+            "revoke username \"alex\" role \"REPORT_VIEWER\""
+          ]
+        },
+        {
+          "name": "tumi_transfer",
+          "action": "tumi",
+          "operation": "transfer",
+          "aliases": [
+            "transfer_domain"
+          ],
+          "summary": "Grant domain ownership to another user, optionally relinquishing the caller's ownership.",
+          "access": "domain_owner",
+          "parameters": {
+            "username": "Receiving user.",
+            "domain": "Owned domain.",
+            "relinquish": "Optional boolean."
+          },
+          "examples": [
+            "transfer username \"alex\" domain \"engineering\" relinquish true"
+          ]
+        },
+        {
+          "name": "tumi_list",
+          "action": "tumi",
+          "operation": "list",
+          "aliases": [
+            "list_users",
+            "list_roles",
+            "list_permissions",
+            "list_owned_domains"
+          ],
+          "summary": "List users, roles, permissions, domains, owned domains, or domains with owners.",
+          "access": "domain_owner",
+          "parameters": {
+            "resource": "users|roles|permissions|domains|owned_domains|domains_and_owners"
+          },
+          "examples": [
+            "read roles",
+            "read permissions",
+            "read domains with owners;"
+          ],
+          "notes": [
+            "Listing every user requires super-admin access; permission listings default to the current user."
+          ]
+        }
+      ]
+    },
+    "Security": {
+      "summary": "Find RBAC guidance and inspect the effective permission model.",
+      "commands": [
+        {
+          "name": "security_permissions",
+          "action": "tumi",
+          "aliases": [
+            "permissions"
+          ],
+          "summary": "Inspect permissions assigned to the current user.",
+          "access": "domain_owner",
+          "parameters": {
+            "operation": "list",
+            "resource": "permissions"
+          },
+          "examples": [
+            "read permissions"
+          ]
+        },
+        {
+          "name": "security_help",
+          "action": "help",
+          "aliases": [
+            "rbac_help"
+          ],
+          "summary": "Open the paginated TUMI administration section.",
+          "parameters": {
+            "topic": "Tumi"
+          },
+          "examples": [
+            "help topic \"Tumi\""
+          ],
+          "console_examples": [
+            "help tumi"
+          ]
+        }
+      ]
+    }
+  }
+}

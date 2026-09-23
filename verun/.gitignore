@@ -1,0 +1,84 @@
+# Maven target directory
+target/
+*.jar
+*.war
+*.ear
+
+# Maven wrapper files
+.mvn/
+mvnw
+mvnw.cmd
+
+# IDE specific files
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# Eclipse
+.classpath
+.project
+.settings/
+bin/
+target/
+
+# NetBeans
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
+*.nb-gradle/
+
+# VS Code
+.vscode/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+Desktop.ini
+
+# Log files
+*.log
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+
+# Other files to ignore
+*.class
+*.jar
+*.war
+*.ear
+*.log
+*.sql
+*.sqlite
+*.db
+*.hprof
+*.pid
+*.seed
+*.lock
+*.tgz
+*.gz
+*.zip
+*.tar
+*.tar.gz
+*.7z
+*.rar
+
+# project file copiler scripts
+verun.txt
+vi.txt
+vdb.txt
+
+# app generated data
+__data__/
+!vdb/__data__/
+vdb/__data__/*
+!vdb/__data__/.gitkeep

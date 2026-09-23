@@ -1,0 +1,68 @@
+# Non-VDB comprehensive demo using currently supported runtime features.
+
+let integerVar: int = 42;
+let floatVar: float = 3.14;
+let stringVar: str = "Hello, Verun!";
+let booleanVar: bool = true;
+let nullVar = null;
+
+print(`Integer: ${integerVar}`);
+print(`Float: ${floatVar}`);
+print(`String: ${stringVar}`);
+print(`Boolean: ${booleanVar}`);
+print(`Null: ${nullVar}`);
+
+let listVar: list = [1, 2, 3, 4, 5];
+let dictVar: dict = { name: "Alice", age: 30, country: "Zambia", isStudent: false };
+let tupleVar = (10, 20, 30);
+
+print(`\nList: ${listVar}`);
+print(`Dictionary: ${dictVar}`);
+print(`Tuple: ${tupleVar}`);
+
+print("\nList operations:");
+listVar.add(6);
+listVar.insert(1, 2);
+listVar.remove(3);
+print(listVar);
+print(`List size: ${listVar.size()}`);
+print(`Popped: ${listVar.pop()}`);
+print(`Joined: ${listVar.join("-")}`);
+
+print("\nDictionary operations:");
+dictVar.update({ email: "alice@example.com", age: 31, favorite_color: "green" });
+let selectedKey = "age";
+print(`Keys: ${dictVar.keys()}`);
+print(`Values: ${dictVar.values()}`);
+print(`Items: ${dictVar.items()}`);
+print(`Name via dot: ${dictVar.name}`);
+print(`Country via bracket string: ${dictVar["country"]}`);
+print(`Age via bracket variable: ${dictVar[selectedKey]}`);
+print(`Favorite color via bare bracket key: ${dictVar[favorite_color]}`);
+dictVar.pop("email");
+print(dictVar);
+
+print("\nTuple-style access:");
+print(`First element: ${tupleVar[0]}`);
+print(`Slice [1:3]: ${tupleVar[1:3]}`);
+print(`Slice [:2]: ${tupleVar[:2]}`);
+
+func addNumbers(a: int, b: int) -> int {
+    return a + b;
+}
+
+func greet(name: str = "Guest") -> str {
+    return `Hello, ${name}!`;
+}
+
+print("\nFunction tests:");
+print(`Sum: ${addNumbers(5, 3)}`);
+print(`Greeting: ${greet("Alice")}`);
+print(`Default greeting: ${greet()}`);
+
+print("\nException handling:");
+try {
+    print(`Attempting division: ${10 / 0}`);
+} catch (e) {
+    print(`Caught error: ${e.message}`);
+}

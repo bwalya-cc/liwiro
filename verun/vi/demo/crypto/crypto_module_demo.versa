@@ -1,0 +1,29 @@
+crypto import *;
+
+print("=== crypto module demo ===");
+
+let message = "blockchain-transaction-001";
+let secret = "demo-chain-secret";
+
+print("sha256: " + crypto.sha256(message));
+print("sha512: " + crypto.sha512(message));
+print("hmac_sha256: " + crypto.hmac_sha256(secret, message));
+
+let b64 = crypto.base64_encode(message);
+print("base64 encode: " + b64);
+print("base64 decode: " + crypto.base64_decode(b64));
+
+let b64url = crypto.base64url_encode(message);
+print("base64url decode: " + crypto.base64url_decode(b64url));
+
+let aes = crypto.aes_gcm_encrypt(message, "demo-key");
+print("aes encrypted: " + str(aes));
+let plain = crypto.aes_gcm_decrypt(aes.ciphertext, "demo-key", aes.iv);
+print("aes decrypted: " + plain);
+
+print("random hex 16 bytes: " + crypto.random_hex(16));
+print("random bytes 16 bytes: " + crypto.random_bytes(16));
+print("uuid: " + crypto.uuid());
+
+let walletKey = crypto.pbkdf2("passphrase", "wallet-salt", 20000, 32, "HmacSHA256");
+print("pbkdf2 wallet key: " + walletKey);

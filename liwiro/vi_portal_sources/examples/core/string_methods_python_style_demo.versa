@@ -1,0 +1,42 @@
+print("=== python-style string methods demo ===");
+
+let fruit = "banana";
+print(fruit.upper());
+print(fruit.capitalize());
+print("MANGO".lower());
+print("  padded text  ".strip());
+print("hello world".capitalise());
+
+print("\ncontains / startswith / endswith:");
+let s = "liwiro-auth-service";
+print(s.contains("auth"));
+print(s.startswith("liwiro"));
+print(s.endswith("service"));
+
+print("\nreplace / count / find / index:");
+print(s.replace("-", "_"));
+print(s.count("i"));
+print(s.find("auth"));
+print(s.index("service"));
+
+print("\nstrip variants:");
+let padded = "   Versa   ";
+print(padded.strip());
+print(padded.lstrip());
+print(padded.rstrip());
+
+print("\ncase helpers:");
+print("hello world".title());
+print("MIXEDCase".casefold());
+print("abc".islower());
+print("ABC".isupper());
+
+print("\ncharacter class checks:");
+print("abcXYZ".isalpha());
+print("12345".isdigit());
+print("abc123".isalnum());
+print("   \t".isspace());
+
+print("\nsplit helpers:");
+print("a,b,c".split(","));
+print("x\ny\nz".splitlines());

@@ -1,0 +1,145 @@
+json_xml import *;
+http import *;
+crypto import *;
+datetime import *;
+
+func _trim(value) {
+  return str(value ?? "").trim();
+}
+
+func _service_env() {
+  return env ?? {};
+}
+
+func _config_value(runtimeConfig, key, fallback) {
+  let cfg = runtimeConfig ?? {};
+  let moduleCfg = module_config ?? {};
+  let env = _service_env();
+  return cfg[key] ?? moduleCfg[key] ?? env[key] ?? fallback;
+}
+
+func _config_text(runtimeConfig, key, fallback) {
+  return _trim(_config_value(runtimeConfig, key, fallback));
+}
+
+func _default_provider(runtimeConfig) {
+  let value = _config_text(runtimeConfig, "defaultProvider", _service_env().MEDIA_DEFAULT_PROVIDER ?? "cloudinary");
+  if (value == "" || value != "cloudinary") {
+    return "cloudinary";
+  }
+  return value;
+}
+
+func _cloudinary_ready(runtimeConfig) {
+  return !(
+    _config_text(runtimeConfig, "cloudName", _service_env().CLOUDINARY_CLOUD_NAME ?? "") == ""
+    || _config_text(runtimeConfig, "apiKey", _service_env().CLOUDINARY_API_KEY ?? "") == ""
+    || _config_text(runtimeConfig, "apiSecret", _service_env().CLOUDINARY_API_SECRET ?? "") == ""
+  );
+}
+
+func providers(runtimeConfig) {
+  return {
+    cloudinary: {
+      ready: _cloudinary_ready(runtimeConfig),
+      folder: _config_text(runtimeConfig, "folder", _service_env().CLOUDINARY_FOLDER ?? "")
+    }
+  };
+}
+
+func status(runtimeConfig) {
+  return {
+    ok: true,
+    defaultProvider: _default_provider(runtimeConfig),
+    providers: providers(runtimeConfig)
+  };
+}
+
+func _normalize_payload(payload) {
+  let req = payload ?? {};
+  let body = req.body ?? req ?? {};
+  return {
+    request: req,
+    body: body,
+    provider: _trim(req.provider ?? body.provider ?? _default_provider(req.config ?? {}))
+  };
+}
+
+func _cloudinary_upload(payload) {
+  let normalized = _normalize_payload(payload);
+  let req = normalized.request;
+  let body = normalized.body;
+  let runtimeConfig = req.config ?? {};
+  let cloudName = _config_text(runtimeConfig, "cloudName", _service_env().CLOUDINARY_CLOUD_NAME ?? "");
+  let apiKey = _config_text(runtimeConfig, "apiKey", _service_env().CLOUDINARY_API_KEY ?? "");
+  let apiSecret = _config_text(runtimeConfig, "apiSecret", _service_env().CLOUDINARY_API_SECRET ?? "");
+  let folder = _trim(body.folder ?? req.folder ?? _config_value(runtimeConfig, "folder", _service_env().CLOUDINARY_FOLDER ?? ""));
+  let publicId = _trim(body.publicId ?? req.publicId ?? "");
+  let sourceUrl = _trim(body.sourceUrl ?? req.sourceUrl ?? "");
+  let dataUri = _trim(body.dataUri ?? req.dataUri ?? "");
+  let dataBase64 = _trim(body.dataBase64 ?? req.dataBase64 ?? "");
+  let textBody = _trim(body.textBody ?? req.textBody ?? "");
+  let filename = _trim(body.filename ?? req.filename ?? publicId ?? "cloudinary-upload.bin");
+  let mimeType = _trim(body.mimeType ?? req.mimeType ?? "application/octet-stream");
+  let fileValue = dataUri;
+  if (fileValue == "" && dataBase64 != "") {
+    fileValue = "data:" + mimeType + ";base64," + dataBase64;
+  }
+  if (fileValue == "" && textBody != "") {
+    fileValue = "data:text/plain;base64," + crypto.base64_encode(textBody);
+    if (mimeType == "application/octet-stream") {
+      mimeType = "text/plain";
+    }
+  }
+  if (fileValue == "") {
+    fileValue = sourceUrl;
+  }
+  if (cloudName == "" || apiKey == "" || apiSecret == "") {
+    return {ok: false, statusCode: 500, error: "Missing Cloudinary configuration", provider: "cloudinary"};
+  }
+  if (fileValue == "") {
+    return {ok: false, statusCode: 400, error: "Provide sourceUrl, dataUri, dataBase64, or textBody", provider: "cloudinary"};
+  }
+  let form = {file: fileValue};
+  if (folder != "") {
+    form.folder = folder;
+  }
+  if (publicId != "") {
+    form.public_id = publicId;
+  }
+  let uploadRes = http.post("https://api.cloudinary.com/v1_1/" + cloudName + "/auto/upload", {
+    authBasic: {username: apiKey, password: apiSecret},
+    form: form,
+    timeoutSeconds: 90
+  });
+  let providerPayload = {};
+  let bodyText = _trim(uploadRes.body ?? "");
+  if (bodyText != "") {
+    providerPayload = json_xml.parse_json(bodyText);
+  }
+  if (!(uploadRes.ok == true)) {
+    return {ok: false, statusCode: uploadRes.status ?? 500, error: "Cloudinary upload failed", provider: "cloudinary", raw: uploadRes, providerResponse: providerPayload};
+  }
+  return {
+    ok: true,
+    statusCode: uploadRes.status ?? 200,
+    provider: "cloudinary",
+    filename: filename,
+    mimeType: mimeType,
+    providerAssetId: _trim(providerPayload.asset_id ?? ""),
+    storageBucket: "",
+    storagePath: _trim(providerPayload.public_id ?? publicId ?? ""),
+    publicUrl: _trim(providerPayload.url ?? ""),
+    secureUrl: _trim(providerPayload.secure_url ?? providerPayload.url ?? ""),
+    sizeBytes: providerPayload.bytes ?? 0,
+    providerResponse: providerPayload
+  };
+}
+
+func upload(payload) {
+  let provider = _normalize_payload(payload).provider;
+  if (provider == "" || provider == "cloudinary") {
+    return _cloudinary_upload(payload);
+  }
+  return {ok: false, statusCode: 400, error: "Unsupported media provider", provider: provider};
+}

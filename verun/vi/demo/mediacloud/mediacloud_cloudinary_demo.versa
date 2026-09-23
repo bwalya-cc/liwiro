@@ -1,0 +1,66 @@
+filer import *;
+import mediacloud;
+demo/mediacloud/lib/mediacloud_demo_helpers import { section, skip, show_exception, show_pretty, show_result, assert_ok, show_provider_status, skip_blocked_environment };
+
+let mediaDir = filer.join("demo", "mediacloud", "media");
+let assets = [
+  {
+    path: filer.join(mediaDir, "kalulu-0.jpg"),
+    filename: "kalulu-0.jpg",
+    mimeType: "image/jpeg",
+    publicId: "liwiro-mediacloud-kalulu-0"
+  },
+  {
+    path: filer.join(mediaDir, "kalulu-1.jpg"),
+    filename: "kalulu-1.jpg",
+    mimeType: "image/jpeg",
+    publicId: "liwiro-mediacloud-kalulu-1"
+  }
+];
+
+section("MediaCloud Cloudinary Image Upload Demo");
+
+let config = cloudinary_media_config;
+if (config == null) {
+  skip("Set VERUN_DEMO_CLOUDINARY_* in " + DEMO_ENV_FILE + " to run Cloudinary demos");
+} else {
+  show_provider_status("cloudinary", config);
+  print("mediaDir=" + mediaDir);
+
+  let uploads = [];
+  try {
+    for (asset : assets) {
+      print("\nUploading " + asset.filename + " from " + asset.path);
+      let result = mediacloud.upload({
+        provider: "cloudinary",
+        config: config,
+        body: {
+          filename: asset.filename,
+          mimeType: asset.mimeType,
+          dataBase64: filer.read_bytes_base64(asset.path),
+          publicId: asset.publicId,
+          folder: "liwiro-demo"
+        }
+      });
+      assert_ok("upload " + asset.filename, result);
+      uploads.add({
+        sourcePath: asset.path,
+        filename: asset.filename,
+        storagePath: result.storagePath,
+        secureUrl: result.secureUrl,
+        sizeBytes: result.sizeBytes
+      });
+    }
+
+    show_pretty("Cloudinary upload summary", {
+      mediaDir: mediaDir,
+      uploadedCount: leng(uploads),
+      uploads: uploads
+    });
+  } catch (e) {
+    if (!skip_blocked_environment("cloudinary image demo", e)) {
+      show_exception("cloudinary image demo failed", e);
+      throw e;
+    }
+  }
+}

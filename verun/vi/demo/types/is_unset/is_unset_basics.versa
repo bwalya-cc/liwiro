@@ -1,0 +1,11 @@
+# is_unset basic checks
+
+print("=== is_unset basics ===");
+
+print(is_unset(missing_name));
+
+let score;
+print(is_unset(score));
+
+score = 42;
+print(is_unset(score));

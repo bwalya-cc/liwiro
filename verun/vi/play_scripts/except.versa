@@ -1,0 +1,9 @@
+print("\nException handling:");
+try {
+    print(`Attempting division: ${10 / 0}`);
+} catch (e) {
+    print(`Caught error type: ${e.type}`);
+    print(`Caught error message: ${e.message}`);
+    print(`Location: line ${e.line}, column ${e.column}`);
+    print(`Source line: ${e.source_line}`);
+}

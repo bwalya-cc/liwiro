@@ -1,0 +1,51 @@
+print("=== Arithmetic ===");
+let a = 12;
+let b = 5;
+print(a + b);
+print(a - b);
+print(a * b);
+print(a / b);
+print(a % b);
+print(2 ** 8);
+
+print("\n=== Comparison + Logical ===");
+print(a > b);
+print(a < b);
+print(a == b);
+print((a > b) && true);
+print((a < b) || true);
+print(!(a < b));
+
+print("\n=== Bitwise ===");
+print(a & b);
+print(a | b);
+print(a ^^ b);
+print(~b);
+print(a << 1);
+print(a >> 1);
+
+print("\n=== Assignment Operators ===");
+let total = 10;
+total += 5;
+total -= 2;
+total *= 3;
+total /= 4;
+total %= 5;
+print(total);
+
+let strVal = "li";
+strVal += "wiro";
+print(strVal);
+
+print("\n=== String/Number Operators ===");
+print("ver" + "un");
+print("id-" + 42);
+print(3 + "-node");
+print("ha" * 3);
+print(2 * "ok");
+
+print("\n=== Conditional + Null Coalescing ===");
+let label = (a > b) ? "bigger" : "smaller";
+print(label);
+let maybeName = null;
+print(maybeName ?? "fallback");

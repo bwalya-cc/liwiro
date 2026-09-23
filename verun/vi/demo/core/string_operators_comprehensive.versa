@@ -1,0 +1,30 @@
+print("=== String operators comprehensive ===");
+
+print(3 * "f");
+print("f" * 3);
+print(5 + "r");
+print("r" + 5);
+
+let s = "core";
+s += "-auth";
+print(s);
+
+let n = 10;
+n += 5;
+print(n);
+
+let mixed = "v";
+mixed += 2;
+print(mixed);
+
+print("prefix-" + 100 + "-suffix");
+print("ha" * 4);
+
+print("=== Operator type checks ===");
+let a = 3 * "f";
+print(type(a));
+let b = 5 + "r";
+print(type(b));
+let c = 10 + 20;
+print(type(c));
+

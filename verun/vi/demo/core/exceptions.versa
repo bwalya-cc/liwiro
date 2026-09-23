@@ -1,0 +1,62 @@
+print("=== Exception handling demo ===");
+
+func print_error(e) {
+    print(`type={e.type}`);
+    print(`message={e.message}`);
+    print(`line={e.line}, column={e.column}`);
+    print(`source={e.source_line}`);
+}
+
+func risky_divide(a, b) {
+    return a / b;
+}
+
+print("\n--- Test 1: Division by zero ---");
+try {
+    print(risky_divide(10, 0));
+} catch (e) {
+    print_error(e);
+}
+
+print("\n--- Test 2: Undefined variable ---");
+try {
+    print(no_such_value);
+} catch (e) {
+    print_error(e);
+}
+
+print("\n--- Test 3: Throw and rethrow ---");
+try {
+    try {
+        throw "Inner failure";
+    } catch (e) {
+        print_error(e);
+        throw e;
+    } complete {
+        print("inner complete");
+    }
+} catch (e) {
+    print("outer catch");
+    print_error(e);
+} complete {
+    print("outer complete");
+}
+
+print("\n--- Test 4: Else/complete path ---");
+try {
+    print("safe path");
+} catch (e) {
+    print_error(e);
+} else {
+    print("else executed");
+} complete {
+    print("cleanup executed");
+}
+
+print("\n--- Test 5: Index error ---");
+try {
+    let numbers = [1, 2, 3];
+    print(numbers[10]);
+} catch (e) {
+    print_error(e);
+}

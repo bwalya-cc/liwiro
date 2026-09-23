@@ -1,0 +1,36 @@
+# Space Explorer Log
+# A simple choice-based adventure script
+
+print("--- Mission Control: Operation Starlight ---");
+
+let pilotName = input("Enter your Pilot Name: ");
+let shipName = input("Enter your Ship Name: ");
+
+print(`\nWelcome, Captain {pilotName}. The {shipName} is ready for departure.`);
+
+let destination = input("Choose a destination (Mars/Europa/Titan): ");
+let fuelLevel = 100;
+
+print(`\nSetting course for {destination}...`);
+
+# Simulate a mission event
+let encounter = input("An asteroid field appears! Do you (dodge/shield)? ");
+
+if (encounter == "dodge") {
+    print("Expert maneuvering! You cleared the field with no damage.");
+    fuelLevel = fuelLevel - 20;
+} else {
+    print("Shields held, but the impact drained significant power.");
+    fuelLevel = fuelLevel - 50;
+}
+
+print(`\n--- Mission Status Report ---`);
+print(`Pilot: {pilotName}`);
+print(`Destination: {destination}`);
+print(`Remaining Fuel: {fuelLevel}%`);
+
+if (fuelLevel > 40) {
+    print("Mission Success: You have enough fuel to return home!");
+} else {
+    print("Mission Warning: Fuel levels critical. Await rescue extraction.");
+}

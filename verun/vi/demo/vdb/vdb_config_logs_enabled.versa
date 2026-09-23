@@ -1,0 +1,38 @@
+vdb import *;
+
+func section(title: str) {
+    print("\n=== " + title + " ===");
+}
+
+func showResult(label: str, res) {
+    print("\n[" + label + "]");
+    print("ok=" + str(res.ok) + " status=" + res.status + " op=" + res.operation);
+    print("message=" + res.message);
+    if (res.error != null) {
+        print("error=" + res.error);
+    }
+    if (res.data != null) {
+        print("data=" + str(res.data));
+    }
+}
+
+try {
+    section("Enable Logs");
+    let cfg = vdb.config({logs: true});
+    print("logging=" + str(cfg.logging) + " logs=" + str(cfg.logs));
+
+    section("Auth + Context");
+    showResult("auth", vdb.auth({user: DEMO_VDB_USER, pass: DEMO_VDB_PASS}));
+    showResult("set", vdb.set({domain: DEMO_VDB_DOMAIN, database: DEMO_VDB_DB}));
+
+    section("CRUD With Visible Logs");
+    let products = vdb.collection("products_logs_demo");
+    showResult("insert", products.insert({name: "Log Demo Product", price: 25, stock: 2}));
+    showResult("find", products.find({name: {$eq: "Log Demo Product"}}, 5));
+    showResult("delete", products.delete({name: {$eq: "Log Demo Product"}}));
+
+    section("Cleanup");
+    showResult("drop collection", vdb.drop("products_logs_demo"));
+} catch (e) {
+    print("VDB log demo skipped: " + e.message);
+}

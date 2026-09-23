@@ -1,0 +1,74 @@
+vdb import *;
+time import *;
+
+func section(title: str) {
+    print("\n=== " + title + " ===");
+}
+
+func showResult(label: str, res) {
+    print("\n[" + label + "]");
+    print("ok=" + str(res.ok) + " status=" + res.status + " op=" + res.operation);
+    print("message=" + res.message);
+    if (res.error != null) {
+        print("error=" + res.error);
+    }
+    print("context=" + str(res.context));
+    if (res.data != null) {
+        print("data=" + str(res.data));
+    }
+}
+
+try {
+    section("Auth + Context");
+    showResult("auth", vdb.auth({user: DEMO_VDB_USER, pass: DEMO_VDB_PASS}));
+    showResult("set", vdb.set({domain: DEMO_VDB_DOMAIN, database: DEMO_VDB_DB}));
+
+    section("CRUD");
+    let products = vdb.collection("job_products_demo");
+    showResult("insert A-100", products.insert({sku: "A-100", name: "Laptop", price: 999.99, stock: 10}));
+    showResult("insert A-101", products.insert({sku: "A-101", name: "Phone", price: 699.99, stock: 20}));
+    showResult("update A-101 stock", products.update({sku: {$eq: "A-101"}}, {stock: 18}));
+    showResult("find products", products.find({}, 20));
+
+    let jobScriptCode = "vdb import *;\n"
+        + "time import *;\n"
+        + "http import *;\n"
+        + "json_xml import *;\n"
+        + "filer import *;\n"
+        + "let now = time.ctime(null, \"iso\");\n"
+        + "let status = -1;\n"
+        + "try { let r = http.get(\"https://httpbin.org/get\", {query: {source: \"vdb_job\"}}); status = r.status; } catch (e) { status = -1; }\n"
+        + "let coll = vdb.collection(\"job_products_demo\");\n"
+        + "coll.insert({sku: \"heartbeat\", ran_at: now, http_status: status});\n"
+        + "let tickDir = filer.join(\"tmp\", \"vi\", \"demo\");\n"
+        + "filer.ensure_dir(tickDir);\n"
+        + "let tickPath = filer.join(tickDir, \"job_tick.log\");\n"
+        + "json_xml.write_text(tickPath, now + \" status=\" + str(status));\n"
+        + "{ran_at: now, http_status: status};";
+
+    section("Store Script");
+    showResult("save job script", vdb.save_script("job_sync_http_and_products", "jobs", jobScriptCode));
+    showResult("load job script", vdb.load_script("job_sync_http_and_products"));
+
+    let scheduleRes = vdb.schedule_job({
+        name: "demo_minute_writer",
+        script: "job_sync_http_and_products",
+        every_seconds: 60,
+        start_at: time.time() + 2,
+        params: {}
+    });
+    section("Schedule Job");
+    showResult("schedule demo_minute_writer", scheduleRes);
+
+    showResult("list jobs (initial)", vdb.list_jobs());
+    print("Waiting 3 seconds so the first run can trigger...");
+    time.sleep(3);
+    showResult("list jobs (after wait)", vdb.list_jobs());
+
+    section("Cleanup");
+    showResult("cancel job", vdb.cancel_job("demo_minute_writer"));
+    showResult("delete job script", vdb.delete_script("job_sync_http_and_products"));
+    showResult("drop collection", vdb.drop("job_products_demo"));
+} catch (e) {
+    print("VDB demo skipped: " + e.message);
+}

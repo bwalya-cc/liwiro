@@ -1,0 +1,24 @@
+filer import *;
+
+print("=== filer csv demo ===");
+
+let outDir = filer.join("tmp", "vi", "filer_demo", "csv");
+filer.ensure_dir(outDir);
+let csvPath = filer.join(outDir, "users.csv");
+
+let rows = [
+    ["name", "age", "email"],
+    ["Alice", "24", "alice@example.com"],
+    ["Bob", "31", "bob@example.com"],
+    ["Cara", "28", "cara@example.com"]
+];
+
+filer.write_csv(csvPath, rows);
+
+let loaded = filer.read_csv_records(csvPath);
+print(loaded.headers);
+print(loaded.records);
+
+for (user : loaded.records) {
+    print(`${user.name} (${user.age}) <${user.email}>`);
+}

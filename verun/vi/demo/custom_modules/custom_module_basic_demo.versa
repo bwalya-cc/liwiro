@@ -1,0 +1,8 @@
+json_xml import *;
+import mediacloud;
+
+print("Custom module registry import is active.");
+print(json_xml.to_json({
+  module: "mediacloud",
+  status: mediacloud.status()
+}));

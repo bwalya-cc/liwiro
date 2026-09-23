@@ -1,0 +1,208 @@
+# Menu Driven Inventory Managament System for Zest Fashion House
+vdb import *;
+
+let PROMPT_LEAD = "Zezt >";
+let prompt;
+
+# Authenticate VDB
+
+try {
+    vdb.auth({ user: DEMO_VDB_USER, pass: DEMO_VDB_PASS });
+    vdb.define({ domain: "zezt", db: "inventory" });
+    vdb.set({ domain: "zezt", db: "inventory" });
+} catch (err) {
+    print(`Encountered an error: {err.message}`);
+    exit(0);
+}
+
+func read_prompt() {
+    prompt = input(`{PROMPT_LEAD} `);
+}
+
+func read_input(lead: str) {
+    let response = input(`{PROMPT_LEAD} {lead}: `);
+    return response;
+}
+
+func echo_str(s: str) {
+    print(`{PROMPT_LEAD} {s}`);
+}
+
+let welcome = (name) => { echo_str(name!="" ? `Welcome to Zest, {name}!` : "Welcome to Zest!"); };
+
+func header_line(text: str, length: int = 20, syms=["="]) {
+    let len_text = leng(text);
+    let len_spaces = 2;
+    let discard = len_spaces + len_text;
+    let avail = length - discard;
+    let syms_per_side = avail / 2;
+
+    let header_left = syms[0] * int(syms_per_side);
+    let header_right = syms[0] * int(syms_per_side + ( is_type(syms_per_side, "float") ? 1 : 0));
+
+    let header = header_left + " " + text + " " + header_right;
+    echo_str(header);
+}
+
+func echo_menu() {
+    header_line("ZEST", 90, ["#"]);
+    echo_str("m/menu: Display Menu");
+    echo_str("r/read: Display Inventory Product");
+    echo_str("n/new: Add New Inventory Product");
+    echo_str("l/list: List Inventory Products");
+    echo_str("d/delete: Delete Inventory Product");
+    echo_str("e/exit: Exit Zezt Inventory Management System");
+}
+
+func echo_product(product: dict) {
+    echo_str(`{product.name}`);
+    echo_str(`\tPRICE: {product.price}`);
+    echo_str(`\tSTOCK: {product.stock}`);
+    echo_str("");
+}
+
+func new_entry_wizard() {
+    
+    header_line("Enter New Inventory Item", 90, ["#"]);
+    
+    let product = {};
+    product.name = read_input("Enter Product Name");
+    product.price = read_input("Enter Product Price");
+    product.stock = read_input(`How many {product.name}'s in stock?`);
+
+    try {
+        let PC = vdb.collection("products");
+        PC.insert(product);
+    }
+    catch (e) {
+        echo_str(e.message);
+        return {success: false, error: e.message};
+    }
+    else {
+        echo_str(`Added {product.name} to inventory`);
+        return {success: true};
+    }
+}
+
+func list_inventory() {
+
+    try {
+
+        let PC = vdb.collection("products");
+        let products = PC.find({}).data;
+
+        header_line("Products in Inventory", 90, ["#"]);
+        echo_str("");
+
+        for (product in products) {
+            echo_product(product);
+        }
+
+    }
+    catch (e) {
+        echo_str(`Failed to fetch product inventory, error: {e.message}`);
+        return {success: false, error: e.message};
+    }
+
+}
+
+func delete_product_wizard() {
+
+    header_line("Remove Product From Inventory", 90, ["#"]);
+    let name = read_input("Enter Product Name");
+    
+    try {
+
+        # Create the products collection
+        let PC = vdb.collection("products");
+
+        # Delete product
+        try {
+            PC.delete({name: {$eq: name}});
+        }
+        catch (e) {
+            echo_str(`Failed to delete product, error: {e.message}`);
+            return {success: false, error: e.message};
+        }
+        else {
+            echo_str(`Product '{name}' removed from inventory`);
+            return {success: true};
+        }
+
+    }
+    catch (e) {
+        print(e);
+        echo_str(`Failed to create Products Collection Controller 'PC', error: {e.message}`);
+        return {success: false, error: e.message};
+    }
+
+}
+
+func read_product_wizard() {
+    header_line("Display Inventory Product", 90, ["#"]);
+    let name = read_input("Enter Product Name");
+
+    try {
+        let PC = vdb.collection("products");
+        let products = [];
+        try {
+            let result = PC.find({name: {$eq: name}});
+            products = result.data;
+        }
+        catch (e) {
+            echo_str(`Error retrieving product '{name}', error: {e.message}`);
+            return {success: false, error: e.message};
+        }
+        else {
+            if (is_unset(products) || products == null || leng(products) <= 0) {
+                echo_str(`Product '{name}' not found`);
+                return {success: false, error: "Product Not Found"};
+            }
+            echo_str("");
+            echo_product(products[0]);
+        }
+    } 
+    catch (e) {
+        echo_str(`Failed to create Product Collection Controller 'PC', error: {e.message}`);
+        return {success: false, error: e.message};
+    }
+}
+
+
+func main_loop() {
+
+    let end = false;
+    welcome("");
+
+    while (!end) {
+
+        read_prompt();
+        echo_str("");
+
+        if (prompt == "m" || prompt == "menu") {
+            echo_menu();
+        }
+        alt (prompt == "r" || prompt == "read") {
+            read_product_wizard();
+        }
+        alt (prompt == "n" || prompt == "new") {
+            new_entry_wizard();
+        }
+        alt (prompt == "l" || prompt == "list") {
+            list_inventory();
+        }
+        alt (prompt == "d" || prompt == "delete") {
+            delete_product_wizard();
+        }
+        else {
+            header_line("ZEZT", 90, ["#"]);
+            end = true;
+        }
+
+        echo_str("");
+
+    }
+
+}
+
+main_loop();

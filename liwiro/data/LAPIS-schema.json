@@ -1,0 +1,241 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "LAPIS Service Configuration",
+    "type": "object",
+    "properties": {
+      "metadata": {
+        "type": "object",
+        "properties": {
+          "apiName": { "type": "string" },
+          "basePath": { "type": "string", "pattern": "^/.*" },
+          "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+          "database": { "type": "string", "pattern": "^[a-zA-Z0-9_\\-]+$" },
+          "rateLimiting": {
+            "type": "object",
+            "properties": {
+              "enabled": { "type": "boolean" },
+              "limit": { "type": "number" },
+              "timeframe": { 
+                "type": "string",
+                "enum": ["second", "minute", "hour", "day"]
+              }
+            },
+            "required": ["enabled", "limit", "timeframe"]
+          }
+        },
+        "required": ["apiName", "basePath", "version", "rateLimiting"]
+      },
+      "auth": {
+        "type": "object",
+        "properties": {
+          "enabled": { "type": "boolean" },
+          "isAuthService": { "type": "boolean" },
+          "keyManagement": {
+            "type": "string",
+            "enum": ["auto", "manual"]
+          },
+          "privateKey": { "type": "string" },
+          "publicKey": { "type": "string" },
+          "authModel": { "type": "string" },
+          "customEndpoints": {
+            "type": "object",
+            "properties": {
+              "enabled": { "type": "boolean" },
+              "signIn": { "type": "string" },
+              "signOut": { "type": "string" },
+              "signUp": { "type": "string" },
+              "register": { "type": "string" },
+              "forgotPassword": { "type": "string" },
+              "resetPassword": { "type": "string" }
+            },
+            "required": ["enabled", "signIn", "signUp"]
+          },
+          "useAsymmetricJWT": { "type": "boolean" },
+          "authServicePublicKey": { "type": "string" },
+          "defaultSuperAdmin": {
+            "type": "object",
+            "properties": {
+              "enabled": { "type": "boolean" },
+              "username": { "type": "string" },
+              "email": { "type": "string" },
+              "password": { "type": "string" },
+              "role": { "type": "string" }
+            }
+          },
+          "passwordResetPage": {
+            "type": "object",
+            "properties": {
+              "enabled": { "type": "boolean" },
+              "title": { "type": "string" },
+              "description": { "type": "string" },
+              "submitLabel": { "type": "string" },
+              "loadingMessage": { "type": "string" },
+              "successMessage": { "type": "string" },
+              "failureMessage": { "type": "string" }
+            }
+          }
+        },
+        "required": ["enabled", "isAuthService", "keyManagement", "customEndpoints"]
+      },
+      "models": {
+        "type": "object",
+        "patternProperties": {
+          "^\\d+$": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "collection": { "type": "string" },
+              "fields": {
+                "type": "object",
+                "patternProperties": {
+                  "^\\d+$": {
+                    "type": "object",
+                    "properties": {
+                      "id": { "type": "string" },
+                      "name": { "type": "string" },
+                      "type": {
+                        "type": "string",
+                        "enum": ["string", "number", "boolean", "date", "object"]
+                      },
+                      "required": { "type": "boolean" },
+                      "unique": { "type": "boolean" },
+                      "default": { "type": "boolean" },
+                      "defaultValue": { "type": "string" },
+                      "objectTemplate": { "type": "string" },
+                      "embeddedFields": {
+                        "type": "array",
+                        "items": { "$ref": "#/definitions/field" },
+                        "maxItems": 3
+                      },
+                      "depth": { "type": "number", "maximum": 3 }
+                    },
+                    "required": ["id", "name", "type", "required"]
+                  }
+                }
+              }
+            },
+            "required": ["name", "collection", "fields"]
+          }
+        }
+      },
+      "endpoints": {
+        "type": "object",
+        "patternProperties": {
+          "^\\d+$": {
+            "type": "object",
+            "properties": {
+              "method": {
+                "type": "string",
+                "enum": ["GET", "POST", "PUT", "DELETE"]
+              },
+              "path": { "type": "string" },
+              "operationType": {
+                "type": "string",
+                "enum": ["crud", "custom", "script"]
+              },
+              "crudOperation": {
+                "type": "string",
+                "enum": ["create", "read", "update", "delete"]
+              },
+              "linkedModel": { "type": "string" },
+              "defaultParameters": {
+                "type": "object",
+                "properties": {
+                  "data": {
+                    "type": "object",
+                    "properties": {
+                      "enabled": { "type": "boolean" },
+                      "name": { "type": "string" }
+                    }
+                  },
+                  "query": {
+                    "type": "object",
+                    "properties": {
+                      "enabled": { "type": "boolean" },
+                      "name": { "type": "string" },
+                      "operator": {
+                        "type": "string",
+                        "enum": ["$eq", "$lt", "$gt", "$lte", "$gte", "$ne", "$in", "$nin"]
+                      }
+                    }
+                  }
+                }
+              },
+              "requiresAuth": { "type": "boolean" },
+              "developerNotes": { "type": "string" },
+              "documentation": {
+                "type": "object",
+                "properties": {
+                  "summary": { "type": "string" },
+                  "description": { "type": "string" },
+                  "sections": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "title": { "type": "string" },
+                        "body": { "type": "string" }
+                      },
+                      "required": ["title", "body"]
+                    }
+                  }
+                }
+              },
+              "exampleParams": {
+                "type": "object",
+                "properties": {
+                  "query": { "type": "object" },
+                  "body": { "type": "object" },
+                  "headers": { "type": "object" }
+                }
+              },
+              "parameters": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": "string" },
+                    "in": {
+                      "type": "string",
+                      "enum": ["query", "header", "path", "body"]
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": ["string", "number", "boolean", "array", "object"]
+                    },
+                    "required": { "type": "boolean" },
+                    "description": { "type": "string" }
+                  },
+                  "required": ["name", "in", "type"]
+                }
+              },
+              "vqlQuery": { "type": "string" },
+              "versaScript": { "type": "string" }
+            },
+            "required": ["method", "path", "operationType"]
+          }
+        }
+      }
+    },
+    "required": ["metadata", "auth", "models", "endpoints"],
+    "definitions": {
+      "field": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "type": { "type": "string" },
+          "required": { "type": "boolean" },
+          "unique": { "type": "boolean" },
+          "default": { "type": "boolean" },
+          "defaultValue": { "type": "string" },
+          "objectTemplate": { "type": "string" },
+          "embeddedFields": {
+            "type": "array",
+            "items": { "$ref": "#/definitions/field" }
+          },
+          "depth": { "type": "number" }
+        }
+      }
+    }
+  }

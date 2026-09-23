@@ -1,0 +1,3 @@
+echo "=== CLEANUP ==="
+drop db test_db
+drop domain test_domain

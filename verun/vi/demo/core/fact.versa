@@ -1,0 +1,10 @@
+func factorial(n: int) -> int {
+    if (n <= 1) {
+        return 1;
+    } else {
+        return n * factorial(n - 1);
+    }
+}
+
+let n = 6;
+print(`Factorial of {n} is {factorial(n)}`);

@@ -1,0 +1,59 @@
+vdb import *;
+
+print("=== vdb_class_vdb_crud_demo ===");
+
+try {
+    vdb.auth({user: DEMO_VDB_USER, pass: DEMO_VDB_PASS});
+    vdb.set({domain: "Class Demo Domain", database: "main"});
+
+    class Person(name: str) <-> vdb.collection("people_class_demo") {
+        schema() {
+            return {
+                name: {type: "string", required: true},
+                student: {type: "bool", default: true},
+                city: {type: "string", default: "Lusaka"}
+            };
+        }
+
+        init(name) {
+            Person.name = name;
+            Person.props_from_schema();
+        }
+
+        before_save() {
+            Person.saved_at = "now";
+        }
+
+        introduce() {
+            print(`Hi, I am {Person.name}, I am {!Person.student ? "not " : ""}a student from {Person.city}`);
+        }
+    }
+
+    print(Person.meta());
+    print(Person.schema());
+
+    let p = Person("Cameron");
+    p.city = "Kitwe";
+    print(p.is_persisted);
+    p.save();
+    print(p.is_persisted);
+    print(p.id);
+    p.introduce();
+
+    let cam = Person.find({name: {$eq: "Cameron"}});
+    print(cam.to_object());
+    cam.update({student: false, city: "Ndola"});
+    cam.refresh();
+    cam.introduce();
+    print(Person.find_by_id(cam.id).to_object());
+    print(Person.count({}));
+    print(Person.exists({name: {$eq: "Cameron"}}));
+
+    cam.delete();
+    print(Person.exists({name: {$eq: "Cameron"}}));
+    vdb.drop("people_class_demo");
+} catch (e) {
+    print("VDB class CRUD demo skipped / failed gracefully");
+    print(`type={e.type}`);
+    print(`message={e.message}`);
+}

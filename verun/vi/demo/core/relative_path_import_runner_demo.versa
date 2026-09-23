@@ -1,0 +1,7 @@
+# This demo intentionally imports using a path relative to the runner working directory.
+# `scripts/run_file.sh` and `scripts/run_demo_files.sh` run from `verun/vi`, so `demo/...` resolves.
+demo/import_helpers/runner_relative_lib import { RELATIVE_IMPORT_LABEL, rel_add };
+
+print("=== Relative Path Import Runner Demo ===");
+print(RELATIVE_IMPORT_LABEL);
+print(rel_add(20, 22));

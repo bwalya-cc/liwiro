@@ -1,0 +1,66 @@
+print("=== builtins list demo ===");
+
+let nums = [3, 1, 4, 1, 5];
+print("Original nums:");
+print(nums);
+
+nums.add(9);
+print("After add 9:");
+print(nums);
+
+nums.insert(99, 2);
+print("After insert(99, 2):");
+print(nums);
+
+print("All indexes of 1:");
+print(nums.all_indexes(1));
+
+print("Removed count for value 1:");
+print(nums.remove_all(1));
+print("After remove_all(1):");
+print(nums);
+
+print("Contains 5?");
+print(nums.contains(5));
+
+print("Index of 4:");
+print(nums.index(4));
+
+print("Popped:");
+print(nums.pop());
+print("After pop:");
+print(nums);
+
+nums.sort();
+print("Sorted:");
+print(nums);
+
+nums.reverse();
+print("Reversed:");
+print(nums);
+
+let words = ["alpha", "beta", "gamma", "beta", "delta"];
+print("\nOriginal words:");
+print(words);
+print("All indexes of 'beta':");
+print(words.all_indexes("beta"));
+print("remove_all('beta') removed:");
+print(words.remove_all("beta"));
+print("Words after remove_all:");
+print(words);
+
+let mixed = ["ok", true, {role: "admin"}, [1, 2], "ok", true];
+print("\nOriginal mixed:");
+print(mixed);
+print("All indexes of true:");
+print(mixed.all_indexes(true));
+print("Removed count for true:");
+print(mixed.remove_all(true));
+print("Mixed after remove_all(true):");
+print(mixed);
+
+print("Direct print handles list/object/bool without casting:");
+print(words);
+print(mixed);
+print({ok: true, tags: ["x", "y"]});
+print(true);

@@ -1,0 +1,13 @@
+vdb import *;
+
+print("=== VDB exception family demo ===");
+
+try {
+    vdb.list_collections();
+    print("unexpected success");
+} catch (e) {
+    print("type=" + e.type);
+    print("base=" + e.base_type);
+    print("alias=" + e.type_alias);
+    print("code=" + e.type_code);
+}

@@ -1,0 +1,57 @@
+vdb import *;
+
+func section(title: str) {
+    print("\n=== " + title + " ===");
+}
+
+func showResult(label: str, res) {
+    print("\n[" + label + "]");
+    print("ok=" + str(res.ok) + " status=" + res.status + " operation=" + str(res.operation));
+    print("message=" + res.message);
+    if (res.error != null) {
+        print("error=" + res.error);
+    }
+    if (res.data != null) {
+        print("data=" + str(res.data));
+    }
+}
+
+try {
+    section("Auth + Context");
+    showResult("auth", vdb.auth({user: DEMO_VDB_USER, pass: DEMO_VDB_PASS}));
+    showResult("set", vdb.set({domain: DEMO_VDB_DOMAIN, database: DEMO_VDB_DB}));
+
+    section("Schemaless collection");
+    showResult("create events_schemaless", vdb.create("events_schemaless"));
+    let events = vdb.collection("events_schemaless");
+    showResult("insert event", events.insert({level: "INFO", message: "schemaless entry"}));
+    showResult("find events", events.find({}, 5));
+
+    section("Schema-aware collection via class");
+    class AuditEntry(id: str, severity: str = "info") {
+        schema() {
+            return {
+                id: {type: "string", required: true},
+                severity: {type: "string", default: "info"},
+                payload: {type: "object"},
+            };
+        }
+
+        init(id, severity: str = "info") {
+            AuditEntry.id = id;
+            AuditEntry.severity = severity;
+            AuditEntry.props_from_schema();
+        }
+    }
+
+    showResult("create audit_entries", vdb.create("audit_entries", AuditEntry));
+    let audits = vdb.collection("audit_entries");
+    showResult("insert audit", audits.insert({id: "A-100", payload: {step: "start"}}));
+    showResult("find audits", audits.find({}, 5));
+
+    section("Cleanup");
+    showResult("drop events", vdb.drop("events_schemaless"));
+    showResult("drop audits", vdb.drop("audit_entries"));
+} catch (e) {
+    print("VDB create demo skipped: " + e.message);
+}

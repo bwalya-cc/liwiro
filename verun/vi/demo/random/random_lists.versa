@@ -1,0 +1,20 @@
+random import *;
+
+print("=== random list ops ===");
+let colors = ["red", "green", "blue", "yellow", "black"];
+print("Original:");
+print(colors);
+
+print("choice:");
+print(random.choice(colors));
+
+print("choices count 4:");
+print(random.choices(colors, 4));
+
+print("sample count 3:");
+print(random.sample(colors, 3));
+
+print("shuffle in place:");
+print(random.shuffle(colors));
+print("After shuffle:");
+print(colors);

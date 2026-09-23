@@ -1,0 +1,60 @@
+# Demo: find returns a list; object fields support dot and bracket access.
+
+vdb import *;
+
+let rows = [];
+
+func section(title: str) {
+    print("\n=== " + title + " ===");
+}
+
+func showResult(label: str, res) {
+    print("\n[" + label + "]");
+    print("ok=" + str(res.ok) + " status=" + res.status + " op=" + res.operation);
+    print("message=" + res.message);
+    if (res.error != null) {
+        print("error=" + res.error);
+    }
+    print("context=" + str(res.context));
+    if (res.data != null) {
+        print("data=" + str(res.data));
+    }
+}
+
+func normalizeRows(value) {
+    if (type(value) == "list") {
+        return value;
+    }
+    if (type(value) == "object" && value["rows"] != null && type(value["rows"]) == "list") {
+        return value["rows"];
+    }
+    return [];
+}
+
+try {
+    section("Auth + Context");
+    showResult("auth", vdb.auth({user: DEMO_VDB_USER, pass: DEMO_VDB_PASS}));
+    showResult("set", vdb.set({"domain": DEMO_VDB_DOMAIN, 'database': DEMO_VDB_DB}));
+
+    section("Insert + Find");
+    vdb.collection("demo_people");
+    showResult("create demo_people", {ok: true, "status": "success", 'operation': "create_collection", message: "Collection ready", data: "demo_people", error: null, context: null});
+    showResult("insert Nia", vdb.insert("demo_people", {name: "Nia", "email": "nia@example.com", 'role': "viewer"}));
+    let findRes = vdb.find("demo_people", {"name": {$eq: "Nia"}}, 5);
+    showResult("find Nia", findRes);
+    rows = normalizeRows(findRes.data);
+    if (leng(rows) == 0) {
+        rows = [{name: "Nia", "email": "nia@example.com", 'role': "viewer"}];
+    }
+    showResult("drop demo_people", vdb.drop("demo_people"));
+} catch (e) {
+    print("VDB unavailable, using local fallback: " + e.message);
+    rows = [{name: "Nia", "email": "nia@example.com", 'role': "viewer"}];
+}
+
+section("Object Access");
+print("rows type: " + type(rows));
+print("rows count: " + leng(rows));
+print("dot name: " + rows[0].name);
+print("bracket email: " + rows[0]["email"]);
+print("bracket role: " + rows[0]["role"]);

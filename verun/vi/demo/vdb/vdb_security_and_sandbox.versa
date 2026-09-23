@@ -1,0 +1,64 @@
+# VDB core demo with security behavior demonstration.
+vdb import *;
+
+func section(title: str) {
+    print("\n=== " + title + " ===");
+}
+
+func showResult(label: str, res) {
+    print("\n[" + label + "]");
+    print("ok=" + str(res.ok) + " status=" + res.status + " op=" + res.operation);
+    print("message=" + res.message);
+    if (res.error != null) {
+        print("error=" + res.error);
+    }
+    print("context=" + str(res.context));
+    if (res.data != null) {
+        print("data=" + str(res.data));
+    }
+}
+
+try {
+    section("Auth");
+    showResult("auth", vdb.auth({user: DEMO_VDB_USER, pass: DEMO_VDB_PASS}));
+
+    section("Security Check");
+    print("Attempting read from restricted default/main...");
+    try {
+        showResult("set restricted context", vdb.set({domain: "default", database: "main"}));
+        let restrictedProducts = vdb.collection("products");
+        showResult("restricted find", restrictedProducts.find({}, 1));
+    } catch (e) {
+        print(`Access blocked as expected: {e.message}`);
+    }
+
+    section("Sandbox Domain Work");
+    showResult("set sandbox context", vdb.set({domain: DEMO_VDB_DOMAIN, database: DEMO_VDB_DB}));
+
+    let products = vdb.collection("products");
+    showResult("insert Laptop", products.insert({name: "Laptop", price: 999.99, stock: 10}));
+    showResult("insert Phone", products.insert({name: "Phone", price: 699.99, stock: 20}));
+
+    showResult("all products", products.find({}, 20));
+    showResult("price > 700", products.find({price: {$gt: 700}}, 10));
+
+    showResult("update Laptop", products.update({name: {$eq: "Laptop"}}, {stock: 7}));
+    showResult("verify Laptop", products.find({name: {$eq: "Laptop"}}, 1));
+
+    showResult("delete Phone", products.delete({name: {$eq: "Phone"}}));
+    showResult("after delete", products.find({}, 20));
+
+    section("Scripts");
+    showResult("save hello_script", vdb.save_script("hello_script", "demo_service", "let x = 1; x + 1;"));
+    showResult("load hello_script", vdb.load_script("hello_script"));
+
+    showResult("execute hello_script", vdb.execute_script("hello_script", {collection: "products"}));
+
+    showResult("list collections", vdb.list_collections());
+
+    section("Cleanup");
+    showResult("drop products", vdb.drop("products"));
+    showResult("collections after drop", vdb.list_collections());
+} catch (e) {
+    print("VDB demo skipped: " + e.message);
+}

@@ -1,0 +1,13 @@
+print("=== list swap demo ===");
+
+let values = [10, 20, 30, 40, 50];
+print("before:");
+print(values);
+
+values.swap(1, 3);
+print("after swap(1, 3):");
+print(values);
+
+values.swap(0, 4);
+print("after swap(0, 4):");
+print(values);

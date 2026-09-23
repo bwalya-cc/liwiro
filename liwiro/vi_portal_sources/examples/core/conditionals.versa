@@ -1,0 +1,14 @@
+# Demo for if-alt-else conditionals with random module
+random import *;
+
+let x = random.randint(0, 10);
+print("Random x (0..10):");
+print(`x: {x}`);
+
+if (x > 5) {
+    print("x is greater than 5");
+} alt (x == 5) {
+    print("x is 5 exactly");
+} else {
+    print("x is less than 5");
+}

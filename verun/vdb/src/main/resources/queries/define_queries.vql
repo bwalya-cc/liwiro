@@ -1,0 +1,7 @@
+echo "=== DOMAIN DEFINITION ==="
+create domain test_domain;
+echo "=== DATABASE DEFINITION ==="
+create database test_db;
+echo "=== VERIFICATION ==="
+read domains;
+read dbs;

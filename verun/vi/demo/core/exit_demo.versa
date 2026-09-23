@@ -1,0 +1,5 @@
+# demo_expected_exit_code: 3
+print("=== exit demo ===");
+print("exit() defaults to code 0; this demo ends with exit(3)");
+exit(3);
+print("This line should never run");

@@ -1,0 +1,46 @@
+vdb import *;
+
+func section(title: str) {
+    print("\n=== " + title + " ===");
+}
+
+func showResult(label: str, res) {
+    print("\n[" + label + "]");
+    print("ok=" + str(res.ok) + " status=" + res.status + " op=" + res.operation);
+    print("message=" + res.message);
+    if (res.error != null) {
+        print("error=" + res.error);
+    }
+    print("context=" + str(res.context));
+    if (res.data != null) {
+        print("data=" + str(res.data));
+    }
+}
+
+try {
+    section("Auth + Context");
+    showResult("auth", vdb.auth({user: DEMO_VDB_USER, pass: DEMO_VDB_PASS}));
+    showResult("set", vdb.set({domain: DEMO_VDB_DOMAIN, database: DEMO_VDB_DB}));
+
+    section("Insert Users");
+    let users = vdb.collection("users_demo_0");
+    showResult("insert Cameron", users.insert({name: "Cameron", age: 19}));
+    showResult("insert Maddie", users.insert({name: "Maddie", age: 25}));
+
+    section("Query");
+    showResult("find all", users.find({}, 20));
+    showResult("find age > 20", users.find({age: {$gt: 20}}, 20));
+
+    section("Update");
+    showResult("update Cameron age", users.update({name: {$eq: "Cameron"}}, {age: 20}));
+    showResult("verify Cameron", users.find({name: {$eq: "Cameron"}}, 1));
+
+    section("Delete");
+    showResult("delete Maddie", users.delete({name: {$eq: "Maddie"}}));
+    showResult("remaining users", users.find({}, 20));
+
+    section("Cleanup");
+    showResult("drop collection", vdb.drop("users_demo_0"));
+} catch (e) {
+    print("VDB demo skipped: " + e.message);
+}

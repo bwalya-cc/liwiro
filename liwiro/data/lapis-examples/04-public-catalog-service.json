@@ -1,0 +1,264 @@
+{
+  "metadata": {
+    "apiName": "PublicCatalogService",
+    "basePath": "/api/catalog",
+    "version": "1.0.0",
+    "database": "public",
+    "rateLimiting": {
+      "enabled": true,
+      "limit": 500,
+      "timeframe": "minute"
+    },
+    "documentation": {
+      "enabled": true,
+      "key": "liwiroservicepass0!"
+    },
+    "developerNotes": "Managed by Liwiro Service Builder. Docs/help visibility and notes are synced from LAPIS metadata.",
+    "setupApiKey": "liwiroservicepass0!",
+    "seedData": {
+      "enabled": true,
+      "collections": {
+        "catalog_products": [
+          {
+            "slug": "copperbelt-demo-record",
+            "title": "Copperbelt Demo Record",
+            "price": 1,
+            "meta": {}
+          }
+        ]
+      }
+    }
+  },
+  "auth": {
+    "enabled": false,
+    "isAuthService": false,
+    "keyManagement": "auto",
+    "customEndpoints": {
+      "enabled": false,
+      "signIn": "/signin",
+      "signOut": "/auth/signout",
+      "signUp": "/auth/signup"
+    },
+    "defaultSuperAdmin": {
+      "enabled": false,
+      "username": "superadmin",
+      "email": "superadmin@liwiro.local",
+      "password": "ChangeMeNow1!",
+      "role": "SUPER_ADMIN"
+    }
+  },
+  "models": {
+    "m_product": {
+      "name": "CatalogProduct",
+      "collection": "catalog_products",
+      "fields": {
+        "f_slug": {
+          "id": "f_slug",
+          "name": "slug",
+          "type": "string",
+          "required": true,
+          "unique": true,
+          "default": false,
+          "defaultValue": "",
+          "embeddedFields": [],
+          "depth": 1
+        },
+        "f_title": {
+          "id": "f_title",
+          "name": "title",
+          "type": "string",
+          "required": true,
+          "unique": false,
+          "default": false,
+          "defaultValue": "",
+          "embeddedFields": [],
+          "depth": 1
+        },
+        "f_price": {
+          "id": "f_price",
+          "name": "price",
+          "type": "number",
+          "required": true,
+          "unique": false,
+          "default": false,
+          "defaultValue": "",
+          "embeddedFields": [],
+          "depth": 1
+        },
+        "f_meta": {
+          "id": "f_meta",
+          "name": "meta",
+          "type": "object",
+          "required": false,
+          "unique": false,
+          "default": false,
+          "defaultValue": "",
+          "objectTemplate": "{\"category\":\"general\",\"featured\":false}",
+          "embeddedFields": [],
+          "depth": 1
+        }
+      }
+    }
+  },
+  "endpoints": {
+    "ep_create": {
+      "method": "POST",
+      "path": "/products",
+      "operationType": "crud",
+      "crudOperation": "create",
+      "linkedModel": "CatalogProduct",
+      "requiresAuth": false,
+      "defaultParameters": {
+        "data": {
+          "enabled": true,
+          "name": "data"
+        },
+        "query": {
+          "enabled": false,
+          "name": "query",
+          "operator": "$eq"
+        }
+      },
+      "developerNotes": "crud endpoint for /products; requiresAuth=False.",
+      "exampleParams": {
+        "query": {
+          "scenario": "kalulu-onboarding-flow"
+        },
+        "body": {
+          "slug": "copperbelt-validation-record",
+          "title": "Copperbelt Validation Record",
+          "price": 2,
+          "meta": {}
+        },
+        "headers": {
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "POST /products create operation for CatalogProduct",
+        "description": "Generated documentation for the PublicCatalogService example service. Override `endpoint.documentation` if this endpoint needs service-specific wording.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "This endpoint is public and can be called without a bearer token."
+          },
+          {
+            "title": "Request Contract",
+            "body": "The request examples below are copied from the LAPIS endpoint definition and are the default values used by the interactive docs.\n\nExample query JSON:\n{\n  \"scenario\": \"kalulu-onboarding-flow\"\n}\n\nExample body JSON:\n{\n  \"slug\": \"copperbelt-demo-record\",\n  \"title\": \"Copperbelt Demo Record\",\n  \"price\": 1,\n  \"meta\": {}\n}\n\nExample headers:\n{\n  \"X-Trace-Id\": \"demo-trace-001\"\n}"
+          },
+          {
+            "title": "Parameters",
+            "body": "No explicit parameter list was declared for this endpoint. Use the example query/body payloads as the contract."
+          },
+          {
+            "title": "Responses",
+            "body": "Successful requests return `201 Created` with insert metadata. Validation and persistence failures return `400` or `500`."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "crud endpoint for /products; requiresAuth=False."
+          }
+        ]
+      }
+    },
+    "ep_read": {
+      "method": "GET",
+      "path": "/products",
+      "operationType": "crud",
+      "crudOperation": "read",
+      "linkedModel": "CatalogProduct",
+      "requiresAuth": false,
+      "defaultParameters": {
+        "data": {
+          "enabled": false,
+          "name": "data"
+        },
+        "query": {
+          "enabled": true,
+          "name": "slug",
+          "operator": "$eq"
+        }
+      },
+      "developerNotes": "crud endpoint for /products; requiresAuth=False.",
+      "exampleParams": {
+        "query": {
+          "slug": "copperbelt-demo-record"
+        },
+        "headers": {
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "GET /products read operation for CatalogProduct",
+        "description": "Generated documentation for the PublicCatalogService example service. Override `endpoint.documentation` if this endpoint needs service-specific wording.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "This endpoint is public and can be called without a bearer token."
+          },
+          {
+            "title": "Request Contract",
+            "body": "The request examples below are copied from the LAPIS endpoint definition and are the default values used by the interactive docs.\n\nExample query JSON:\n{\n  \"slug\": \"copperbelt-demo-record\"\n}\n\nExample body JSON:\n{}\n\nExample headers:\n{\n  \"X-Trace-Id\": \"demo-trace-001\"\n}"
+          },
+          {
+            "title": "Parameters",
+            "body": "No explicit parameter list was declared for this endpoint. Use the example query/body payloads as the contract."
+          },
+          {
+            "title": "Responses",
+            "body": "Successful requests return `200 OK` with every matching record. Empty query objects such as `{}` mean “match all records”."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "crud endpoint for /products; requiresAuth=False."
+          }
+        ]
+      }
+    },
+    "ep_featured": {
+      "method": "POST",
+      "path": "/products/featured",
+      "operationType": "custom",
+      "requiresAuth": false,
+      "vqlQuery": "read collection catalog_products where meta.featured == true limit 100;",
+      "developerNotes": "custom endpoint for /products/featured; requiresAuth=False.",
+      "exampleParams": {
+        "query": {
+          "scenario": "kalulu-onboarding-flow"
+        },
+        "body": {
+          "dryRun": true
+        },
+        "headers": {
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "POST /products/featured custom operation",
+        "description": "Generated documentation for the PublicCatalogService example service. Override `endpoint.documentation` if this endpoint needs service-specific wording.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "This endpoint is public and can be called without a bearer token."
+          },
+          {
+            "title": "Request Contract",
+            "body": "The request examples below are copied from the LAPIS endpoint definition and are the default values used by the interactive docs.\n\nExample query JSON:\n{\n  \"scenario\": \"kalulu-onboarding-flow\"\n}\n\nExample body JSON:\n{\n  \"dryRun\": true\n}\n\nExample headers:\n{\n  \"X-Trace-Id\": \"demo-trace-001\"\n}"
+          },
+          {
+            "title": "Parameters",
+            "body": "No explicit parameter list was declared for this endpoint. Use the example query/body payloads as the contract."
+          },
+          {
+            "title": "Responses",
+            "body": "Successful requests return JSON. Script-level `statusCode` values are promoted to the HTTP response automatically."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "custom endpoint for /products/featured; requiresAuth=False."
+          }
+        ]
+      }
+    }
+  }
+}

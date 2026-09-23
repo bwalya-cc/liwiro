@@ -1,0 +1,11 @@
+# Interactive greeting script for the VI Portal
+
+# Request the user's name via the runtime input function
+let name = input("Please enter your name: ");
+
+# Use backtick interpolation for the greeting
+# Note: Versa uses {variable} inside backticks
+let greeting = `Hello, {name}! Welcome to the Liwiro VI Portal.`;
+
+# Print to the runtime console
+print(greeting);

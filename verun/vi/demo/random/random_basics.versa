@@ -1,0 +1,25 @@
+random import *;
+
+print("=== random basics ===");
+random.seed(42);
+
+print("random():");
+print(random.random());
+
+print("randint(0, 10):");
+print(random.randint(0, 10));
+
+print("randints(0, 10, 5):");
+print(random.randints(0, 10, 5));
+
+print("randrange(10):");
+print(random.randrange(10));
+
+print("uniform(1.5, 3.5):");
+print(random.uniform(1.5, 3.5));
+
+print("boolean():");
+print(random.boolean());
+
+print("chance(0.25):");
+print(random.chance(0.25));

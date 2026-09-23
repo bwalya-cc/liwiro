@@ -1,0 +1,405 @@
+{
+  "metadata": {
+    "apiName": "CRMService",
+    "basePath": "/api/crm",
+    "version": "1.0.0",
+    "database": "tenantdata",
+    "rateLimiting": {
+      "enabled": true,
+      "limit": 180,
+      "timeframe": "minute"
+    },
+    "documentation": {
+      "enabled": true,
+      "key": "liwiroservicepass0!"
+    },
+    "developerNotes": "Managed by Liwiro Service Builder. Docs/help visibility and notes are synced from LAPIS metadata.",
+    "setupApiKey": "liwiroservicepass0!",
+    "seedData": {
+      "enabled": true,
+      "collections": {
+        "tenants": [
+          {
+            "tenantId": "tenant-kalulu-trading",
+            "name": "Kalulu Kaumba"
+          }
+        ]
+      }
+    }
+  },
+  "auth": {
+    "enabled": true,
+    "isAuthService": false,
+    "keyManagement": "auto",
+    "useAsymmetricJWT": true,
+    "customEndpoints": {
+      "enabled": false,
+      "signIn": "/signin",
+      "signOut": "/auth/signout",
+      "signUp": "/auth/signup"
+    },
+    "defaultSuperAdmin": {
+      "enabled": false,
+      "username": "superadmin",
+      "email": "superadmin@liwiro.local",
+      "password": "ChangeMeNow1!",
+      "role": "SUPER_ADMIN"
+    },
+    "authServiceName": "AuthCoreService"
+  },
+  "models": {
+    "m_tenant": {
+      "name": "Tenant",
+      "collection": "tenants",
+      "fields": {
+        "f_tenant_id": {
+          "id": "f_tenant_id",
+          "name": "tenantId",
+          "type": "string",
+          "required": true,
+          "unique": true,
+          "default": false,
+          "defaultValue": "",
+          "embeddedFields": [],
+          "depth": 1
+        },
+        "f_tenant_name": {
+          "id": "f_tenant_name",
+          "name": "name",
+          "type": "string",
+          "required": true,
+          "unique": false,
+          "default": false,
+          "defaultValue": "",
+          "embeddedFields": [],
+          "depth": 1
+        }
+      }
+    },
+    "m_contact": {
+      "name": "Contact",
+      "collection": "contacts",
+      "fields": {
+        "f_contact_id": {
+          "id": "f_contact_id",
+          "name": "contactId",
+          "type": "string",
+          "required": true,
+          "unique": true,
+          "default": false,
+          "defaultValue": "",
+          "embeddedFields": [],
+          "depth": 1
+        },
+        "f_contact_tenant": {
+          "id": "f_contact_tenant",
+          "name": "tenantId",
+          "type": "string",
+          "required": true,
+          "unique": false,
+          "default": false,
+          "defaultValue": "",
+          "embeddedFields": [],
+          "depth": 1
+        },
+        "f_contact_email": {
+          "id": "f_contact_email",
+          "name": "email",
+          "type": "string",
+          "required": true,
+          "unique": false,
+          "default": false,
+          "defaultValue": "",
+          "embeddedFields": [],
+          "depth": 1
+        },
+        "f_contact_status": {
+          "id": "f_contact_status",
+          "name": "status",
+          "type": "string",
+          "required": true,
+          "unique": false,
+          "default": true,
+          "defaultValue": "ACTIVE",
+          "embeddedFields": [],
+          "depth": 1
+        }
+      }
+    }
+  },
+  "endpoints": {
+    "ep_contact_create": {
+      "method": "POST",
+      "path": "/contacts",
+      "operationType": "crud",
+      "crudOperation": "create",
+      "linkedModel": "Contact",
+      "requiresAuth": true,
+      "defaultParameters": {
+        "data": {
+          "enabled": true,
+          "name": "data"
+        },
+        "query": {
+          "enabled": false,
+          "name": "query",
+          "operator": "$eq"
+        }
+      },
+      "developerNotes": "crud endpoint for /contacts; requiresAuth=True.",
+      "exampleParams": {
+        "query": {
+          "scenario": "kalulu-onboarding-flow"
+        },
+        "body": {
+          "contactId": "contact-kalulu-001",
+          "tenantId": "tenant-kalulu-trading",
+          "email": "kalumbi.banda@zmail.com",
+          "status": "active"
+        },
+        "headers": {
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "POST /contacts create operation for Contact",
+        "description": "Generated documentation for the CRMService example service. Override `endpoint.documentation` if this endpoint needs service-specific wording.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Bearer authentication is required before the handler runs."
+          },
+          {
+            "title": "Request Contract",
+            "body": "The request examples below are copied from the LAPIS endpoint definition and are the default values used by the interactive docs.\n\nExample query JSON:\n{\n  \"scenario\": \"kalulu-onboarding-flow\"\n}\n\nExample body JSON:\n{\n  \"contactId\": \"contact-kalulu-001\",\n  \"tenantId\": \"tenant-kalulu-trading\",\n  \"email\": \"kalumbi.banda@zmail.com\",\n  \"status\": \"active\"\n}\n\nExample headers:\n{\n  \"X-Trace-Id\": \"demo-trace-001\"\n}"
+          },
+          {
+            "title": "Parameters",
+            "body": "No explicit parameter list was declared for this endpoint. Use the example query/body payloads as the contract."
+          },
+          {
+            "title": "Responses",
+            "body": "Successful requests return `201 Created` with insert metadata. Validation and persistence failures return `400` or `500`."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "crud endpoint for /contacts; requiresAuth=True."
+          }
+        ]
+      }
+    },
+    "ep_contact_read": {
+      "method": "GET",
+      "path": "/contacts",
+      "operationType": "crud",
+      "crudOperation": "read",
+      "linkedModel": "Contact",
+      "requiresAuth": true,
+      "defaultParameters": {
+        "data": {
+          "enabled": false,
+          "name": "data"
+        },
+        "query": {
+          "enabled": true,
+          "name": "tenantId",
+          "operator": "$eq"
+        }
+      },
+      "developerNotes": "crud endpoint for /contacts; requiresAuth=True.",
+      "exampleParams": {
+        "query": {
+          "contactId": "contact-kalulu-001"
+        },
+        "headers": {
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "GET /contacts read operation for Contact",
+        "description": "Generated documentation for the CRMService example service. Override `endpoint.documentation` if this endpoint needs service-specific wording.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Bearer authentication is required before the handler runs."
+          },
+          {
+            "title": "Request Contract",
+            "body": "The request examples below are copied from the LAPIS endpoint definition and are the default values used by the interactive docs.\n\nExample query JSON:\n{\n  \"contactId\": \"contact-kalulu-001\"\n}\n\nExample body JSON:\n{}\n\nExample headers:\n{\n  \"X-Trace-Id\": \"demo-trace-001\"\n}"
+          },
+          {
+            "title": "Parameters",
+            "body": "No explicit parameter list was declared for this endpoint. Use the example query/body payloads as the contract."
+          },
+          {
+            "title": "Responses",
+            "body": "Successful requests return `200 OK` with every matching record. Empty query objects such as `{}` mean “match all records”."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "crud endpoint for /contacts; requiresAuth=True."
+          }
+        ]
+      }
+    },
+    "ep_contact_update": {
+      "method": "PUT",
+      "path": "/contacts",
+      "operationType": "crud",
+      "crudOperation": "update",
+      "linkedModel": "Contact",
+      "requiresAuth": true,
+      "defaultParameters": {
+        "data": {
+          "enabled": true,
+          "name": "data"
+        },
+        "query": {
+          "enabled": true,
+          "name": "contactId",
+          "operator": "$eq"
+        }
+      },
+      "developerNotes": "crud endpoint for /contacts; requiresAuth=True.",
+      "exampleParams": {
+        "query": {
+          "contactId": "contact-kalulu-001"
+        },
+        "body": {
+          "contactId": "contact-kalulu-001",
+          "tenantId": "tenant-kalulu-trading",
+          "email": "kalumbi.banda@zmail.com",
+          "status": "active"
+        },
+        "headers": {
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "PUT /contacts update operation for Contact",
+        "description": "Generated documentation for the CRMService example service. Override `endpoint.documentation` if this endpoint needs service-specific wording.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Bearer authentication is required before the handler runs."
+          },
+          {
+            "title": "Request Contract",
+            "body": "The request examples below are copied from the LAPIS endpoint definition and are the default values used by the interactive docs.\n\nExample query JSON:\n{\n  \"contactId\": \"contact-kalulu-001\"\n}\n\nExample body JSON:\n{\n  \"contactId\": \"contact-kalulu-001\",\n  \"tenantId\": \"tenant-kalulu-trading\",\n  \"email\": \"kalumbi.banda@zmail.com\",\n  \"status\": \"active\"\n}\n\nExample headers:\n{\n  \"X-Trace-Id\": \"demo-trace-001\"\n}"
+          },
+          {
+            "title": "Parameters",
+            "body": "No explicit parameter list was declared for this endpoint. Use the example query/body payloads as the contract."
+          },
+          {
+            "title": "Responses",
+            "body": "Successful requests return `200 OK` with update metadata. `404` is returned when no records match the supplied query."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "crud endpoint for /contacts; requiresAuth=True."
+          }
+        ]
+      }
+    },
+    "ep_contact_delete": {
+      "method": "DELETE",
+      "path": "/contacts",
+      "operationType": "crud",
+      "crudOperation": "delete",
+      "linkedModel": "Contact",
+      "requiresAuth": true,
+      "defaultParameters": {
+        "data": {
+          "enabled": false,
+          "name": "data"
+        },
+        "query": {
+          "enabled": true,
+          "name": "contactId",
+          "operator": "$eq"
+        }
+      },
+      "developerNotes": "crud endpoint for /contacts; requiresAuth=True.",
+      "exampleParams": {
+        "query": {
+          "contactId": "contact-kalulu-001"
+        },
+        "headers": {
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "DELETE /contacts delete operation for Contact",
+        "description": "Generated documentation for the CRMService example service. Override `endpoint.documentation` if this endpoint needs service-specific wording.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Bearer authentication is required before the handler runs."
+          },
+          {
+            "title": "Request Contract",
+            "body": "The request examples below are copied from the LAPIS endpoint definition and are the default values used by the interactive docs.\n\nExample query JSON:\n{\n  \"contactId\": \"contact-kalulu-001\"\n}\n\nExample body JSON:\n{}\n\nExample headers:\n{\n  \"X-Trace-Id\": \"demo-trace-001\"\n}"
+          },
+          {
+            "title": "Parameters",
+            "body": "No explicit parameter list was declared for this endpoint. Use the example query/body payloads as the contract."
+          },
+          {
+            "title": "Responses",
+            "body": "Successful requests return `200 OK` with delete metadata. `404` is returned when no records match the supplied query."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "crud endpoint for /contacts; requiresAuth=True."
+          }
+        ]
+      }
+    },
+    "ep_tenant_contacts": {
+      "method": "POST",
+      "path": "/contacts/by-tenant",
+      "operationType": "custom",
+      "requiresAuth": true,
+      "vqlQuery": "read collection contacts where tenantId == \"tenant-demo\" limit 200;",
+      "developerNotes": "custom endpoint for /contacts/by-tenant; requiresAuth=True.",
+      "exampleParams": {
+        "query": {
+          "scenario": "kalulu-onboarding-flow"
+        },
+        "body": {
+          "dryRun": true
+        },
+        "headers": {
+          "X-Trace-Id": "demo-trace-001"
+        }
+      },
+      "documentation": {
+        "summary": "POST /contacts/by-tenant custom operation",
+        "description": "Generated documentation for the CRMService example service. Override `endpoint.documentation` if this endpoint needs service-specific wording.",
+        "sections": [
+          {
+            "title": "Authorization",
+            "body": "Bearer authentication is required before the handler runs."
+          },
+          {
+            "title": "Request Contract",
+            "body": "The request examples below are copied from the LAPIS endpoint definition and are the default values used by the interactive docs.\n\nExample query JSON:\n{\n  \"scenario\": \"kalulu-onboarding-flow\"\n}\n\nExample body JSON:\n{\n  \"dryRun\": true\n}\n\nExample headers:\n{\n  \"X-Trace-Id\": \"demo-trace-001\"\n}"
+          },
+          {
+            "title": "Parameters",
+            "body": "No explicit parameter list was declared for this endpoint. Use the example query/body payloads as the contract."
+          },
+          {
+            "title": "Responses",
+            "body": "Successful requests return JSON. Script-level `statusCode` values are promoted to the HTTP response automatically."
+          },
+          {
+            "title": "Operational Notes",
+            "body": "custom endpoint for /contacts/by-tenant; requiresAuth=True."
+          }
+        ]
+      }
+    }
+  }
+}

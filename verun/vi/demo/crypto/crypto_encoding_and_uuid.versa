@@ -1,0 +1,14 @@
+crypto import *;
+
+print("=== crypto encoding + uuid ===");
+let raw = "hello versa";
+let b64 = crypto.base64_encode(raw);
+print(b64);
+print(crypto.base64_decode(b64));
+
+let u = crypto.uuid();
+print("uuid:");
+print(u);
+
+print("random_hex(8):");
+print(crypto.random_hex(8));

@@ -1,0 +1,79 @@
+json_xml import *;
+filer import *;
+
+print("=== json_xml module demo ===");
+
+let outDir = filer.join("tmp", "vi", "json_xml_demo");
+filer.ensure_dir(outDir);
+let jsonPath = filer.join(outDir, "sample.json");
+let xmlPath = filer.join(outDir, "sample.xml");
+let textPath = filer.join(outDir, "note.txt");
+
+let obj = {
+  app: "liwiro",
+  version: 1,
+  ok: true,
+  features: ["vi", "vdb"],
+  meta: {
+    build: 20260329,
+    ratio: 1.5
+  }
+};
+
+print("=== JSON object <-> text ===");
+let jsonText = json_xml.obj_to_json(obj, true);
+print(jsonText);
+print(json_xml.to_json(obj, false));
+
+let parsedJson = json_xml.parse_json(jsonText);
+let parsedJsonAlias = json_xml.json_to_obj(jsonText);
+print(type(parsedJson));
+print(parsedJson.version);
+print(type(parsedJson.version));
+print(parsedJsonAlias.meta.build);
+print(type(parsedJsonAlias.meta.build));
+
+print("=== Object/JSON -> XML ===");
+let xmlFromObj = json_xml.obj_to_xml(obj, "root");
+print(xmlFromObj);
+
+let xmlFromJsonText = json_xml.json_to_xml(jsonText, "root");
+print(xmlFromJsonText);
+
+print("=== XML wrapper view ===");
+let xmlObject = json_xml.parse_xml(xmlFromObj);
+print(type(xmlObject));
+print(xmlObject.root.name);
+print(leng(xmlObject.root.children));
+print(xmlObject.features.root.name);
+
+print("=== XML -> JSON/object ===");
+let fromXml = json_xml.xml_to_json(xmlFromObj);
+let fromXmlAlias = json_xml.xml_to_obj(xmlFromObj);
+print(fromXml);
+print(type(fromXml));
+print(fromXml.features);
+print(type(fromXml.version));
+print(fromXmlAlias.meta.build);
+print(type(fromXmlAlias.meta.build));
+
+print("=== File helpers ===");
+json_xml.write_json(jsonPath, obj, true);
+let jsonLoaded = json_xml.read_json(jsonPath);
+print(jsonLoaded.version);
+print(type(jsonLoaded.version));
+
+json_xml.write_xml(xmlPath, xmlFromObj);
+let xmlLoaded = json_xml.read_xml(xmlPath);
+print(xmlLoaded.root.name);
+print(leng(xmlLoaded.root.children));
+
+json_xml.write_text(textPath, "json_xml module is working");
+print(json_xml.read_text(textPath));
+
+print("=== Builtin casts ===");
+let castJson = json("{\"count\":1,\"ratio\":1.5}");
+print(type(castJson.count));
+let castXml = xml("<book><title>Versa</title></book>");
+print(castXml.root.name);
+print(castXml.title.text);

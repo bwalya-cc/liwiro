@@ -1,0 +1,44 @@
+vdb import *;
+
+func section(title: str) {
+    print("\n=== " + title + " ===");
+}
+
+func showResult(label: str, res) {
+    print("\n[" + label + "]");
+    print("ok=" + str(res.ok) + " status=" + res.status + " op=" + res.operation);
+    print("message=" + res.message);
+    if (res.error != null) {
+        print("error=" + res.error);
+    }
+    print("context=" + str(res.context));
+    if (res.data != null) {
+        print("data=" + str(res.data));
+    }
+}
+
+try {
+    section("Auth + Context");
+    showResult("auth", vdb.auth({user: DEMO_VDB_USER, pass: DEMO_VDB_PASS}));
+    showResult("set", vdb.set({domain: DEMO_VDB_DOMAIN, database: DEMO_VDB_DB}));
+
+    let tx = vdb.collection("tx_demo_3");
+
+    section("Transaction");
+    showResult("begin", vdb.begin_transaction());
+    try {
+        showResult("insert #1", tx.insert({id: 1, status: "pending"}));
+        showResult("insert #2", tx.insert({id: 2, status: "pending"}));
+        showResult("commit", vdb.commit_transaction());
+    } catch (e) {
+        showResult("abort", vdb.abort_transaction());
+        print("inner error: " + e.message);
+    }
+
+    showResult("verify records", tx.find({}, 20));
+
+    section("Cleanup");
+    showResult("drop collection", vdb.drop("tx_demo_3"));
+} catch (e) {
+    print("VDB demo skipped: " + e.message);
+}

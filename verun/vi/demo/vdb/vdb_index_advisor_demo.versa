@@ -1,0 +1,49 @@
+vdb import *;
+
+print("=== vdb index advisor demo ===");
+
+let authRes = vdb.auth({user: DEMO_VDB_USER, pass: DEMO_VDB_PASS});
+print(authRes.status);
+
+vdb.set({domain: DEMO_VDB_DOMAIN ?? "default", db: DEMO_VDB_DB ?? "main"});
+
+let coll = vdb.collection("advisor_demo_products");
+coll.insert({sku: "A-1", category: "db", price: 100});
+coll.insert({sku: "A-2", category: "db", price: 200});
+coll.insert({sku: "B-1", category: "api", price: 150});
+
+let i = 0;
+while (i < 12) {
+    coll.find({category: "db"}, 50);
+    i = i + 1;
+}
+
+print("advisor status:");
+print(vdb.index_advisor_status().data);
+
+print("apply recommendations:");
+print(vdb.index_advisor_apply().data);
+
+print("indexes after apply:");
+print(vdb.list_indexes("advisor_demo_products").data);
+
+let j = 0;
+while (j < 12) {
+    coll.find({category: "db"}, 50);
+    j = j + 1;
+}
+
+print("advisor status after index usage:");
+print(vdb.index_advisor_status().data);
+
+print("set advisor mode to manual:");
+print(vdb.index_advisor_policy("manual").data);
+
+print("remove advisor-created indexes:");
+print(vdb.index_advisor_remove_auto_indexes().data);
+
+print("indexes after remove:");
+print(vdb.list_indexes("advisor_demo_products").data);
+
+print("cleanup collection:");
+print(vdb.drop("advisor_demo_products").data);

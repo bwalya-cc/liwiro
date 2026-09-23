@@ -1,0 +1,11 @@
+time import *;
+
+print("=== time sleep/perf demo ===");
+let before = time.perf_counter();
+time.sleep(0.05);
+let after = time.perf_counter();
+
+print("elapsed (seconds):");
+print(after - before);
+print("monotonic:");
+print(time.monotonic());

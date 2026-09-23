@@ -1,0 +1,84 @@
+# Ignore Java compiled classes and output directories
+out/
+*.class
+
+# Python virtual environments and compiled byte-code
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Node.js dependencies
+node_modules/
+
+# Temporary, log, and backup files
+*.log
+*.tmp
+*.bak
+*.swp
+.idea/
+.DS_Store
+Thumbs.db
+tmp/*
+tmp/runtime-logs/validation-sandbox/
+tmp/platform-runtime.json
+tmp/runtime-tools.json
+liwiro/backend/.runtime/
+
+# Liwiro-WUI build and temporary files
+/liwiro-wui/.next/
+/liwiro-wui/build/
+
+# Ignore the project summery file
+all.txt
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.keystore
+*.jks
+*.crt
+*.cer
+*.der
+*.credentials
+*.credentials.*
+credentials.local.versa
+liwiro/backend/liwiro.vdb.auth.json
+liwiro/backend/.env.local.lock
+
+# Local application state and generated data
+liwiro/data/verse/agent_profiles.bson
+liwiro/data/verse/learning_records.bson
+liwiro/data/verse/**/*.bson
+liwiro/data/verse/*.bson
+liwiro/data/verse/dataset_archives/*
+liwiro/data/verse/.proactive-scheduler.lock
+liwiro/data/verse/platform_activity.sqlite3*
+liwiro/backend/liwiro/data/
+!liwiro/data/verse/threads/.gitkeep
+!liwiro/data/verse/datasets/.gitkeep
+!liwiro/data/verse/dataset_archives/.gitkeep
+*.sqlite
+*.sqlite3
+*.db
+last_lapis_res.txt
+resume.txt
+.vercel
+.vercel.cache
+*email_config.vscpt
+verun/vsi/demo/email_cofig.vscpt
+*media_credentials.vscpt
+verun/vsi/demo/mediacloud/media_credentials.vscpt
+verun/vi/demo/.vi_demo_*.versa
+
+# Application folders
+.obsidian
+.codex

@@ -1,0 +1,13 @@
+jwt import *;
+
+print("=== jwt sign/verify demo ===");
+let claims = {sub: "u123", role: "user"};
+let secret = "demo-secret";
+let token = jwt.sign(claims, secret, {issuer: "versa-demo", audience: "demo", expiresInSeconds: 600});
+
+print("token:");
+print(token);
+
+let verified = jwt.verify(token, secret, {issuer: "versa-demo", audience: "demo"});
+print("verified:");
+print(verified);

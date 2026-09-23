@@ -1,0 +1,57 @@
+# Demo: VDB retrieval returns list objects; access by dot and bracket syntax.
+
+vdb import *;
+
+let records = [];
+let authUser = "CHANGE_ME_VDB_USER";
+let authPass = "CHANGE_ME_VDB_PASSWORD";
+let demoDomain = "vi_demos";
+let demoDb = "main";
+
+func normalizeRows(value) {
+  if (type(value) == "list") {
+    return value;
+  }
+  if (type(value) == "object" && value["rows"] != null && type(value["rows"]) == "list") {
+    return value["rows"];
+  }
+  return [];
+}
+
+try {
+  authUser = DEMO_VDB_USER;
+  authPass = DEMO_VDB_PASS;
+  demoDomain = DEMO_VDB_DOMAIN;
+  demoDb = DEMO_VDB_DB;
+} catch (err) {
+}
+
+try {
+  let authResult = vdb.auth({user: authUser, pass: authPass});
+  print("auth: " + authResult);
+
+  vdb.set({domain: demoDomain, db: demoDb});
+  try {
+    vdb.drop("demo_people");
+  } catch (dropErr) {
+  }
+  vdb.collection("demo_people");
+  vdb.insert("demo_people", {name: "Nia", "email": "nia@example.com", 'role': "viewer"});
+  let findResult = vdb.find("demo_people", {name: {"$eq": "Nia"}}, 5);
+  records = normalizeRows(findResult.data);
+  if (leng(records) == 0) {
+    records = [{name: "Nia", "email": "nia@example.com", 'role': "viewer"}];
+  }
+  vdb.drop("demo_people");
+} catch (err) {
+  print("VDB unavailable, using local fallback: " + err.message);
+  records = [{name: "Nia", "email": "nia@example.com", 'role': "viewer"}];
+}
+
+print("records type: " + type(records));
+print("count: " + leng(records));
+print(records[0].name);
+print(records[0]["email"]);
+print(records[0]['role']);
+print(records[0]["role"]);
+print(records[0][role]);

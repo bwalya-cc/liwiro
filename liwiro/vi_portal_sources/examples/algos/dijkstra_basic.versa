@@ -1,0 +1,51 @@
+print("=== dijkstra (simple weighted graph) ===");
+let graph = {
+    A: {B: 4, C: 2},
+    B: {C: 5, D: 10},
+    C: {E: 3},
+    D: {F: 11},
+    E: {D: 4},
+    F: {}
+};
+
+func smallest_unvisited(dist, visited) {
+    let best = "";
+    let best_dist = 999999;
+    for (k : dist.keys()) {
+        if (!visited.contains(k) && dist[k] < best_dist) {
+            best = k;
+            best_dist = dist[k];
+        }
+    }
+    return best;
+}
+
+func dijkstra(g, start) {
+    let dist = {};
+    let visited = [];
+
+    for (k : g.keys()) {
+        dist[k] = 999999;
+    }
+    dist[start] = 0;
+
+    while (leng(visited) < leng(g.keys())) {
+        let current = smallest_unvisited(dist, visited);
+        if (current == "") {
+            break;
+        }
+        visited.add(current);
+
+        let neighbors = g[current];
+        for (n : neighbors.keys()) {
+            let candidate = dist[current] + neighbors[n];
+            if (candidate < dist[n]) {
+                dist[n] = candidate;
+            }
+        }
+    }
+
+    return dist;
+}
+
+print(dijkstra(graph, "A"));

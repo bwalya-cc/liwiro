@@ -1,0 +1,12 @@
+import mediacloud;
+demo/mediacloud/lib/mediacloud_demo_helpers import { section, show_pretty, show_provider_status };
+
+section("MediaCloud Status Demo");
+
+let cloudConfig = cloudinary_media_config;
+
+let cloudSummary = show_provider_status("cloudinary", cloudConfig);
+
+show_pretty("MediaCloud status summary", {
+  providers: [cloudSummary]
+});

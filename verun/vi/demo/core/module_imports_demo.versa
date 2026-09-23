@@ -1,0 +1,22 @@
+json_xml import *;
+crypto import *;
+import datetime;
+random import { randint };
+
+print("=== Module imports demo (success path) ===");
+let obj = json_xml.parse_json("{\"name\":\"Ava\"}");
+print(obj.name);
+print(crypto.sha256("versa"));
+print(parse_json("{\"imported\":true}").imported);
+print(sha256("versa-direct"));
+
+print("Builtin json()/xml() do not require module imports:");
+print(json("{\"ok\":true}").ok);
+print(xml("<r><n>1</n></r>").n.text);
+
+print("Namespace import form:");
+let now = datetime.now();
+print(now.human("%Y-%m-%d %H:%M:%S"));
+
+print("Selective import form:");
+print(randint(1, 3));

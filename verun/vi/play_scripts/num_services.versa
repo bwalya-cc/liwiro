@@ -1,0 +1,16 @@
+# import vdb
+vdb import *;
+
+# Authenticate
+vdb.auth({user: "zulan", pass: "VerunDemo0!"});
+
+# Change to config db in liwiro domain
+vdb.set({domain: "liwiro", "db": "config"});
+
+# Define the services collection
+let services_collection = vdb.collection("services");
+
+# Get the services in the services collection and print how many there are
+let services = services_collection.find({}, 10);
+
+print(leng(services))

@@ -1,0 +1,23 @@
+filer import *;
+json_xml import *;
+
+print("=== filer json demo ===");
+
+let outDir = filer.join("tmp", "vi", "filer_demo", "json");
+filer.ensure_dir(outDir);
+let jsonPath = filer.join(outDir, "config.json");
+
+let data = {
+    app: "liwiro",
+    enabled: true,
+    ports: [5000, 5001],
+    features: {auth: true, xml: true}
+};
+
+filer.write_json(jsonPath, data, true);
+let loaded = filer.read_json(jsonPath);
+
+print(type(loaded));
+print(loaded.app);
+print(loaded.features.auth);
+print(json_xml.obj_to_json(loaded, true));

@@ -1,0 +1,11 @@
+print("=== reduce builtin demo ===");
+
+let total = reduce((left, right) => left + right, [1, 2, 3, 4]);
+print("sum=" + str(total));
+print("sum builtin=" + str(sum([1, 2, 3])));
+
+let joined = reduce((left, right) => left + right, "abc", "");
+print("joined=" + joined);
+
+let keys = reduce((left, right) => left + right, {a: 1, b: 2}, "");
+print("map keys=" + keys);
