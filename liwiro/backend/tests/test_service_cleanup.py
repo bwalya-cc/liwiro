@@ -12,7 +12,7 @@ BACKEND_ROOT = Path(__file__).resolve().parents[1]
 if str(BACKEND_ROOT) not in sys.path:
     sys.path.insert(0, str(BACKEND_ROOT))
 
-from app.main import create_app, _lapis_change_impacts
+from app.main import create_app, _join_route, _lapis_change_impacts
 
 
 class ServiceCleanupRoutesTests(unittest.TestCase):
@@ -43,6 +43,11 @@ class ServiceCleanupRoutesTests(unittest.TestCase):
             "permissions": ["VIEW_SERVICES", "MANAGE_SERVICES"],
         }
         return app, token
+
+    def test_route_joining_preserves_existing_base_path(self):
+        self.assertEqual(_join_route("/api/auth", "/signin"), "/api/auth/signin")
+        self.assertEqual(_join_route("/api/auth", "/api/auth/signin"), "/api/auth/signin")
+        self.assertEqual(_join_route("", "/liwiro/setup/reset-super-admin"), "/liwiro/setup/reset-super-admin")
 
     def test_model_rename_reports_affected_crud_endpoint(self):
         old = {
@@ -91,6 +96,60 @@ class ServiceCleanupRoutesTests(unittest.TestCase):
         self.assertEqual(response.get_json()["status"], 409)
         self.assertEqual(request_mock.call_args.args[1], "http://127.0.0.1:5011/api/accounts/users")
         self.assertEqual(request_mock.call_args.kwargs["headers"]["Authorization"], "Bearer abc")
+
+    def test_auth_action_proxies_signin_through_backend_with_configured_base_path(self):
+        app, token = self._build_app()
+        app.vdb_client.read_documents.return_value = (
+            True,
+            [{
+                "apiName": "authcore",
+                "processId": "456",
+                "port": 5011,
+                "lapis_config": {
+                    "metadata": {"basePath": "/api/auth"},
+                    "auth": {"isAuthService": True, "customEndpoints": {"enabled": True, "signIn": "/signin"}},
+                },
+            }],
+        )
+        upstream = MagicMock(status_code=200)
+        upstream.json.return_value = {"authenticated": True, "token": "signed-token"}
+
+        with patch("app.main.requests.post", return_value=upstream) as request_mock:
+            response = app.test_client().post(
+                "/services/456/auth-action",
+                headers={"Authorization": f"Bearer {token}"},
+                json={"action": "signin", "body": {"username": "admin", "password": "secret"}},
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.get_json(), {"status": 200, "body": {"authenticated": True, "token": "signed-token"}})
+        self.assertEqual(request_mock.call_args.args[0], "http://127.0.0.1:5011/api/auth/signin")
+        self.assertEqual(request_mock.call_args.kwargs["json"], {"username": "admin", "password": "secret"})
+
+    def test_auth_action_proxies_reset_super_admin_with_setup_key(self):
+        app, token = self._build_app()
+        app.vdb_client.read_documents.return_value = (
+            True,
+            [{
+                "apiName": "authcore",
+                "processId": "456",
+                "port": 5011,
+                "lapis_config": {"metadata": {"basePath": "/api/auth"}, "auth": {"isAuthService": True}},
+            }],
+        )
+        upstream = MagicMock(status_code=200)
+        upstream.json.return_value = {"message": "Super admin reset"}
+
+        with patch("app.main.requests.post", return_value=upstream) as request_mock:
+            response = app.test_client().post(
+                "/services/456/auth-action",
+                headers={"Authorization": f"Bearer {token}"},
+                json={"action": "reset-super-admin", "setupApiKey": "setup-secret", "body": {"username": "admin"}},
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(request_mock.call_args.args[0], "http://127.0.0.1:5011/liwiro/setup/reset-super-admin")
+        self.assertEqual(request_mock.call_args.kwargs["headers"]["X-Liwiro-Setup-Key"], "setup-secret")
 
     def test_api_governance_manifest_exposes_contract_and_lifecycle_controls(self):
         app, token = self._build_app()

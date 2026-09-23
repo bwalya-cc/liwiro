@@ -412,7 +412,9 @@ export default function ServiceDetailPage() {
       ? (authDependencyService?.lapis_config?.auth?.customEndpoints?.signOut || "/auth/signout")
       : "/auth/signout",
   )
-  const authTargetRoot = authIsAuthService ? serviceRoot : (authDependencyService?.port ? `http://127.0.0.1:${authDependencyService.port}` : "")
+  const authTargetProcessId = String(
+    authIsAuthService ? (service?.processId || processId || "") : (authDependencyService?.processId || ""),
+  ).trim()
   const authTargetSignInRoute = authIsAuthService ? signInRoute : dependencySignInRoute
   const authTargetSignOutRoute = authIsAuthService ? signOutRoute : dependencySignOutRoute
   const authProfileOptions = useMemo(() => {
@@ -1042,8 +1044,8 @@ export default function ServiceDetailPage() {
   }
 
   const runResetSuperAdmin = async () => {
-    if (!serviceRoot) {
-      toast.error("Service root URL unavailable. Start the service first.")
+    if (!authTargetProcessId) {
+      toast.error("Authentication service is unavailable or not running.")
       return
     }
     if (!setupApiKey) {
@@ -1052,23 +1054,29 @@ export default function ServiceDetailPage() {
     }
     setSetupRunning(true)
     try {
-      const endpointUrl = new URL("liwiro/setup/reset-super-admin", serviceRoot).toString()
-      const response = await fetch(endpointUrl, {
+      const response = await fetch(`${backend}/services/${authTargetProcessId}/auth-action`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-Liwiro-Setup-Key": setupApiKey,
+          ...authHeaders(),
         },
         body: JSON.stringify({
-          username: authBootstrapCreds.username,
-          email: authBootstrapCreds.email,
-          password: authBootstrapCreds.password,
-          role: authBootstrapCreds.role || "SUPER_ADMIN",
+          action: "reset-super-admin",
+          setupApiKey,
+          body: {
+            username: authBootstrapCreds.username,
+            email: authBootstrapCreds.email,
+            password: authBootstrapCreds.password,
+            role: authBootstrapCreds.role || "SUPER_ADMIN",
+          },
         }),
       })
-      const data = await response.json().catch(() => ({}))
-      if (!response.ok) throw new Error(data?.error || "Super admin reset failed")
-      toast.success(data?.message || data?.status || "Super admin reset completed")
+      const result = await response.json().catch(() => ({}))
+      if (!response.ok) throw new Error(result?.error || "Super admin reset failed")
+      if (Number(result?.status || 0) < 200 || Number(result?.status || 0) >= 300) {
+        throw new Error(result?.body?.error || result?.body?.message || "Super admin reset failed")
+      }
+      toast.success(result?.body?.message || result?.body?.status || "Super admin reset completed")
     } catch (err) {
       toast.error(err?.message || "Super admin reset failed")
     } finally {
@@ -1077,7 +1085,7 @@ export default function ServiceDetailPage() {
   }
 
   const runAuthenticate = async () => {
-    if (!authTargetRoot) {
+    if (!authTargetProcessId) {
       toast.error(authIsAuthService ? "Service root URL unavailable. Start the service first." : "Authentication service is unavailable or not running.")
       return
     }
@@ -1089,17 +1097,17 @@ export default function ServiceDetailPage() {
     }
     setAuthenticating(true)
     try {
-      const endpointUrl = new URL(
-        authTargetSignInRoute.startsWith("/") ? authTargetSignInRoute.slice(1) : authTargetSignInRoute,
-        authTargetRoot,
-      ).toString()
-      const response = await fetch(endpointUrl, {
+      const response = await fetch(`${backend}/services/${authTargetProcessId}/auth-action`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        headers: { "Content-Type": "application/json", ...authHeaders() },
+        body: JSON.stringify({ action: "signin", body: { username, password } }),
       })
-      const data = await response.json().catch(() => ({}))
-      if (!response.ok) throw new Error(data?.error || "Authentication failed")
+      const result = await response.json().catch(() => ({}))
+      if (!response.ok) throw new Error(result?.error || "Authentication failed")
+      const data = result?.body || {}
+      if (Number(result?.status || 0) < 200 || Number(result?.status || 0) >= 300) {
+        throw new Error(data?.error || data?.message || "Authentication failed")
+      }
       if (data?.authenticated === false) {
         throw new Error(data?.reason || data?.error || "Authentication failed")
       }
@@ -1119,7 +1127,7 @@ export default function ServiceDetailPage() {
   }
 
   const runSignOut = async () => {
-    if (!authTargetRoot) {
+    if (!authTargetProcessId) {
       toast.error(authIsAuthService ? "Service root URL unavailable. Start the service first." : "Authentication service is unavailable or not running.")
       return
     }
@@ -1129,19 +1137,20 @@ export default function ServiceDetailPage() {
       return
     }
     try {
-      const endpointUrl = new URL(
-        authTargetSignOutRoute.startsWith("/") ? authTargetSignOutRoute.slice(1) : authTargetSignOutRoute,
-        authTargetRoot,
-      ).toString()
-      const response = await fetch(endpointUrl, {
+      const response = await fetch(`${backend}/services/${authTargetProcessId}/auth-action`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${bearer}`,
+          ...authHeaders(),
         },
+        body: JSON.stringify({ action: "signout", bearerToken: bearer }),
       })
-      const data = await response.json().catch(() => ({}))
-      if (!response.ok) throw new Error(data?.error || data?.message || "Sign out failed")
+      const result = await response.json().catch(() => ({}))
+      if (!response.ok) throw new Error(result?.error || "Sign out failed")
+      const data = result?.body || {}
+      if (Number(result?.status || 0) < 200 || Number(result?.status || 0) >= 300) {
+        throw new Error(data?.error || data?.message || "Sign out failed")
+      }
       setAuthToken("")
       toast.success(data?.message || "Signed out. Bearer token cleared.")
     } catch (err) {

@@ -1,0 +1,127 @@
+# Hangman CLI (VI) using VDB for storage
+# Requirements: authenticate VDB and set domain/database before calling VDB-backed helpers.
+# Usage (example):
+# vdb.auth({ user: "...", pass: "..." });
+# vdb.set("mydomain", "mydb");
+# Then run setup_demo(), new_game_cli(...), guess_cli(...), etc.
+
+# Collections used (convention): "users", "games"
+
+# Helpers and game logic
+func mask_word(word, guesses) {
+    # Return the masked word where unguessed letters become '_'
+    let result = "";
+    let i = 0;
+    while (i < len(word)) {
+        let ch = word[i];
+        if (contains(guesses, ch)) {
+            result = result + ch;
+        } else {
+            result = result + "_";
+        }
+        i = i + 1;
+    }
+    return result;
+}
+
+func is_won(word, guesses) {
+    let masked = mask_word(word, guesses);
+    return masked == word;
+}
+
+func create_game(owner, secret_word) {
+    let game = {
+        owner: owner,
+        word: secret_word,
+        guesses: [],
+        wrong_guesses: 0,
+        max_wrong: 6,
+        created_at: now()
+    };
+
+    # Persisting to VDB: caller must have authenticated and set context.
+    # Use a vdb query or the vdb.collection(...) API in your environment.
+    # This sample returns the prepared object; replace the below with a VDB create when running.
+    return game;
+}
+
+func load_game(game_id) {
+    # Example VDB read placeholder. Replace with a vdb-backed read after auth/set:
+    # let g = read collection games where id == game_id;
+    # return g;
+    return nil; # placeholder until VDB call is executed in your environment
+}
+
+func make_guess(game, letter) {
+    # `game` is expected to be an in-memory game object or one loaded from VDB.
+    if (game == nil) {
+        return { error: "game_not_found" };
+    }
+
+    # normalize
+    letter = lower(letter);
+
+    # already guessed?
+    if (contains(game.guesses, letter)) {
+        return { status: "already_guessed", game: game };
+    }
+
+    # update guesses
+    let new_guesses = append(game.guesses, letter);
+
+    let new_wrong = game.wrong_guesses;
+    if (!contains(game.word, letter)) {
+        new_wrong = new_wrong + 1;
+    }
+
+    # Prepare updated game object
+    let updated = {
+        owner: game.owner,
+        word: game.word,
+        guesses: new_guesses,
+        wrong_guesses: new_wrong,
+        max_wrong: game.max_wrong,
+        created_at: game.created_at
+    };
+
+    # Persist update: replace with an update collection statement or vdb API when running.
+
+    let masked = mask_word(updated.word, updated.guesses);
+    let won = is_won(updated.word, updated.guesses);
+    let lost = updated.wrong_guesses >= updated.max_wrong;
+
+    return { status: "ok", game: updated, masked: masked, won: won, lost: lost };
+}
+
+# CLI helpers for interactive VI use
+func new_game_cli(owner, secret_word) {
+    let created = create_game(owner, secret_word);
+    # Persist created into VDB here if desired.
+    print(`Created game for {owner}. Word length: {len(secret_word)}.`);
+    return created;
+}
+
+func guess_cli(game, letter) {
+    let res = make_guess(game, letter);
+    if (res.error != nil) {
+        print(`Error: {res.error}`);
+        return res;
+    }
+    print(`Masked: {res.masked}`);
+    if (res.won) {
+        print("You won!");
+    } else if (res.lost) {
+        print("You lost!");
+    } else {
+        print(`Wrong guesses: {res.game.wrong_guesses} / {res.game.max_wrong}`);
+    }
+    return res;
+}
+
+# Example setup helper; caller must authenticate first.
+func setup_demo() {
+    # This demonstrates creating a demo game. Replace domain/auth before running.
+    let demo = create_game("demo_user", "versaland");
+    print("Demo game prepared. Persist it to VDB to play remotely.");
+    return demo;
+}

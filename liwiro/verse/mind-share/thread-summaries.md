@@ -95,3 +95,10 @@ Content:
 - Key Findings: Script uses schema-aware VDB collection `staff_logs` in the `hr` domain.
 - Open Questions: Should we add authentication for employee IDs or just simple logging?
 - Recommended Next Step: Validate the script execution and consider LAPIS endpoint promotion.
+
+### 2026-09-23T17:07:10.840806+00:00 | Kalulu | Text/Markdown | High confidence
+Basis: User reported the script runs with no errors but no output; diagnosing missing main invocation
+Thread: b1f543fc6f874d71a09a2c64caf36994
+Content Type: text/markdown
+Content:
+User run: hangman VI script executed with no visible output. Likely cause: script contains functions but no invoked main entrypoint. Next step: confirm interactive vs single-run target and produce validated vi-script with main loop and VDB auth usage.

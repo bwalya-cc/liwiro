@@ -243,6 +243,17 @@ def _service_name_query(api_name: str) -> dict:
     return {"apiName": {"$eq": str(api_name)}}
 
 
+def _join_route(base_path: Any, sub_path: Any) -> str:
+    """Join a service base path and route without duplicating the base path."""
+    base = str(base_path or "").strip().strip("/")
+    sub = str(sub_path or "").strip().strip("/")
+    if base and (sub == base or sub.startswith(f"{base}/")):
+        route = sub
+    else:
+        route = "/".join(part for part in (base, sub) if part)
+    return f"/{route}" if route else "/"
+
+
 def _runtime_cfg(key: str):
     # Re-read persisted AI values so a long-lived worker and a restarted worker
     # observe the same configuration source.
@@ -6752,6 +6763,86 @@ def test_service_route(process_id):
         return jsonify({"error": f"Unable to reach the service: {exc}"}), 502
     except Exception as exc:
         current_app.logger.error(f"Error testing service route {process_id}: {exc}")
+        return jsonify({"error": str(exc)}), 500
+
+
+@main_bp.route("/services/<string:process_id>/auth-action", methods=["POST"])
+def proxy_service_auth_action(process_id):
+    """Run an auth setup action through Liwiro instead of the browser.
+
+    Generated services run on a different local origin, so direct browser calls to
+    their sign-in and setup routes are subject to CORS.  This deliberately allows
+    only the fixed auth actions derived from the service LAPIS configuration.
+    """
+    denied = _frontend_auth_or_forbid()
+    if denied:
+        return denied
+    denied = _authorize_or_forbid("WRITE")
+    if denied:
+        return denied
+    denied = _require_platform_permission("MANAGE_SERVICES")
+    if denied:
+        return denied
+
+    body = request.get_json(silent=True) or {}
+    action = str(body.get("action") or "").strip().lower()
+    if action not in {"signin", "signout", "reset-super-admin"}:
+        return jsonify({"error": "Unsupported auth action"}), 400
+
+    try:
+        _use_runtime_workspace()
+        success, services = current_app.vdb_client.read_documents("services", _service_query(process_id))
+        if not success or not services:
+            return jsonify({"error": "Service not found"}), 404
+        service = services[0]
+        session = _session_from_header()
+        if not _session_can_access_service(session, service):
+            return jsonify({"error": "Service access denied"}), 403
+
+        config = service.get("lapis_config") if isinstance(service.get("lapis_config"), dict) else {}
+        auth_config = config.get("auth") if isinstance(config.get("auth"), dict) else {}
+        custom_endpoints = auth_config.get("customEndpoints") if isinstance(auth_config.get("customEndpoints"), dict) else {}
+        port = int(service.get("port") or 0)
+        if port <= 0:
+            return jsonify({"error": "Service is not running"}), 409
+
+        if action == "reset-super-admin":
+            if not bool(auth_config.get("isAuthService")):
+                return jsonify({"error": "Only an authentication service can reset its super admin"}), 400
+            path = "/liwiro/setup/reset-super-admin"
+        else:
+            endpoint_key = "signIn" if action == "signin" else "signOut"
+            default_path = "/auth/signin" if action == "signin" else "/auth/signout"
+            path = str(custom_endpoints.get(endpoint_key) or default_path) if bool(custom_endpoints.get("enabled")) else default_path
+
+        base_path = "" if action == "reset-super-admin" else str(((config.get("metadata") or {}).get("basePath") or "")).strip().strip("/")
+        target = f"http://127.0.0.1:{port}/"
+        if base_path:
+            target += f"{base_path}/"
+        target += path.lstrip("/")
+        headers = {"Accept": "application/json"}
+        if action == "reset-super-admin":
+            setup_key = str(body.get("setupApiKey") or "").strip()
+            if not setup_key:
+                return jsonify({"error": "Setup API key is required"}), 400
+            headers["X-Liwiro-Setup-Key"] = setup_key
+        elif action == "signout":
+            bearer = str(body.get("bearerToken") or "").strip()
+            if not bearer:
+                return jsonify({"error": "Bearer token is required for sign out"}), 400
+            headers["Authorization"] = f"Bearer {bearer}"
+
+        payload = body.get("body") if isinstance(body.get("body"), dict) else {}
+        response = requests.post(target, json=payload, headers=headers, timeout=30)
+        try:
+            response_body = response.json()
+        except ValueError:
+            response_body = response.text
+        return jsonify({"status": response.status_code, "body": response_body}), 200
+    except requests.RequestException as exc:
+        return jsonify({"error": f"Unable to reach the service: {exc}"}), 502
+    except Exception as exc:
+        current_app.logger.error(f"Error proxying auth action for service {process_id}: {exc}")
         return jsonify({"error": str(exc)}), 500
 
 
