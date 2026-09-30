@@ -145,7 +145,7 @@ curl -X POST http://127.0.0.1:1957/vql \
 
 ## 8. Common VQL
 
-```json
+```text
 context;
 whoami;
 read domains;
@@ -159,13 +159,14 @@ help export;
 
 ## 9. Common export VQL
 
-```json
+```text
 export domain engineering to "/tmp/vdb-exports" as "nightly-backup";
 ```
 
 ## 10. Common Versa -> VDB usage
 
 ```versa
+vdb import *;
 vdb.auth({user: DEMO_VDB_USER, pass: DEMO_VDB_PASS});
 vdb.set({domain: DEMO_VDB_DOMAIN, database: DEMO_VDB_DB});
 let c = vdb.collection("products");
@@ -175,29 +176,31 @@ print(r);
 
 ## 11. Useful Liwiro backend routes
 
+Use your signed-in Liwiro session token in `LIWIRO_TOKEN` for protected routes. Replace the default addresses below with the addresses printed at startup if ports differ.
+
 Health/auth:
 
 ```bash
 curl -sS http://127.0.0.1:5000/auth/status
-curl -sS http://127.0.0.1:5000/auth/me
+curl -sS http://127.0.0.1:5000/auth/me -H "Authorization: Bearer $LIWIRO_TOKEN"
 ```
 
 Service fleet:
 
 ```bash
-curl -sS http://127.0.0.1:5000/services
+curl -sS http://127.0.0.1:5000/services -H "Authorization: Bearer $LIWIRO_TOKEN"
 ```
 
 VDB portal connection:
 
 ```bash
-curl -sS http://127.0.0.1:5000/platform/vdb/connection
+curl -sS http://127.0.0.1:5000/platform/vdb/connection -H "Authorization: Bearer $LIWIRO_TOKEN"
 ```
 
 VI portal connection:
 
 ```bash
-curl -sS http://127.0.0.1:5000/platform/vi/connection
+curl -sS http://127.0.0.1:5000/platform/vi/connection -H "Authorization: Bearer $LIWIRO_TOKEN"
 ```
 
 ## 12. Local env setup

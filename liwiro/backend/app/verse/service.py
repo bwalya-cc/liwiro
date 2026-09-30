@@ -132,13 +132,11 @@ _SIMPLE_VERSA_SCOPE_TERMS = (
     "calculator",
 )
 _COMPLEX_VERSA_SCOPE_TERMS = (
-    "vdb",
-    "database",
-    "storage",
-    "collection",
-    "domain",
     "auth",
-    "schema",
+    "authentication",
+    "authorization",
+    "credential",
+    "credentials",
     "endpoint",
     "api",
     "service",
@@ -790,13 +788,20 @@ def _is_simple_direct_versa_request(user_text: str, *, page_kind: str = "", desi
         return False
     has_build_intent = any(
         _contains_phrase(lowered, term)
-        for term in ("write", "create", "make", "build", "generate", "draft", "script")
+        for term in ("write", "create", "make", "build", "generate", "draft", "script", "fix", "repair", "update")
     )
     if not has_build_intent:
         return False
     tokens = tokenize(lowered)
     has_small_scope = any(_contains_phrase(lowered, term) for term in _SIMPLE_VERSA_SCOPE_TERMS)
-    return has_small_scope or len(tokens) <= 24
+    has_self_contained_scope = any(
+        _contains_phrase(lowered, term)
+        for term in ("cli", "command line", "command-line", "terminal", "console", "scratch", "prototype", "menu")
+    )
+    # A VDB-backed CLI can use a conventional local collection and record
+    # shape. That is a reversible implementation default, unlike API, auth,
+    # or deployment work which needs a materially broader decision.
+    return has_small_scope or has_self_contained_scope or len(tokens) <= 24
 
 
 def _should_force_direct_artifact_response(user_text: str, *, page_kind: str = "", desired_kind: str = "", response_mode: str = "") -> bool:
@@ -1137,10 +1142,10 @@ class VerseService:
             return str(override_model).strip()
         provider = str(provider_name or "").strip().lower()
         if provider == "openai":
-            return str(self.provider_config.get("OPENAI_MODEL") or "gpt-5-mini").strip()
+            return str(self.provider_config.get("OPENAI_MODEL") or "gpt-6-luna").strip()
         if provider == "anthropic":
-            return str(self.provider_config.get("ANTHROPIC_MODEL") or "claude-sonnet-4-6").strip()
-        return str(self.provider_config.get("GOOGLE_MODEL") or "gemini-3-flash-preview").strip()
+            return str(self.provider_config.get("ANTHROPIC_MODEL") or "claude-sonnet-5-5").strip()
+        return str(self.provider_config.get("GOOGLE_MODEL") or "gemini-3.8-flash").strip()
 
     def _provider_is_configured(self, provider_name: str) -> bool:
         provider = str(provider_name or "").strip().lower()
@@ -4210,18 +4215,18 @@ class VerseService:
             "If technical payload is needed, keep the message conversational and put the payload in the structured artifact field instead.",
             "If the best artifact belongs in another Liwiro workspace, still prepare the correct target artifact. Liwiro can stage navigation before execution.",
             "Ground your answer in the relevant Liwiro or Verun manuals when they are available in context, and guide the user toward the wiki/manual pages when helpful.",
-            "When the request mixes design and implementation, default to a planning response until the implementation details are grounded enough to validate.",
-            "Use response_mode=planning when you are recommending the approach and waiting for confirmation or missing details.",
+            "Treat a concrete implementation request as authorization to make conventional, reversible implementation choices. Inspect available context first, then choose safe defaults instead of asking routine follow-up questions.",
+            "For a self-contained utility, CLI, prototype, game, or script, choose the filename, menu flow, and local storage shape yourself when the user has not specified them. State those assumptions briefly in the completed result rather than asking the user to approve them.",
+            "Use response_mode=planning only when a missing decision would materially change scope, security, irreversible data changes, credentials, an external integration, or the intended outcome. Do not use planning merely because ordinary implementation details are absent.",
             "Use response_mode=artifact only when the artifact is ready to validate or already validated.",
-            "Do not force a planning gate for a small self-contained Versa utility, example, greeting script, or toy CLI when the request is already concrete enough to draft directly.",
+            "Do not force a planning gate for a self-contained Versa utility, VDB-backed CLI, example, greeting script, or toy CLI when the request is concrete enough to draft directly.",
             "If you invite another specialist, that specialist is expected to contribute concrete new information rather than remain implicit.",
             "When teammates are relevant, mention them naturally by name and remit rather than speaking as if you work alone.",
             "When joining after another specialist, add a genuinely new angle, build on their work, and avoid repeating the same draft-status language.",
             f"Current collaboration level: {normalize_collaboration_level(collaboration_level)}.",
-            "Always decide the most useful immediate next step for the user.",
-            "Return that immediate next step in next_step as one concrete sentence.",
-            "If you return an artifact, next_step should tell the user what to open, run, or review next.",
-            "If you do not return an artifact, next_step must still give a concrete follow-up action or decision.",
+            "Always decide the most useful immediate action yourself before replying.",
+            "Return next_step as one concrete sentence describing the completed action or the only genuinely required user action.",
+            "Do not make next_step ask the user to choose routine defaults, confirm a ready implementation, or perform a smoke test that you can perform yourself.",
         ]
         normalized_collaboration = normalize_collaboration_level(collaboration_level)
         if normalized_collaboration == "collaborative":
@@ -4301,7 +4306,7 @@ class VerseService:
             "If the user is asking for something to be applied into the current page, return a concrete artifact in the JSON artifact field.",
             "If the user clearly needs a different Liwiro workspace, still return the best destination artifact rather than dropping to prose.",
             "When the user asks for CLI utilities, scratch prototypes, or Versa scripts, prefer artifact.kind=vi-script rather than service-builder-lapis.",
-            "If the user asks for a small self-contained Versa example or utility, return the vi-script draft directly instead of asking for another confirmation round.",
+            "If the user asks for a self-contained Versa example, utility, game, scratch script, or VDB-backed CLI, return the vi-script draft directly instead of asking for another confirmation round. Choose conventional local storage defaults when none are specified.",
             "For any artifact that contains Versa code, keep refining it until the code is parser-valid and uses documented Versa syntax.",
             "Treat retrieved platform contracts and canonical manuals as executable constraints: never invent Versa syntax, VDB command grammar, or LAPIS fields that are not documented there.",
             "Before returning a technical artifact, cross-check its full payload against the relevant contract, not just the line or field most recently discussed.",

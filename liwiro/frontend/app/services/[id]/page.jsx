@@ -2121,7 +2121,7 @@ export default function ServiceDetailPage() {
         <div className="rounded-2xl border border-white/[0.08] bg-[#102c49] p-5">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-300">service.env</p>
           <p className="mt-3 text-sm leading-7 text-slate-300">
-            Script routes receive these values under <code className="text-sky-300">service.env.MY_KEY</code>. Use the preset buttons to scaffold media provider placeholders, then replace them with real credentials before testing.
+            Script routes receive these values under <code className="text-sky-300">service.env.MY_KEY</code>. Use a preset to add the provider settings, then enter your credentials before testing.
           </p>
           <div className="mt-4 flex flex-wrap gap-2">
             {MEDIA_STORAGE_ENV_PRESETS.map((preset) => (

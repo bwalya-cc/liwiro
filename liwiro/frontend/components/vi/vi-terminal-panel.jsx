@@ -3,13 +3,14 @@
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react"
 import { FitAddon } from "@xterm/addon-fit"
 import { Terminal } from "@xterm/xterm"
-import { Eraser } from "lucide-react"
+import { Eraser, Sparkles } from "lucide-react"
 import { CopyIconButton } from "@/components/ui/copy-icon-button"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useDocumentVisible } from "@/hooks/use-document-visible"
 import { authHeaders } from "@/lib/auth"
 import { computeJitteredDelayMs, createFailureCircuit } from "@/lib/request-circuit"
+import { dispatchVerseAssistantSeed, storePendingVerseAssistantSeed } from "@/lib/verse-actions"
 import { toast } from "sonner"
 
 const PRIMARY_PROMPT = "> "
@@ -23,6 +24,16 @@ const TERMINAL_ACTIVE_POLL_INTERVAL_MS = 250
 const TERMINAL_IDLE_POLL_INTERVAL_MS = 900
 const TERMINAL_RETRY_BASE_MS = 2_000
 const TERMINAL_RETRY_MAX_MS = 30_000
+const AI_FIX_TRANSCRIPT_LIMIT = 12_000
+
+function extractTerminalFailure(text) {
+  const normalized = String(text || "").replace(/\r\n/g, "\n").trim()
+  if (!normalized) return ""
+  const lines = normalized.split("\n")
+  const failureIndex = lines.findLastIndex((line) => /\b(error|exception|failed|failure|traceback|syntaxerror|runtimeerror)\b/i.test(line))
+  if (failureIndex < 0) return ""
+  return lines.slice(Math.max(0, failureIndex - 2)).join("\n").slice(-AI_FIX_TRANSCRIPT_LIMIT)
+}
 
 function joinTranscript(parts) {
   return parts
@@ -171,6 +182,7 @@ export const VITerminalPanel = forwardRef(function VITerminalPanel(
   const [connected, setConnected] = useState(false)
   const [active, setActive] = useState(false)
   const [hasTranscript, setHasTranscript] = useState(false)
+  const [terminalFailure, setTerminalFailure] = useState("")
   const [completionState, setCompletionState] = useState(null)
   const [connectionHealth, setConnectionHealth] = useState({
     degraded: false,
@@ -207,6 +219,7 @@ export const VITerminalPanel = forwardRef(function VITerminalPanel(
     transcriptTextRef.current += pendingTranscriptRef.current.join("")
     pendingTranscriptRef.current = []
     updateHasTranscript(transcriptTextRef.current.trim())
+    setTerminalFailure(extractTerminalFailure(transcriptTextRef.current))
     return transcriptTextRef.current
   }
 
@@ -226,6 +239,7 @@ export const VITerminalPanel = forwardRef(function VITerminalPanel(
     pendingTranscriptRef.current = []
     transcriptTextRef.current = String(value || "")
     updateHasTranscript(transcriptTextRef.current.trim())
+    setTerminalFailure(extractTerminalFailure(transcriptTextRef.current))
   }
 
   const appendTranscript = (value) => {
@@ -239,6 +253,29 @@ export const VITerminalPanel = forwardRef(function VITerminalPanel(
   }
 
   const currentTranscriptText = () => flushTranscript()
+
+  const askAiToFixTerminalFailure = () => {
+    const transcript = currentTranscriptText().slice(-AI_FIX_TRANSCRIPT_LIMIT)
+    const errorContext = terminalFailure || extractTerminalFailure(transcript)
+    if (!errorContext) {
+      toast.message("Run a command that reports an error, then ask AI to diagnose it.")
+      return
+    }
+    const content = [
+      "Please diagnose this VI terminal failure and propose the smallest safe fix.",
+      "Keep the investigation, recommended commands, and any follow-up in this chat so the work remains tracked. If a source change is needed, return a reviewable Verse change that I can apply and run from this terminal.",
+      activeFilePath ? `Active file: ${activeFilePath}` : "Active file: none selected",
+      sourceDir ? `VI source directory: ${sourceDir}` : "",
+      "Terminal context:",
+      "```text",
+      transcript,
+      "```",
+    ].filter(Boolean).join("\n\n")
+    const seed = { pathname: "/vi-portal", open: true, message: { role: "user", content } }
+    storePendingVerseAssistantSeed(seed)
+    dispatchVerseAssistantSeed(seed)
+    toast.success("AI repair request is ready in the tracked page chat.")
+  }
 
   const invalidateListingCaches = () => {
     filesCacheRef.current = { data: null, promise: null, expiresAt: 0 }
@@ -1783,6 +1820,18 @@ export const VITerminalPanel = forwardRef(function VITerminalPanel(
             </div>
             <Button type="button" variant="outline" size="sm" className="h-8 border-slate-700 bg-slate-900/95 text-slate-100 hover:bg-slate-800 hover:text-white" onClick={() => reconnectTerminal().catch((error) => toast.error(error?.message || "Failed to reconnect VI terminal"))}>
               {active ? "Refresh" : "Reconnect"}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={askAiToFixTerminalFailure}
+              disabled={!terminalFailure}
+              title={terminalFailure ? "Open a tracked AI diagnosis with this terminal error" : "Available after the terminal reports an error"}
+              className="h-8 border-violet-400/30 bg-violet-400/10 text-violet-100 hover:bg-violet-400/20 hover:text-white disabled:border-slate-800 disabled:bg-slate-900 disabled:text-slate-500"
+            >
+              <Sparkles className="mr-1.5 h-3.5 w-3.5" />
+              Ask AI to fix
             </Button>
           </div>
         </div>

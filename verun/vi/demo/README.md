@@ -1,21 +1,21 @@
 # VI Demo Catalog
 
-This folder is the curated Versa demo set for `verun/vi`.
+Explore Versa with runnable examples of language features, modules, and VDB workflows.
 
 ## Structure
 
 - `core/`
-  Canonical language and runtime demos: control flow, functions, collections, imports, type operators, exceptions, and parser-safe syntax.
+  Language and runtime examples: control flow, functions, collections, imports, type operators, exceptions, and syntax.
 - `algos/`
   Standalone algorithm demos that exercise loops, recursion, lists, and basic collection work without external modules.
 - `crypto/`, `datetime/`, `email/`, `filer/`, `http/`, `json_xml/`, `jwt/`, `random/`, `time/`
-  Focused module demos. Each folder has one overview demo plus smaller demos for the higher-value sub-surfaces.
+  Focused module demos. Each folder has one overview demo plus smaller demos for the individual functions.
 - `custom_modules/`
   Custom module registry demos for plain runtime use, service context, and VDB-aware context.
 - `types/is_unset/`
   Focused demos for unset bindings and guard-style usage.
 - `vdb/`
-  Canonical VDB demos for auth, context, CRUD, class binding, transactions, scripts, jobs, indexes, security, and production-style workflows.
+  VDB examples for auth, context, CRUD, class binding, transactions, scripts, jobs, indexes, security, and production-style workflows.
 - `vdb_exceptions/`
   Focused VDB exception-family demos.
 - `mediacloud/`
@@ -34,7 +34,7 @@ These files are inputs or helpers, not standalone demos:
 
 The default demo runners skip support files automatically.
 
-## Primary Coverage
+## Find an Example
 
 | Area | Primary demo | Focused companions |
 | --- | --- | --- |
@@ -55,38 +55,38 @@ The default demo runners skip support files automatically.
 ## Compact Demos
 
 - `vdb/vdb_list_and_object_access_variant.versa`
-  Kept as a variant/reference copy for the access pattern beside `vdb/vdb_list_and_object_access.versa`.
+  Try an alternative to the access pattern in `vdb/vdb_list_and_object_access.versa`.
 - `core/print.versa`
-  Tiny literal-print smoke example kept for quick manual sanity checks.
+  Print a literal value in a minimal script.
 - `core/leng.versa`
-  Narrow builtin smoke test kept as a quick REPL-sized example.
+  Try the length builtin in a short example.
 - `core/list_indexing.versa`
-  Minimal indexing loop kept as a short standalone snippet.
+  Access list items by index in a short loop.
 - `core/for_in_demo.versa`
-  Small loop-style snippet kept alongside the broader loop demos.
+  Iterate over a collection with a for-in loop.
 - `core/for_with_index_demo.versa`
-  Small indexed-loop snippet kept alongside the broader loop demos.
+  Iterate with an index as well as a value.
 - `core/fib_with_for_loop.versa`
-  Fibonacci-by-for-loop kept as a tiny algorithm example.
+  Calculate Fibonacci numbers with a for loop.
 - `core/fib_with_while_loop.versa`
-  Fibonacci-by-while-loop kept as a tiny algorithm example.
+  Calculate Fibonacci numbers with a while loop.
 - `core/casting_and_string_ops.versa`
-  Compact mixed-operator sample kept beside the fuller casting/operator demos.
+  Try type casting and string operators together.
 - `random/random_randints_demo.versa`
-  Focused single-call example kept beside the broader random demos.
+  Generate random integers in a single call.
 - `crypto/crypto_hash_and_hmac.versa`
-  Focused hash/HMAC snippet kept beside the broader crypto demo.
+  Calculate hashes and HMACs.
 - `crypto/crypto_encoding_and_uuid.versa`
-  Focused encoding/UUID snippet kept beside the broader crypto demo.
+  Try encoding helpers and UUID generation.
 - `time/time_formatting_demo.versa`
-  Focused formatting snippet kept beside the broader time demo.
+  Format time values.
 
 ## Generated Artifacts
 
 - `tmp/vi/demo/job_tick.log`
   Created by the VDB job scheduling demo when the stored script runs.
 
-Generated runtime output should live under `tmp/` rather than inside the curated demo tree.
+Look under `tmp/` for output produced by the demos.
 
 ## Runners
 

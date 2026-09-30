@@ -419,7 +419,7 @@ export default function EndpointConfig({
                         Scripts receive merged request params plus `query`, `body`, `service`, and auth context helpers at runtime.
                       </p>
                       <p className="text-xs text-slate-500 dark:text-slate-300">
-                        Media presets scaffold Cloudinary upload routes using service.env placeholders.
+                        Media presets add Cloudinary upload routes. Enter your credentials in service.env before uploading.
                       </p>
                     </div>
                   )}

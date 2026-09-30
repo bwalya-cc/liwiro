@@ -42,4 +42,4 @@ Verun contains the two runtime layers beneath Liwiro:
 
 ## Storage Note
 
-`verun/vdb/__data__` is a fresh-start runtime directory. The repository keeps only an empty placeholder there. Structured state under that tree is BSON-backed, and operational files are recreated on demand by VDB startup and runtime flows.
+`verun/vdb/__data__` is a fresh-start runtime directory. VDB creates its operational files there as you use it. Structured state is stored in BSON format.

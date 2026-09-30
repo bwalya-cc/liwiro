@@ -1,9 +1,9 @@
-# LAPIS Examples (Comprehensive)
+# LAPIS Examples
 
-This folder provides 15 service LAPIS examples for Liwiro feature coverage and integration testing.
+Choose from 15 LAPIS examples to explore service patterns in Liwiro. Load an example in Service Builder, review its configuration, and adapt it to your service.
 
-See [API governance](../../docs/api-governance.md) for the shared authoring,
-validation, documentation, and service-management contract.
+See [API governance](../../../docs/liwiro/service-management-and-governance.md) for guidance on authoring,
+validation, documentation, and service management.
 
 1. `01-auth-core-service.json`
 - Dedicated authentication service (`isAuthService: true`) with real VDB-backed signup/signin, super-admin-only register route, forgot-password email route, and auth user model.
@@ -39,27 +39,27 @@ validation, documentation, and service-management contract.
 - High-ingest telemetry service with anomaly custom query + rollup script endpoint.
 
 12. `12-kitchen-sink-platform-e2e.json`
-- End-to-end all-features config covering CRUD, script, custom VQL, auth, nested objects.
+- Combined service example covering CRUD, script, custom VQL, auth, nested objects.
 
 13. `13-contact-form-email-service.json`
 - Contact form service with `POST /contact` script endpoint using the VI `email` module and strict `service.env.*` SMTP validation.
 
 14. `14-create-service-e2e-noauth.json`
-- Live E2E-focused no-auth service that exercises CRUD + custom VQL + script endpoint flows for automated create-service verification.
+- No-auth service for trying CRUD, custom VQL, and script endpoints together.
 
 15. `15-media-storage-bridge-service.json`
 - Media storage bridge service with Versa-script upload routes for Cloudinary. Generation and provider-status checks work without credentials; set the optional `CLOUDINARY_*` values only when sending a real upload.
 
 ## Notes
 - All files are schema-compatible with current backend validation.
-- `requiresAuth` is set on protected endpoints to drive auth/rbac-focused test scenarios.
+- `requiresAuth` is set on protected endpoints to require authentication when calling those routes.
 - Auth-consuming examples use `authServiceName: "AuthCoreService"` and automatic demo key resolution, so they generate and run together without copying a public-key placeholder between files. Production deployments should replace the demo JWT secret through their runtime configuration.
-- Operation coverage is already present across the catalog, so no additional example files were required for builder/manager support:
+- Choose an example by endpoint type:
   - full CRUD examples: `02-inventory-service-auth-consumer.json`, `03-orders-service-rbac.json`, `07-crm-multitenant-service.json`, `12-kitchen-sink-platform-e2e.json`, `14-create-service-e2e-noauth.json`
   - custom VQL examples: `02-inventory-service-auth-consumer.json`, `03-orders-service-rbac.json`, `06-analytics-custom-vql-service.json`, `12-kitchen-sink-platform-e2e.json`, `14-create-service-e2e-noauth.json`
   - Versa script examples: `01-auth-core-service.json`, `05-events-webhook-script-service.json`, `10-workflow-orchestrator-service.json`, `13-contact-form-email-service.json`, `15-media-storage-bridge-service.json`
   - combined CRUD + custom VQL + script examples: `02-inventory-service-auth-consumer.json`, `03-orders-service-rbac.json`, `12-kitchen-sink-platform-e2e.json`, `14-create-service-e2e-noauth.json`
-- Every example now includes:
+- Example configuration fields:
   - `metadata.documentation.enabled` for docs visibility
   - `metadata.documentation.key` default value (`liwiroservicepass0!`) for per-service docs auth
   - optional `metadata.env` for per-service script environment values (available in scripts as `service.env.*`)
@@ -68,5 +68,5 @@ validation, documentation, and service-management contract.
   - `metadata.seedData` for default collection seed payloads
   - Auth seed records may use `seedPassword`; it is hashed during service generation and is never persisted as plaintext.
   - endpoint-level `developerNotes`
-  - endpoint-level `exampleParams` for docs auto-fill testing
+  - endpoint-level `exampleParams` for prefilled requests in service docs
   - `auth.defaultSuperAdmin` bootstrap configuration (enabled by default for auth-service examples)

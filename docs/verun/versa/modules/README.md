@@ -2,11 +2,11 @@
 
 Last updated: 2026-03-11
 
-This directory documents the native modules injected into the Versa runtime.
+Use Versa modules to make HTTP requests, work with files, send email, and access VDB from your scripts.
 
 ## 1. What a module is in VI
 
-A VI module is a native capability surface that the evaluator makes available to Versa code. Modules exist because some behaviors are naturally implemented in the host runtime rather than in pure script syntax.
+A VI module provides functions you can import into Versa scripts and REPL sessions.
 
 Typical examples are:
 
@@ -19,14 +19,6 @@ Typical examples are:
 - time and datetime helpers
 - random value generation
 - VDB integration
-
-Most module implementation lives under:
-
-- `verun/vi/src/main/java/verun/runtime/modules`
-
-The `vdb` bridge is special because it also depends on evaluator-side behavior under:
-
-- `verun/vi/src/main/java/verun/runtime/evaluator`
 
 ## 2. Import styles
 

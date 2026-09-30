@@ -358,6 +358,16 @@ def _script_http_status(result: Any) -> int:
     return 200
 
 
+def _is_conflict_error(result: Any) -> bool:
+    """Whether a storage failure represents a duplicate/unique-key conflict."""
+    if isinstance(result, dict):
+        detail = result.get("error") or result.get("message") or result.get("reason") or ""
+    else:
+        detail = result or ""
+    text = str(detail).strip().lower()
+    return any(marker in text for marker in ("unique constraint", "unique index", "duplicate", "already exists", "conflict"))
+
+
 def _coerce_int(value: Any) -> int | None:
     try:
         return int(float(str(value).strip()))
@@ -3949,7 +3959,10 @@ def generate_api_service(lapis_config):
         success, result = domain_manager.create_document(model_name, data)
         if success:
             return jsonify({"message": f"Resource created in {model_name}", "created": True, "result": result}), 201
-        return jsonify({"error": result.get('error', 'Creation failed')}), 500
+        error = (result or {}).get("error", "Creation failed")
+        if _is_conflict_error(result):
+            return jsonify({"error": error, "conflict": True}), 409
+        return jsonify({"error": error}), 500
 
     def read_resource(model_name):
         if not domain_manager.ensure_workspace(api_name, service_db):

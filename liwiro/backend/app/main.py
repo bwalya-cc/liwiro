@@ -257,7 +257,7 @@ def _join_route(base_path: Any, sub_path: Any) -> str:
 def _runtime_cfg(key: str):
     # Re-read persisted AI values so a long-lived worker and a restarted worker
     # observe the same configuration source.
-    if key in {"AI_PROVIDER", "OPENAI_API_KEY", "OPENAI_MODEL", "GOOGLE_API_KEY", "GOOGLE_MODEL", "ANTHROPIC_API_KEY", "ANTHROPIC_MODEL"}:
+    if key in {"AI_USAGE_LEVEL", "AI_PROVIDER", "OPENAI_API_KEY", "OPENAI_MODEL", "GOOGLE_API_KEY", "GOOGLE_MODEL", "ANTHROPIC_API_KEY", "ANTHROPIC_MODEL"}:
         try:
             path = _backend_env_local_path()
             runtime_keys = set(getattr(current_app, "ai_config_runtime_keys", set()))
@@ -378,6 +378,7 @@ def _verse_service() -> VerseService:
         str(_runtime_cfg("VERSE_ROOT") or "").strip(),
         str(_runtime_cfg("VERSE_DATA_DIR") or "").strip(),
         str(_runtime_cfg("AI_PROVIDER") or "").strip(),
+        str(_runtime_cfg("AI_USAGE_LEVEL") or "medium").strip(),
         str(_runtime_cfg("GOOGLE_MODEL") or "").strip(),
         str(_runtime_cfg("GOOGLE_API_KEY") or "").strip(),
         str(_runtime_cfg("ANTHROPIC_MODEL") or "").strip(),
@@ -390,6 +391,7 @@ def _verse_service() -> VerseService:
         return service
     provider_config = {
         "AI_PROVIDER": _runtime_cfg("AI_PROVIDER"),
+        "AI_USAGE_LEVEL": _runtime_cfg("AI_USAGE_LEVEL") or "medium",
         "GOOGLE_API_KEY": _runtime_cfg("GOOGLE_API_KEY"),
         "GOOGLE_MODEL": _runtime_cfg("GOOGLE_MODEL"),
         "ANTHROPIC_API_KEY": _runtime_cfg("ANTHROPIC_API_KEY"),
@@ -408,10 +410,13 @@ def _verse_service() -> VerseService:
     return service
 
 
+from .verse.providers.settings import normalize_usage_level, USAGE_LEVELS
+
+
 _AI_PROVIDER_SPECS = {
-    "openai": {"label": "OpenAI", "keyConfig": "OPENAI_API_KEY", "modelConfig": "OPENAI_MODEL", "defaultModel": "gpt-5-mini"},
-    "google": {"label": "Google Gemini", "keyConfig": "GOOGLE_API_KEY", "modelConfig": "GOOGLE_MODEL", "defaultModel": "gemini-3-flash-preview"},
-    "anthropic": {"label": "Anthropic Claude", "keyConfig": "ANTHROPIC_API_KEY", "modelConfig": "ANTHROPIC_MODEL", "defaultModel": "claude-sonnet-4-6"},
+    "openai": {"label": "OpenAI", "keyConfig": "OPENAI_API_KEY", "modelConfig": "OPENAI_MODEL", "defaultModel": "gpt-6-luna"},
+    "google": {"label": "Google Gemini", "keyConfig": "GOOGLE_API_KEY", "modelConfig": "GOOGLE_MODEL", "defaultModel": "gemini-3.8-flash"},
+    "anthropic": {"label": "Anthropic Claude", "keyConfig": "ANTHROPIC_API_KEY", "modelConfig": "ANTHROPIC_MODEL", "defaultModel": "claude-sonnet-5-5"},
 }
 
 _AI_ENV_PERSIST_LOCK = threading.RLock()
@@ -449,6 +454,7 @@ def _ai_config_status(session: dict | None = None) -> dict[str, Any]:
             "model": str(_runtime_cfg(spec["modelConfig"]) or spec["defaultModel"]).strip(),
             "configured": bool(str(_runtime_cfg(spec["keyConfig"]) or "").strip()),
             "default": provider_id == selected,
+            "recommendedModel": spec["defaultModel"],
         }
         for provider_id, spec in _AI_PROVIDER_SPECS.items()
     ]
@@ -457,6 +463,8 @@ def _ai_config_status(session: dict | None = None) -> dict[str, Any]:
         "configured": bool(selected_provider["configured"]),
         "anyConfigured": any(item["configured"] for item in providers),
         "defaultProvider": selected,
+        "usageLevel": normalize_usage_level(_runtime_cfg("AI_USAGE_LEVEL")),
+        "usageLevels": list(USAGE_LEVELS),
         "canManage": _is_super_admin_session(session),
         "providers": providers,
     }
@@ -8508,6 +8516,8 @@ def update_ai_config():
     providers = body.get("providers") if isinstance(body.get("providers"), dict) else {}
     updates: dict[str, str] = {}
     try:
+        if "usageLevel" in body:
+            updates["AI_USAGE_LEVEL"] = normalize_usage_level(body["usageLevel"])
         if "defaultProvider" in body:
             selected = _sanitize_ai_config_text(body.get("defaultProvider"), field="Default provider", max_length=32).lower()
             if selected not in _AI_PROVIDER_SPECS:
@@ -8572,6 +8582,7 @@ def test_ai_config():
     spec = _AI_PROVIDER_SPECS[provider_id]
     provider_config = {
         "AI_PROVIDER": provider_id,
+        "AI_USAGE_LEVEL": _runtime_cfg("AI_USAGE_LEVEL") or "medium",
         "OPENAI_API_KEY": _runtime_cfg("OPENAI_API_KEY"),
         "OPENAI_MODEL": _runtime_cfg("OPENAI_MODEL"),
         "GOOGLE_API_KEY": _runtime_cfg("GOOGLE_API_KEY"),
@@ -8580,6 +8591,8 @@ def test_ai_config():
         "ANTHROPIC_MODEL": _runtime_cfg("ANTHROPIC_MODEL"),
     }
     try:
+        if "usageLevel" in body:
+            provider_config["AI_USAGE_LEVEL"] = normalize_usage_level(body["usageLevel"])
         for field, config_key in (("apiKey", spec["keyConfig"]), ("model", spec["modelConfig"])):
             if field in body:
                 value = _sanitize_ai_config_text(body[field], field=field, max_length=10000 if field == "apiKey" else 160)

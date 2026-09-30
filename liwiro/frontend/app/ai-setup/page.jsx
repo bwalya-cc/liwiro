@@ -25,6 +25,7 @@ const PROVIDER_COPY = {
 function buildDraft(payload) {
   return {
     defaultProvider: String(payload?.defaultProvider || "openai"),
+    usageLevel: payload?.usageLevel || "medium",
     providers: Object.fromEntries((payload?.providers || []).map((provider) => [provider.id, {
       ...provider,
       apiKey: "",
@@ -83,7 +84,7 @@ export default function AiSetupPage() {
       const response = await fetch(`${backend}/platform/ai/config`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", ...authHeaders() },
-        body: JSON.stringify({ defaultProvider: draft.defaultProvider, providers }),
+        body: JSON.stringify({ defaultProvider: draft.defaultProvider, usageLevel: draft.usageLevel, providers }),
       })
       const payload = await response.json().catch(() => ({}))
       if (!response.ok) throw new Error(payload?.error || "Failed to save AI configuration")
@@ -94,7 +95,7 @@ export default function AiSetupPage() {
       invalidateVerseBootstrap(backend)
       window.dispatchEvent(new CustomEvent("liwiro:ai-config-updated", { detail: payload }))
       toast.success("AI configuration saved. Checking provider connections…")
-      await Promise.all((payload.providers || []).filter((provider) => provider.configured).map((provider) => testConnection(provider.id, { model: provider.model })))
+      await Promise.all((payload.providers || []).filter((provider) => provider.configured).map((provider) => testConnection(provider.id, { model: provider.model, usageLevel: payload.usageLevel })))
     } catch (error) {
       toast.error(error?.message || "Failed to save AI configuration")
     } finally {
@@ -109,7 +110,7 @@ export default function AiSetupPage() {
       const response = await fetch(`${backend}/platform/ai/config/test`, {
         method: "POST",
         headers: { "Content-Type": "application/json", ...authHeaders() },
-        body: JSON.stringify({ provider: providerId, model: saved?.model || draft.providers[providerId]?.model, ...(!saved && draft.providers[providerId]?.apiKey ? { apiKey: draft.providers[providerId].apiKey } : {}) }),
+        body: JSON.stringify({ provider: providerId, usageLevel: saved?.usageLevel || draft.usageLevel || "medium", model: saved?.model || draft.providers[providerId]?.model, ...(!saved && draft.providers[providerId]?.apiKey ? { apiKey: draft.providers[providerId].apiKey } : {}) }),
       })
       const payload = await response.json().catch(() => ({}))
       if (!response.ok) throw new Error(payload?.error || "Connection test failed")
@@ -168,6 +169,35 @@ export default function AiSetupPage() {
         </CardContent>
       </Card>
 
+      <Card>
+        <CardHeader><CardTitle>AI usage level</CardTitle></CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-slate-400">Start with Medium for everyday work. This shared setting controls reasoning effort on supported models and gives them room to finish an answer.</p>
+          <fieldset disabled={!config.canManage || saving}>
+            <legend className="sr-only">Choose AI usage level</legend>
+            <div className="grid gap-3 md:grid-cols-3">
+              {[
+                { id: "low", title: "Low", detail: "Quick questions and small edits. Favors faster replies and lower token use." },
+                { id: "medium", title: "Medium · Recommended", detail: "Service design, debugging, and analysis. Balances thoroughness and usage." },
+                { id: "high", title: "High", detail: "Difficult problems and detailed reviews. Allows more reasoning and may take longer or cost more." },
+              ].map((level) => (
+                <label key={level.id} className={`rounded-xl border p-4 ${draft.usageLevel === level.id ? "border-sky-400 bg-sky-400/10" : "border-white/10"}`}>
+                  <span className="flex items-center gap-2">
+                    <input type="radio" name="ai-usage-level" value={level.id} checked={draft.usageLevel === level.id} onChange={() => {
+                      setDraft((current) => ({ ...current, usageLevel: level.id }))
+                      setTestResults({})
+                    }} />
+                    <span className="font-semibold">{level.title}</span>
+                  </span>
+                  <span className="mt-2 block text-sm text-slate-400">{level.detail}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+          <p className="text-xs text-slate-400">Usage level is not a spending cap. Model choice, conversation length, and specialist activity also affect usage. Older or custom models may not support effort controls. Manage specialist collaboration and proactive reviews in Settings → Verse.</p>
+        </CardContent>
+      </Card>
+
       <div className="grid gap-5 xl:grid-cols-3">
         {providers.map((provider) => {
           const result = testResults[provider.id]
@@ -182,6 +212,12 @@ export default function AiSetupPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div><Label htmlFor={`${provider.id}-model`}>Model</Label><Input id={`${provider.id}-model`} className="mt-2" value={provider.model || ""} disabled={!config.canManage || saving} onChange={(event) => updateProvider(provider.id, { model: event.target.value })} /></div>
+                {provider.recommendedModel ? (
+                  <div className="space-y-2">
+                    <p className="text-xs text-slate-400">Suggested model: {provider.recommendedModel}. Availability depends on your provider account. Saved model choices stay in place until you change them.</p>
+                    <Button type="button" variant="outline" disabled={!config.canManage || saving || provider.model === provider.recommendedModel} onClick={() => updateProvider(provider.id, { model: provider.recommendedModel })}>Use suggested model</Button>
+                  </div>
+                ) : null}
                 <div>
                   <Label htmlFor={`${provider.id}-key`}>{provider.configured ? "Replace API key" : "API key"}</Label>
                   <PasswordInput id={`${provider.id}-key`} className="mt-2" autoComplete="new-password" placeholder={PROVIDER_COPY[provider.id]?.keyPlaceholder || "Enter API key"} value={provider.apiKey || ""} disabled={!config.canManage || saving || provider.removeApiKey} onChange={(event) => updateProvider(provider.id, { apiKey: event.target.value, removeApiKey: false })} />

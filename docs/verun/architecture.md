@@ -1,145 +1,44 @@
-# Verun System Architecture
+# Verun Architecture
 
-## Overview
-Verun is a modular system combining a lightweight database (VDB) and a scriptable runtime (VI). It is designed for high performance and flexibility, with strict separation of concerns to avoid circular dependencies. This document outlines the architectural organization, module responsibilities, and interaction patterns.
+Verun provides the Versa interpreter (VI) and VDB database used by Liwiro. The Maven project in `verun/pom.xml` contains two modules: `vi` and `vdb`.
 
----
+## VI: run Versa
 
-## Module Structure
+VI parses and evaluates Versa source, supports file execution and an interactive REPL, and provides native modules for files, HTTP, data conversion, email, cryptography, and VDB access.
 
-### 1. **`vdb-core` (Database Engine)**
-#### Responsibilities
-- **Low-Level Storage**  
-  - Document storage (CRUD operations: `insert`, `find`, `update`, `delete`).  
-  - Index management and schema validation.  
-  - Transaction handling and connection pooling.  
-  - BSON-backed internal persistence under `verun/vdb/__data__`.  
-- **Data Representation**  
-  - Works with native Java types (`Map<String, Object>`, `List`, primitives).  
-  - Avoids JSON parsing except for I/O boundaries (e.g., HTTP APIs).  
+- `verun/vi/src/main/java/verun/runtime/Main.java` is the runtime entry point.
+- `verun/vi/src/main/java/verun/runtime/parser/` parses source.
+- `verun/vi/src/main/java/verun/runtime/evaluator/` evaluates expressions and statements, resolves members, and connects scripts to VDB.
+- `verun/vi/src/main/java/verun/runtime/modules/` implements native modules.
 
-#### Key Components
-- `DocumentStore`: Core interface for collection-level operations.  
-- `IndexManager`: Handles indexing strategies (B-tree, hash).  
-- `StorageEngine`: Implementation for disk-based storage.  
+Run files with `verun/vi/scripts/run_file.sh` and open the REPL with `verun/vi/scripts/run_repl.sh`. In Liwiro, VI Portal adds a file editor, terminal, source-directory selection, environment settings, and custom module management.
 
----
+## VDB: store and query data
 
-### 2. **`vdb-query-engine` (Query & Script Orchestration)**
-#### Responsibilities
-- **Query Execution**  
-  - Parses and executes complex queries (e.g., aggregation pipelines).  
-  - Merges results from scripts and raw database operations.  
-- **Script Integration**  
-  - Invokes VI runtime to execute `.versa` scripts.  
-  - Manages script context (e.g., variables, database handles).  
-- **Result Formatting**  
-  - Converts results to JSON-shaped API/CLI output while VDB keeps BSON-backed internal storage.  
+VDB manages domains, databases, collections, documents, models, users, sessions, scripts, and permissions. Its implementation lives under `verun/vdb/src/main/java/verun/vdb/`.
 
-#### Key Components
-- `QueryParser`: Translates VQL (Verun Query Language) to executable plans.  
-- `ScriptOrchestrator`: Coordinates script execution via VI.  
-- `ResultAggregator`: Combines script output with raw DB results.  
+| Component | Responsibility |
+| --- | --- |
+| `VDB` and `Collection` | Database and collection operations |
+| `BsonStorage` | BSON persistence |
+| `VDBCommandLanguage`, `CommandValidator`, `VQLProcessor` | Command parsing, validation, and execution |
+| `QueryEvaluator` | Query conditions |
+| `Model` and `ModelRegistry` | Data models and validation |
+| `UserManager`, `SessionManager`, `Tumi` | Accounts, sessions, and permission checks |
+| `VDBRequestDispatcher` | Shared transport request handling |
+| `VDBHttpServer`, `VDBUnixSocket`, `VDBNamedPipe` | HTTP and platform IPC interfaces |
+| `VDBConsole`, `VDBLineEditor`, `HelpProvider` | Interactive commands, editing, and help |
 
----
+The console, HTTP server, and IPC interfaces expose the database through different transports. Select the appropriate transport for your host; selecting a transport does not replace authentication or permission checks.
 
-### 3. **`vi` (Versa Interpreter)**
-#### Responsibilities
-- **Script Execution**  
-  - Parses and executes `.versa` scripts.  
-  - Provides runtime environment (variables, functions, error handling).  
-- **Database Integration**  
-  - Uses `vdb-core` for storage operations.  
-  - Exposes a clean API for `vdb-query-engine` to invoke scripts.  
+## How Liwiro connects
 
-#### Key Components
-- `Parser/Lexer`: Converts scripts to AST.  
-- `Evaluator`: Executes AST with access to `vdb-core` APIs.  
-- `RuntimeContext`: Manages script state (e.g., variables, DB connections).  
+The Liwiro backend manages VDB connections and generated-service processes. The browser uses the backend for VDB Portal and VI Portal operations. Generated services run as separate processes and use their own runtime configuration to access VDB.
 
----
+Versa scripts can use the native `vdb` bridge. Authenticate and select the intended domain/database before accessing collections. Service scripts receive additional context such as request parameters and service environment values; standalone files do not automatically receive those inputs.
 
-## Dependency Graph
-```mermaid
-flowchart LR
-    vi --> vdb-core
-    vdb-query-engine --> vi
-    vdb-query-engine --> vdb-core
-```
+## Data and operations
 
-![Verun Dependency Graph](./images/verun%20dep%20graph%20sketch.png)
+VDB stores runtime data under `verun/vdb/__data__/`. Treat it as application data, including users, permissions, collection documents, and stored scripts. Use documented export and operational procedures when moving or resetting data. A runtime reset can delete application data.
 
----
-
-## Key Design Principles
-
-### 1. **Decoupling**
-- `vdb-core` has **no knowledge** of `vi` or `vdb-query-engine`.  
-- `vi` only interacts with `vdb-core` via its public Java API (no JSON/BSON).  
-
-### 2. **Performance**
-- **Native Types**: `vdb-core` avoids serialization overhead by using Java primitives.  
-- **Script Caching**: `vi` caches compiled ASTs for frequently used scripts.  
-
----
-
-## Data Flow
-1. **Query Execution**  
-   ```plaintext
-   CLI/API → vdb-query-engine → QueryParser → ScriptOrchestrator → vi → vdb-core
-   ```  
-2. **Script Execution**  
-   ```plaintext
-   vi → vdb-core (for storage) → ResultAggregator → JSON/BSON output
-   ```
-
----
-
-## Example API Contracts
-
-### `vdb-core` Interface
-```java
-public interface DocumentStore {
-    void insert(String collection, Map<String, Object> document);
-    List<Map<String, Object>> find(String collection, Bson filter);
-    void update(String collection, Bson filter, Map<String, Object> updates);
-    void delete(String collection, Bson filter);
-}
-```
-
-### `vi` Script Execution API
-```java
-public class ScriptRuntime {
-    public Object execute(String scriptCode, Map<String, Object> context) {
-        // Parses script, injects context, and returns result
-    }
-}
-```
-
----
-
-## Performance Considerations
-- **Minimal Serialization**: `vdb-core` and `vi` exchange data as Java objects.  
-- **Bulk Operations**: `vdb-query-engine` batches script executions where possible.  
-- **Indexed Scripts**: Frequently used scripts are precompiled and cached.  
-
----
-
-## Development Guidelines
-1. **Module Isolation**  
-   - Never introduce `vi` dependencies in `vdb-core`.  
-2. **Testing**  
-   - `vdb-core` tests focus on storage correctness.  
-   - `vdb-query-engine` tests validate script/query integration.  
-3. **Dependency Management**  
-   - Use Maven/Gradle to enforce module boundaries.  
-
----
-
-## Future Directions
-- **Distributed Queries**: Extend `vdb-query-engine` to shard scripts across nodes.  
-- **JIT Compilation**: Enhance `vi` with GraalVM for faster script execution.  
-
----
-
-_Last Updated: [17/03/2025]_ &copy; Zulan | Developed by [Bwalya Cameron Chishimba (Zulan)](https://zulan.io/folio/verun)
+See [VDB setup and operations](vdb/setup-and-operations.md), [VQL reference](vdb/vql-reference.md), [Versa runtime usage](versa/runtime-cli-repl.md), and [Liwiro runtime flows](../integration/runtime-flows.md).

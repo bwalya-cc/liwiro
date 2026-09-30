@@ -170,7 +170,7 @@
           },
           {
             "title": "Request Contract",
-            "body": "The request examples below are copied from the LAPIS endpoint definition and are the default values used by the interactive docs.\n\nExample query JSON:\n{\n  \"scenario\": \"kalulu-onboarding-flow\"\n}\n\nExample body JSON:\n{\n  \"sessionId\": \"sess-kalulu-001\",\n  \"userId\": \"user-kalulu-001\",\n  \"state\": \"active\",\n  \"payload\": {}\n}\n\nExample headers:\n{\n  \"X-Trace-Id\": \"demo-trace-001\"\n}"
+            "body": "The request examples below are copied from the LAPIS endpoint definition and are the default values used by the interactive docs.\n\nExample query JSON:\n{\n  \"scenario\": \"kalulu-onboarding-flow\"\n}\n\nExample body JSON:\n{\n  \"sessionId\": \"sess-validation-001\",\n  \"userId\": \"user-validation-001\",\n  \"state\": \"active\",\n  \"payload\": {}\n}\n\nExample headers:\n{\n  \"X-Trace-Id\": \"demo-trace-001\"\n}"
           },
           {
             "title": "Parameters",
@@ -322,7 +322,7 @@
       "developerNotes": "crud endpoint for /sessions; requiresAuth=True.",
       "exampleParams": {
         "query": {
-          "sessionId": "sess-kalulu-001"
+          "sessionId": "sess-validation-001"
         },
         "headers": {
           "X-Trace-Id": "demo-trace-001"
@@ -338,7 +338,7 @@
           },
           {
             "title": "Request Contract",
-            "body": "The request examples below are copied from the LAPIS endpoint definition and are the default values used by the interactive docs.\n\nExample query JSON:\n{\n  \"sessionId\": \"sess-kalulu-001\"\n}\n\nExample body JSON:\n{}\n\nExample headers:\n{\n  \"X-Trace-Id\": \"demo-trace-001\"\n}"
+            "body": "The request examples below are copied from the LAPIS endpoint definition and are the default values used by the interactive docs.\n\nExample query JSON:\n{\n  \"sessionId\": \"sess-validation-001\"\n}\n\nExample body JSON:\n{}\n\nExample headers:\n{\n  \"X-Trace-Id\": \"demo-trace-001\"\n}"
           },
           {
             "title": "Parameters",

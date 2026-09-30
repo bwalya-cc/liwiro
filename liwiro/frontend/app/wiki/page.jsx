@@ -15,7 +15,7 @@ export default function WikiPage() {
     if (!normalizedTerm) {
       return true
     }
-    const haystack = [page.title, page.summary, page.category, ...(page.highlights || []), ...((page.tags || []))].join(" ").toLowerCase()
+    const haystack = [page.title, page.summary, page.category, page.content, ...(page.highlights || []), ...((page.tags || []))].join(" ").toLowerCase()
     return haystack.includes(normalizedTerm)
   }, [normalizedTerm])
 
@@ -55,7 +55,7 @@ export default function WikiPage() {
         </div>
       }
       systemTitle="Getting Started"
-      systemDescription="If you are new, read these pages in order. If not, jump straight to the subsystem catalog."
+      systemDescription="New to Liwiro? Start with these guides, or browse by topic below."
       editorTitle="Guides"
       editorDescription="Browse the public Liwiro manual."
       systemPanel={
@@ -92,7 +92,7 @@ export default function WikiPage() {
             </CardHeader>
             <CardContent className="space-y-2 text-sm text-slate-300">
               <p>Use the left panel for the fastest onboarding path.</p>
-              <p>Use the catalog when you already know the subsystem or artifact you need.</p>
+              <p>Browse the guides to find the tool or task you need.</p>
               <p>Search by product terms like Versa, VDB, VQL, LAPIS, auth, or dry-run.</p>
               <p>All wiki pages are readable without signing in.</p>
             </CardContent>

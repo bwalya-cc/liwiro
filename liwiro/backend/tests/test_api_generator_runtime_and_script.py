@@ -184,6 +184,11 @@ class _FailingDomainManager(_FakeDomainManager):
         return False
 
 
+class _UniqueConflictDomainManager(_FakeDomainManager):
+    def create_document(self, model_name, data):
+        return False, {"error": "Unique constraint failed for field 'sku': SKU-VALIDATION-9001"}
+
+
 class ApiGeneratorTests(unittest.TestCase):
     @patch("models.domain.DomainManager", _FailingDomainManager)
     def test_generation_fails_fast_when_service_workspace_cannot_be_prepared(self):
@@ -305,6 +310,23 @@ class ApiGeneratorTests(unittest.TestCase):
                 },
             },
         }
+
+    @patch("models.domain.DomainManager", _UniqueConflictDomainManager)
+    def test_crud_create_reports_unique_constraint_as_conflict(self):
+        cfg = self._crud_cfg()
+        cfg["endpoints"]["create_users"] = {
+            "method": "POST",
+            "path": "/users",
+            "operationType": "crud",
+            "crudOperation": "create",
+            "linkedModel": "User",
+        }
+
+        app = generate_api_service(cfg)
+        response = app.test_client().post("/api/v1/users", json={"username": "SKU-VALIDATION-9001"})
+
+        self.assertEqual(response.status_code, 409)
+        self.assertTrue((response.get_json() or {}).get("conflict"))
 
     def _custom_vql_cfg(self):
         return {

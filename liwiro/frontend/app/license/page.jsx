@@ -39,9 +39,9 @@ export default async function LicensePage() {
       title="Open-source license"
       description="Repository licensing, attribution, and the full license text displayed directly in the workspace."
       systemTitle="License Summary"
-      systemDescription="Primary license type and attribution details for this repository."
+      systemDescription="License terms and attribution details for Liwiro."
       editorTitle="License Text"
-      editorDescription="Full source text from the repository license files."
+      editorDescription="Read the full license and attribution notice."
       systemPanel={
         <div className="space-y-4">
           <div className="rounded-[1.25rem] border border-white/10 bg-white/5 p-4">
@@ -54,9 +54,9 @@ export default async function LicensePage() {
             <div className="relative mt-3">
               <CopyIconButton
                 text={noticeText}
-                label="Copy repository notice"
+                label="Copy attribution notice"
                 successMessage="Repository notice copied"
-                errorMessage="Failed to copy repository notice"
+                errorMessage="Failed to copy attribution notice"
                 className="absolute right-3 top-3 border-white/10 bg-slate-950/90 text-slate-100 hover:bg-slate-900 hover:text-white"
               />
               <pre className="overflow-x-auto whitespace-pre-wrap rounded-2xl border border-white/10 bg-[rgba(5,12,20,0.96)] p-4 text-xs leading-6 text-slate-200">

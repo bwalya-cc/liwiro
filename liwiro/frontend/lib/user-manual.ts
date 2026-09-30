@@ -38,7 +38,7 @@ The platform login, service bearer tokens, and VDB credentials are separate.`,
   },
   {
     slug: "authentication", title: "Service Authentication", category: "Security", audience: "Service authors and operators", subsystem: "security", order: 20, gettingStarted: true,
-    summary: "Connect protected services to an authenticator through its real sign-in and sign-out endpoints.", tags: ["auth", "bearer", "jwt", "services"], related: ["service-builder", "service-manager"],
+    summary: "Connect protected services to an authenticator using its sign-in and sign-out endpoints.", tags: ["auth", "bearer", "jwt", "services"], related: ["service-builder", "service-manager"],
     content: `# Service Authentication
 
 Liwiro uses bearer tokens for protected generated-service endpoints. The authenticator owns its users and token endpoints; dependent services verify the tokens it issues.
@@ -54,7 +54,7 @@ Seed or create a user before signing in. A successful sign-in response must incl
 
 ## Connect a dependent service
 
-For a service with protected routes, enable authentication and select the authenticator by its exact service name. Save the service so Liwiro restarts it with the selected auth configuration. Do not configure a made-up proxy path on the dependent service.
+For a service with protected routes, enable authentication and select the authenticator by its exact service name. Save the service so Liwiro restarts it with the selected auth configuration. Use the sign-in and sign-out paths configured on the authenticator.
 
 ## Test protected routes
 
@@ -85,7 +85,7 @@ Provide a unique API name, a base path beginning with \`/\`, a semantic version 
 - **Custom** endpoints use a readable VDB command in \`vqlQuery\`.
 - **Script** endpoints use a complete Versa script in \`versaScript\`.
 
-Set **Requires Auth** only after selecting an authenticator. Validation blocks incomplete contracts before generation.`,
+Set **Requires Auth** only after selecting an authenticator. Liwiro checks for missing or invalid settings before creating the service.`,
   },
   {
     slug: "service-manager", title: "Manage and Edit a Service", category: "Services", audience: "Service operators", subsystem: "services", order: 40, gettingStarted: true,
@@ -96,7 +96,7 @@ Use the structured editor to change endpoint method, path, operation type, auth 
 
 ## Save endpoint edits
 
-Choose **Save Service Configuration + Restart** after making changes. Liwiro validates the complete LAPIS configuration, stores it, restarts the service, and opens the restarted service record. The new process ID is used for later edits and tests.
+Choose **Save Service Configuration + Restart** after making changes. Liwiro validates the complete LAPIS configuration, stores it, restarts the service, and opens the restarted service record. Continue editing and testing from the reopened service.
 
 If validation fails, no restart is performed. Fix the named endpoint or model relationship and save again.
 

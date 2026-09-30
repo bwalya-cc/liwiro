@@ -9,16 +9,16 @@ Use this folder as a practical reference set for writing, validating, and runnin
 - `docs/verun/guide/versa-guide.md`
   - stepwise beginner → intermediate → pro checkpoints, with tasks such as running the REPL, importing modules, exercising the `vdb` bridge, and exploring runtime CLI/REPL debugging. Follow the links in each section before digging into the detailed references.
 
-The combined canonical bundle now lives in `verun/vi/verse-verun-reference/reference.json`. Use that when you need the implementation-backed source of truth that includes both Versa and VDB, then fall back to this folder for long-form companion notes.
+For a searchable, machine-readable reference covering both Versa and VDB, use `verun/vi/verse-verun-reference/reference.json`. The guides below provide examples and step-by-step instructions.
 
 ## Fast path
 
-Read these in order when you need to build or repair real Versa code:
+Read these in order when you need to write or troubleshoot Versa code:
 
 1. `docs/verun/versa/syntax.md`
    This is the language reference for statements, expressions, control flow, and literal shapes.
 2. `verun/vi/verse-verun-reference/reference.json`
-   This is the canonical machine-readable Verse-Verun reference bundle with the full Versa slice plus shared Versa/VDB integration sections.
+   Look up Versa features and shared Versa/VDB integration details in a machine-readable format.
 3. `docs/verun/versa/syntax-rules.md`
    This is the rules-and-mistakes companion. Use it for parser errors, invalid constructs, and authoring constraints.
 4. `docs/verun/versa/modules.md`
@@ -58,13 +58,4 @@ Read these in order when you need to build or repair real Versa code:
 - Keep module imports at the top of the file.
 - Import a module before using it as a namespace, for example `vdb import *;`.
 - Service `versaScript` endpoints may rely on runtime-provided names such as `params` and `service`.
-- Prefer parser-valid, concrete Versa over pseudo-code or mixed-language syntax.
-
-## Runtime ownership
-
-- `verun/vi/src/main/java/verun/runtime/Main.java`
-  Runtime entry point for file execution and REPL sessions.
-- `verun/vi/src/main/java/verun/runtime/parser`
-  Syntax parsing and chunk completeness.
-- `verun/vi/src/main/java/verun/runtime/evaluator`
-  Execution, built-ins, module injection, and VDB bridge behavior.
+- Use the syntax examples in this guide when writing executable Versa scripts.

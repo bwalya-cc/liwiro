@@ -5,6 +5,8 @@ from typing import Any
 
 import requests
 
+from .settings import normalize_usage_level, OUTPUT_TOKEN_FLOORS
+
 from .base import (
     AIAuthenticationError,
     AICapabilities,
@@ -19,9 +21,10 @@ from .base import (
 
 
 class OpenAIResponsesProvider(AIProvider):
-    def __init__(self, api_key: str, model: str):
+    def __init__(self, api_key: str, model: str, usage_level: str = "medium"):
+        self.usage_level = normalize_usage_level(usage_level)
         self.api_key = str(api_key or "").strip()
-        self.model = str(model or "gpt-5-mini").strip() or "gpt-5-mini"
+        self.model = str(model or "gpt-6-luna").strip() or "gpt-6-luna"
         if not self.api_key:
             raise AIConfigurationError("OPENAI_API_KEY is required when AI_PROVIDER=openai")
 
@@ -75,9 +78,9 @@ class OpenAIResponsesProvider(AIProvider):
             "max_output_tokens": int(request.max_output_tokens or 1200),
             "text": {"format": {"type": "text"}},
         }
-        if selected_model.startswith(("gpt-5", "o1", "o3", "o4")):
-            payload["reasoning"] = {"effort": "low"}
-            payload["max_output_tokens"] = max(4096, payload["max_output_tokens"])
+        if selected_model.startswith(("gpt-5", "gpt-6", "o1", "o3", "o4")):
+            payload["reasoning"] = {"effort": self.usage_level}
+            payload["max_output_tokens"] = max(OUTPUT_TOKEN_FLOORS[self.usage_level], payload["max_output_tokens"])
         else:
             payload["temperature"] = float(request.temperature)
         if request.structured_output_schema:

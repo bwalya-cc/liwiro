@@ -9,14 +9,14 @@ Use this folder as the practical reference for VDB setup, transport, commands, a
 - `docs/verun/guide/vdb-guide.md`
   - beginner → intermediate → pro checkpoints focused on starting VDB, managing domains/collections, and mastering VQL/TUMI auth plus service integration, with links into the deeper reference docs.
 
-The canonical combined bundle now lives in `verun/vi/verse-verun-reference/reference.json`. Use that when you need the implementation-backed VDB reference that is structured at the same level as the Versa half, then use this folder for longer operational companion material.
+For a searchable, machine-readable reference covering both Versa and VDB, use `verun/vi/verse-verun-reference/reference.json`. The guides below provide examples and step-by-step instructions.
 
 ## Fast path
 
 1. `docs/verun/vdb/setup-and-operations.md`
    Use this for startup, runtime location, transport mode, and operational checks. It also explains the shared paginated console/server help catalog and its focused command lookups.
 2. `verun/vi/verse-verun-reference/reference.json`
-   Use this for the canonical machine-readable VDB and shared-runtime reference that Verse agents can also retrieve from directly.
+   Use this to look up VDB commands and shared-runtime details in a machine-readable format.
 3. `docs/verun/vdb/vql-reference.md`
    Use this for command families, inputs, output shapes, and valid JSON examples that match the help section payloads.
 4. `docs/verun/vdb/usage-guide.md`
@@ -28,7 +28,7 @@ The canonical combined bundle now lives in `verun/vi/verse-verun-reference/refer
 
 ## What VDB is
 
-VDB is the platform data layer. It owns:
+VDB is the platform data layer. Use it to manage:
 
 - domains and databases
 - collection models and documents

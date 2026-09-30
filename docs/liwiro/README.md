@@ -1,50 +1,33 @@
-# Liwiro Documentation
+# Liwiro Guide
 
-Liwiro is the control plane and operator workspace in this repository.
+Use Liwiro to design, run, and manage services from one workspace.
 
-It owns:
+## Get Started
 
-- setup and sign-in
-- the workspace shell and navigation
-- service authoring and service generation
-- service lifecycle management
-- VDB Portal and VI Portal access through backend-mediated routes
-- settings, platform administration, and public wiki/manual pages
+Follow the [quick start](../../README.md#quick-start), then open the frontend address shown by the launcher. Set up your account and sign in.
 
-## Read This Section With
+- **Service Builder**: define models, authentication, and endpoints, or load a LAPIS example.
+- **Service Manager**: start and stop services, edit their configuration, and test routes.
+- **VDB Portal**: select a database workspace and run queries or manage access.
+- **VI Portal**: write and run Versa files.
+- **Verse Chat**: work with specialists on service design, analysis, reliability, and documentation.
+- **Settings**: configure the platform and manage users.
+- **Wiki**: browse the manual without signing in.
 
-- `docs/integration/liwiro-platform.md`
-  - backend/frontend responsibilities and how Liwiro sits over Verun
-- `docs/integration/liwiro-cli.md`
-  - headless control-plane operations through `./liwiro.sh`
-- `docs/reference/command-cheatsheet.md`
-  - quick startup and operator commands
+## Guides
 
-## Liwiro-Specific Notes
+- [Service management](service-management-and-governance.md): edit services, test routes, and review the impact of changes.
+- [Verse Chat](verse-chat.md): configure providers, choose specialists, and work with shared context.
+- [Command-line usage](../integration/liwiro-cli.md): manage Liwiro through `./liwiro.sh`.
+- [Command cheatsheet](../reference/command-cheatsheet.md): look up startup and operator commands.
+- [Platform integration](../integration/liwiro-platform.md): understand how Liwiro connects to its runtimes.
 
-- `docs/liwiro/verse-chat.md`
-  - Verse Chat architecture, provider setup, routing, mind-share, and agent rename behavior
-- `docs/liwiro/service-management-and-governance.md`
-  - safe service lifecycle, route testing, change impact warnings, error semantics, and release evidence
+## Running Locally
 
-## Local Development
+Start Liwiro with `./liwiro/scripts/start_all.sh`. The launcher detects your platform and Python installation. If a default frontend, backend, or VDB HTTP port is busy, it uses the next free port.
 
-The canonical local launcher is `./liwiro/scripts/start_all.sh`.
+Keep local credentials in `.env.local` files. Authentication and runtime state are stored under `liwiro/backend/.runtime/`.
 
-That entrypoint now keeps the public command surface stable while routing internally through:
+## Service API Documentation
 
-- `liwiro/scripts/unix/`
-- `liwiro/scripts/win/`
-
-Runtime behavior to expect:
-
-- host platform is detected from runtime OS signals rather than shell type
-- first successful startup writes `tmp/platform-runtime.json`
-- first successful Python discovery writes `tmp/runtime-tools.json`
-- backend auth/runtime state is written under `liwiro/backend/.runtime/`
-- local secrets belong in `.env.local` files and other ignored local runtime files only
-- frontend, backend, and local VDB HTTP startup automatically move to the next free port when defaults are busy
-
-## Runtime Docs Boundary
-
-Generated services can expose `/liwiro/docs` and `/liwiro/docs.json` at runtime. Those are service-level API docs, not the repository manuals under `docs/`.
+Generated services can expose `/liwiro/docs` and `/liwiro/docs.json`. Use those pages for the API reference of a specific service, and these guides for working with Liwiro itself.

@@ -23,7 +23,7 @@ from app.verse.providers.google import GoogleGeminiProvider
 from app.verse.providers.openai import OpenAIResponsesProvider
 from app.verse.retrieval import _manual_candidates, build_liwiro_reference_context, build_prompt_context_bundle, build_versa_reference_context
 from app.verse.routing import VerseRouter
-from app.verse.service import VerseService, _canonicalize_vdb_artifact_query
+from app.verse.service import VerseService, _canonicalize_vdb_artifact_query, _is_simple_direct_versa_request
 from app.verse import store as verse_store_module
 
 
@@ -54,6 +54,20 @@ class _RecordingProvider(_SequenceProvider):
 
 
 class VerseRuntimeTests(unittest.TestCase):
+    def test_self_contained_vdb_cli_skips_confirmation_gate(self):
+        self.assertTrue(
+            _is_simple_direct_versa_request(
+                "Fix my hangman game in the scratch folder as an interactive menu-driven Versa CLI with VDB storage",
+                desired_kind="vi-script",
+            )
+        )
+        self.assertFalse(
+            _is_simple_direct_versa_request(
+                "Build a Versa CLI with authentication and VDB storage",
+                desired_kind="vi-script",
+            )
+        )
+
     def test_vdb_artifact_normalization_requires_readable_commands(self):
         self.assertEqual(_canonicalize_vdb_artifact_query("read users"), "read users")
         self.assertEqual(_canonicalize_vdb_artifact_query("read collection orders"), "read collection orders")
@@ -1665,7 +1679,8 @@ class VerseRuntimeTests(unittest.TestCase):
         self.assertEqual(result.usage["promptTokenCount"], 12)
         call = post.call_args
         self.assertIn("generateContent", call.args[0])
-        self.assertEqual(call.kwargs["json"]["generationConfig"]["maxOutputTokens"], 128)
+        self.assertEqual(call.kwargs["json"]["generationConfig"]["maxOutputTokens"], 8192)
+        self.assertEqual(call.kwargs["json"]["generationConfig"]["thinkingConfig"]["thinkingLevel"], "MEDIUM")
         self.assertEqual(call.kwargs["json"]["contents"][0]["parts"][0]["text"], "hello")
 
     def test_openai_provider_posts_expected_payload(self):
@@ -1705,7 +1720,7 @@ class VerseRuntimeTests(unittest.TestCase):
         call = post.call_args
         self.assertEqual(call.args[0], "https://api.openai.com/v1/responses")
         self.assertGreaterEqual(call.kwargs["json"]["max_output_tokens"], 4096)
-        self.assertEqual(call.kwargs["json"]["reasoning"]["effort"], "low")
+        self.assertEqual(call.kwargs["json"]["reasoning"]["effort"], "medium")
         self.assertEqual(call.kwargs["json"]["input"][0]["content"][0]["type"], "input_text")
         self.assertEqual(call.kwargs["json"]["input"][0]["content"][0]["text"], "hello")
         self.assertEqual(call.kwargs["json"]["text"]["format"]["type"], "json_schema")

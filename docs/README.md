@@ -1,76 +1,40 @@
-# Repository Documentation
+# Liwiro Documentation
 
-This `docs/` tree is the canonical documentation set for the repository.
-
-Use it as four main sections:
-
-- `docs/liwiro/`
-  - Liwiro product and operator-facing material
-- `docs/verun/`
-  - Verun internals, including Versa and VDB
-- `docs/integration/`
-  - how Liwiro, Verun, VDB, VI, generated services, and LAPIS fit together
-- `docs/reference/`
-  - quick lookup material, commands, and documentation maps
+Find guides for building services, running Versa scripts, and managing your data.
 
 ## Start Here
 
-Read in this order if you want the shortest path to a full picture:
-
-1. `docs/liwiro/README.md`
-2. `docs/verun/README.md`
-3. `docs/integration/README.md`
-4. `docs/reference/documentation-map.md`
+1. [Set up and use Liwiro](liwiro/README.md)
+2. [Explore Versa and VDB](verun/README.md)
+3. [Connect services and runtimes](integration/README.md)
+4. [Look up commands](reference/command-cheatsheet.md)
 
 ## Local Startup
 
-For a fresh local checkout:
+Follow the [quick start](../README.md#quick-start) to copy the environment templates, add your local credentials, and run `./liwiro/scripts/start_all.sh`.
 
-1. Copy the example env files into local ignored env files.
-2. Put real credentials only in the local env files or other ignored local files.
-3. Run `./liwiro/scripts/start_all.sh`.
+Open the frontend address shown in the startup output. The launcher detects your platform and Python installation, and uses the next free local port if a default port is busy.
 
-The startup layer is platform-aware and terminal-agnostic:
+## Browse by Task
 
-- public entrypoints stay under `liwiro/scripts/`
-- platform-specific implementations live under `liwiro/scripts/unix/` and `liwiro/scripts/win/`
-- host detection is cached in `tmp/platform-runtime.json` after a successful startup
-- Python discovery is cached in `tmp/runtime-tools.json`
-- busy default ports automatically roll forward to the next free local port
+- [Build and manage services](liwiro/service-management-and-governance.md)
+- [Configure AI providers and usage](liwiro/ai-setup.md)
+- [Explore service data with Ananse](liwiro/ananse.md)
+- [Manage settings and access](liwiro/settings-and-access.md)
+- [Work with Verse specialists](liwiro/verse-chat.md)
+- [Choose a LAPIS example](integration/lapis-examples.md)
+- [Write and run Versa](verun/versa/README.md)
+- [Set up and query VDB](verun/vdb/README.md)
+- [Manage Liwiro from the command line](integration/liwiro-cli.md)
+- [Understand how the platform fits together](integration/system-description.md)
+- [Browse the documentation map](reference/documentation-map.md)
 
-## Structure
+## Service API Documentation
 
-- `docs/liwiro/`
-  - Liwiro-specific guidance and platform-focused notes
-- `docs/verun/`
-  - Verun architecture, type system, Versa docs, and VDB docs
-- `docs/integration/`
-  - system description, architecture, component map, runtime flows, and Liwiro integration
-- `docs/reference/`
-  - command cheatsheets and document indexes
-- `docs/legal/`
-  - license notice, third-party licenses, credits, and commercial-policy notes
-- `docs/compliance/`
-  - compliance-specific operational notes such as MIT acceptance behavior
-- `docs/archive/`
-  - historical audits, research notes, and roadmap material
-- `docs/assets/`
-  - screenshots and shared documentation assets
+Generated services can expose their own API reference at `/liwiro/docs` and `/liwiro/docs.json`. Open a service in Service Manager to find its documentation and test its routes.
 
-## Storage Note
+## Other Resources
 
-`verun/vdb/__data__` is intentionally checked in as an empty fresh-start directory. VDB recreates operational state there on demand, and structured runtime state under that tree is BSON-backed rather than JSON-backed.
-
-## Runtime Docs Note
-
-The generated-service route `/liwiro/docs` and `/liwiro/docs.json` is runtime API documentation exposed by generated services. It is separate from this repository documentation tree.
-
-## Useful Entry Points
-
-- `docs/integration/system-description.md`
-- `docs/integration/liwiro-platform.md`
-- `docs/integration/lapis-examples.md`
-- `docs/liwiro/service-management-and-governance.md`
-- `docs/verun/versa/README.md`
-- `docs/verun/vdb/README.md`
-- `docs/reference/command-cheatsheet.md`
+- `legal/`: licenses, third-party credits, and commercial-policy notes
+- `compliance/`: operational guidance for license acceptance
+- `assets/`: screenshots and shared documentation images

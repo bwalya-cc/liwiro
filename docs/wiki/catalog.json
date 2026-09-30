@@ -1,0 +1,705 @@
+[
+  {
+    "slug": "getting-started",
+    "title": "Getting Started",
+    "summary": "Set up Liwiro, create a service, and test it from one workspace.",
+    "category": "Platform",
+    "audience": "All users",
+    "subsystem": "platform",
+    "source": "docs/wiki/getting-started.md",
+    "tags": [
+      "setup",
+      "services",
+      "overview"
+    ],
+    "related": [
+      "authentication",
+      "service-builder",
+      "service-manager"
+    ]
+  },
+  {
+    "slug": "authentication",
+    "title": "Service Authentication",
+    "summary": "Connect protected services to an authenticator using its sign-in and sign-out endpoints.",
+    "category": "Security",
+    "audience": "Service authors and operators",
+    "subsystem": "security",
+    "source": "docs/wiki/authentication.md",
+    "tags": [
+      "auth",
+      "bearer",
+      "jwt",
+      "services"
+    ],
+    "related": [
+      "service-builder",
+      "service-manager"
+    ]
+  },
+  {
+    "slug": "service-builder",
+    "title": "Build a Service",
+    "summary": "Define metadata, models, endpoints, and authentication in LAPIS.",
+    "category": "Services",
+    "audience": "Service authors",
+    "subsystem": "services",
+    "source": "docs/wiki/service-builder.md",
+    "tags": [
+      "lapis",
+      "builder",
+      "endpoints"
+    ],
+    "related": [
+      "authentication",
+      "service-manager",
+      "endpoint-types"
+    ]
+  },
+  {
+    "slug": "service-manager",
+    "title": "Manage and Edit a Service",
+    "summary": "Edit endpoint definitions, save them, restart the service, and test the running result.",
+    "category": "Services",
+    "audience": "Service operators",
+    "subsystem": "services",
+    "source": "docs/wiki/service-manager.md",
+    "tags": [
+      "manager",
+      "endpoints",
+      "restart",
+      "testing"
+    ],
+    "related": [
+      "authentication",
+      "endpoint-types"
+    ]
+  },
+  {
+    "slug": "endpoint-types",
+    "title": "Endpoint Types",
+    "summary": "Use the correct endpoint type and required fields for generated services.",
+    "category": "Services",
+    "audience": "Service authors",
+    "subsystem": "services",
+    "source": "docs/wiki/endpoint-types.md",
+    "tags": [
+      "crud",
+      "vql",
+      "versa",
+      "endpoints"
+    ],
+    "related": [
+      "service-builder",
+      "service-manager"
+    ]
+  },
+  {
+    "slug": "versa",
+    "title": "Versa and VI",
+    "summary": "Write and validate Versa files and service scripts.",
+    "category": "VI Runtime",
+    "audience": "Developers",
+    "subsystem": "vi",
+    "source": "docs/wiki/versa.md",
+    "tags": [
+      "versa",
+      "vi",
+      "scripts"
+    ],
+    "related": [
+      "endpoint-types"
+    ]
+  },
+  {
+    "slug": "vdb",
+    "title": "VDB Workspace",
+    "summary": "Work with VDB only after authentication and workspace selection.",
+    "category": "VDB",
+    "audience": "Developers and operators",
+    "subsystem": "vdb",
+    "source": "docs/wiki/vdb.md",
+    "tags": [
+      "vdb",
+      "vql",
+      "data"
+    ],
+    "related": [
+      "getting-started"
+    ]
+  },
+  {
+    "slug": "architecture",
+    "title": "Architecture Overview",
+    "summary": "The repository is a layered architecture with a generated-service runtime in the middle.",
+    "category": "Integration",
+    "audience": "Service authors and operators",
+    "subsystem": "platform",
+    "source": "docs/integration/architecture.md",
+    "tags": [
+      "architecture",
+      "integration"
+    ],
+    "related": []
+  },
+  {
+    "slug": "component-map",
+    "title": "Component Map",
+    "summary": "This page is the repository-wide component index. Use it when you need to answer four questions quickly:",
+    "category": "Integration",
+    "audience": "Service authors and operators",
+    "subsystem": "platform",
+    "source": "docs/integration/component-map.md",
+    "tags": [
+      "component-map",
+      "integration"
+    ],
+    "related": []
+  },
+  {
+    "slug": "lapis-examples",
+    "title": "LAPIS examples and generation guide",
+    "summary": "LAPIS examples and generation guide. Usage, examples, and troubleshooting.",
+    "category": "Integration",
+    "audience": "Service authors and operators",
+    "subsystem": "platform",
+    "source": "docs/integration/lapis-examples.md",
+    "tags": [
+      "lapis-examples",
+      "integration"
+    ],
+    "related": []
+  },
+  {
+    "slug": "liwiro-cli",
+    "title": "Liwiro CLI",
+    "summary": "`./liwiro.sh` is the terminal-first control plane for Liwiro. It now covers:",
+    "category": "Integration",
+    "audience": "Service authors and operators",
+    "subsystem": "platform",
+    "source": "docs/integration/liwiro-cli.md",
+    "tags": [
+      "liwiro-cli",
+      "integration"
+    ],
+    "related": []
+  },
+  {
+    "slug": "liwiro-platform",
+    "title": "Liwiro Integration",
+    "summary": "This document explains how Liwiro turns the raw Verun runtime pieces into an operator-managed platform.",
+    "category": "Integration",
+    "audience": "Service authors and operators",
+    "subsystem": "platform",
+    "source": "docs/integration/liwiro-platform.md",
+    "tags": [
+      "liwiro-platform",
+      "integration"
+    ],
+    "related": []
+  },
+  {
+    "slug": "runtime-flows",
+    "title": "Runtime Flows",
+    "summary": "This page describes the major end-to-end sequences in the platform.",
+    "category": "Integration",
+    "audience": "Service authors and operators",
+    "subsystem": "platform",
+    "source": "docs/integration/runtime-flows.md",
+    "tags": [
+      "runtime-flows",
+      "integration"
+    ],
+    "related": []
+  },
+  {
+    "slug": "system-description",
+    "title": "Verun + Liwiro System Description",
+    "summary": "This repository is a complete platform stack for designing, generating, running, and operating data-backed services.",
+    "category": "Integration",
+    "audience": "Service authors and operators",
+    "subsystem": "platform",
+    "source": "docs/integration/system-description.md",
+    "tags": [
+      "system-description",
+      "integration"
+    ],
+    "related": []
+  },
+  {
+    "slug": "ai-setup",
+    "title": "AI Setup and Usage",
+    "summary": "AI Setup and Usage. Usage, examples, and troubleshooting.",
+    "category": "Platform",
+    "audience": "Service authors and operators",
+    "subsystem": "platform",
+    "source": "docs/liwiro/ai-setup.md",
+    "tags": [
+      "ai-setup",
+      "platform"
+    ],
+    "related": []
+  },
+  {
+    "slug": "ananse",
+    "title": "Ananse Workbench",
+    "summary": "Ananse Workbench. Usage, examples, and troubleshooting.",
+    "category": "Platform",
+    "audience": "Service authors and operators",
+    "subsystem": "platform",
+    "source": "docs/liwiro/ananse.md",
+    "tags": [
+      "ananse",
+      "platform"
+    ],
+    "related": []
+  },
+  {
+    "slug": "service-management-and-governance",
+    "title": "Service Management and Governance",
+    "summary": "Liwiro manages a service as a versioned LAPIS contract plus its local runtime,",
+    "category": "Platform",
+    "audience": "Service authors and operators",
+    "subsystem": "platform",
+    "source": "docs/liwiro/service-management-and-governance.md",
+    "tags": [
+      "service-management-and-governance",
+      "platform"
+    ],
+    "related": []
+  },
+  {
+    "slug": "settings-and-access",
+    "title": "Settings and Access",
+    "summary": "Use **Settings** to configure Liwiro, manage users, and adjust Verse collaboration. Available controls depend on your account permissions.",
+    "category": "Platform",
+    "audience": "Service authors and operators",
+    "subsystem": "platform",
+    "source": "docs/liwiro/settings-and-access.md",
+    "tags": [
+      "settings-and-access",
+      "platform"
+    ],
+    "related": []
+  },
+  {
+    "slug": "verse-chat",
+    "title": "Verse Chat in Liwiro",
+    "summary": "Verse Chat in Liwiro. Usage, examples, and troubleshooting.",
+    "category": "Platform",
+    "audience": "Service authors and operators",
+    "subsystem": "platform",
+    "source": "docs/liwiro/verse-chat.md",
+    "tags": [
+      "verse-chat",
+      "platform"
+    ],
+    "related": []
+  },
+  {
+    "slug": "command-cheatsheet",
+    "title": "Command Cheatsheet",
+    "summary": "This page is the practical operator/developer quick reference for the full stack.",
+    "category": "Reference",
+    "audience": "Service authors and operators",
+    "subsystem": "platform",
+    "source": "docs/reference/command-cheatsheet.md",
+    "tags": [
+      "command-cheatsheet",
+      "reference"
+    ],
+    "related": []
+  },
+  {
+    "slug": "documentation-map",
+    "title": "Documentation Map",
+    "summary": "This page is the quickest route through the repository documentation after the root index.",
+    "category": "Reference",
+    "audience": "Service authors and operators",
+    "subsystem": "platform",
+    "source": "docs/reference/documentation-map.md",
+    "tags": [
+      "documentation-map",
+      "reference"
+    ],
+    "related": []
+  },
+  {
+    "slug": "verun-architecture",
+    "title": "Verun Architecture",
+    "summary": "Verun provides the Versa interpreter (VI) and VDB database used by Liwiro. The Maven project in `verun/pom.xml` contains two modules: `vi` and `vdb`.",
+    "category": "Runtime",
+    "audience": "Service authors and operators",
+    "subsystem": "platform",
+    "source": "docs/verun/architecture.md",
+    "tags": [
+      "architecture",
+      "runtime"
+    ],
+    "related": []
+  },
+  {
+    "slug": "vdb-guide",
+    "title": "VDB Guided Path",
+    "summary": "Walk through VDB setup, runtime operations, and advanced data/security workflows in three stages?with links to the companion reference files.",
+    "category": "Learning Paths",
+    "audience": "Service authors and operators",
+    "subsystem": "platform",
+    "source": "docs/verun/guide/vdb-guide.md",
+    "tags": [
+      "vdb-guide",
+      "learning paths"
+    ],
+    "related": []
+  },
+  {
+    "slug": "versa-guide",
+    "title": "Versa Guided Path",
+    "summary": "Build Versa fluency through three stages and keep the deeper references handy alongside each checkpoint.",
+    "category": "Learning Paths",
+    "audience": "Service authors and operators",
+    "subsystem": "platform",
+    "source": "docs/verun/guide/versa-guide.md",
+    "tags": [
+      "versa-guide",
+      "learning paths"
+    ],
+    "related": []
+  },
+  {
+    "slug": "type-system",
+    "title": "Verun Type System",
+    "summary": "This document explains the data types supported in the **Verun ecosystem**, including:",
+    "category": "Runtime",
+    "audience": "Service authors and operators",
+    "subsystem": "platform",
+    "source": "docs/verun/type-system.md",
+    "tags": [
+      "type-system",
+      "runtime"
+    ],
+    "related": []
+  },
+  {
+    "slug": "auth-and-rbac-notes",
+    "title": "Authentication & Authorization",
+    "summary": "1. **User Roles**:",
+    "category": "VDB",
+    "audience": "Service authors and operators",
+    "subsystem": "vdb",
+    "source": "docs/verun/vdb/auth-and-rbac-notes.md",
+    "tags": [
+      "auth-and-rbac-notes",
+      "vdb"
+    ],
+    "related": []
+  },
+  {
+    "slug": "echo-command",
+    "title": "VDB Echo Command",
+    "summary": "The `echo` command in VDB allows you to output messages in the console or add a note object to the result in the http server interface.",
+    "category": "VDB",
+    "audience": "Service authors and operators",
+    "subsystem": "vdb",
+    "source": "docs/verun/vdb/echo-command.md",
+    "tags": [
+      "echo-command",
+      "vdb"
+    ],
+    "related": []
+  },
+  {
+    "slug": "setup-and-operations",
+    "title": "VDB Setup and Operations",
+    "summary": "This page covers how VDB is built, started, authenticated, and operated in this repository.",
+    "category": "VDB",
+    "audience": "Service authors and operators",
+    "subsystem": "vdb",
+    "source": "docs/verun/vdb/setup-and-operations.md",
+    "tags": [
+      "setup-and-operations",
+      "vdb"
+    ],
+    "related": []
+  },
+  {
+    "slug": "tumi-rbac",
+    "title": "TUMI and RBAC",
+    "summary": "TUMI is VDB's user/role/permission command namespace. It is not a separate standalone module folder in this repository.",
+    "category": "VDB",
+    "audience": "Service authors and operators",
+    "subsystem": "vdb",
+    "source": "docs/verun/vdb/tumi-rbac.md",
+    "tags": [
+      "tumi-rbac",
+      "vdb"
+    ],
+    "related": []
+  },
+  {
+    "slug": "usage-guide",
+    "title": "VersaDB (VDB) Usage Guide",
+    "summary": "Use this guide to recall the most common command shapes, command sequence, and runtime methods that are referenced in both the interactive help and the public docs.",
+    "category": "VDB",
+    "audience": "Service authors and operators",
+    "subsystem": "vdb",
+    "source": "docs/verun/vdb/usage-guide.md",
+    "tags": [
+      "usage-guide",
+      "vdb"
+    ],
+    "related": []
+  },
+  {
+    "slug": "vql-reference",
+    "title": "VQL Reference",
+    "summary": "VQL Reference. Usage, examples, and troubleshooting.",
+    "category": "VDB",
+    "audience": "Service authors and operators",
+    "subsystem": "vdb",
+    "source": "docs/verun/vdb/vql-reference.md",
+    "tags": [
+      "vql-reference",
+      "vdb"
+    ],
+    "related": []
+  },
+  {
+    "slug": "datetime-custom-format",
+    "title": "VI Datetime Custom Formatting",
+    "summary": "Use `%`-style datetime tokens with `datetime` value helpers.",
+    "category": "Versa",
+    "audience": "Service authors and operators",
+    "subsystem": "vi",
+    "source": "docs/verun/versa/datetime-custom-format.md",
+    "tags": [
+      "datetime-custom-format",
+      "versa"
+    ],
+    "related": []
+  },
+  {
+    "slug": "module-crypto",
+    "title": "crypto Module",
+    "summary": "- `sha256(text)`",
+    "category": "Versa Modules",
+    "audience": "Service authors and operators",
+    "subsystem": "vi",
+    "source": "docs/verun/versa/modules/crypto.md",
+    "tags": [
+      "crypto",
+      "versa modules"
+    ],
+    "related": []
+  },
+  {
+    "slug": "module-datetime",
+    "title": "datetime Module",
+    "summary": "- `now()`",
+    "category": "Versa Modules",
+    "audience": "Service authors and operators",
+    "subsystem": "vi",
+    "source": "docs/verun/versa/modules/datetime.md",
+    "tags": [
+      "datetime",
+      "versa modules"
+    ],
+    "related": []
+  },
+  {
+    "slug": "module-email",
+    "title": "email Module",
+    "summary": "- `send(options)`",
+    "category": "Versa Modules",
+    "audience": "Service authors and operators",
+    "subsystem": "vi",
+    "source": "docs/verun/versa/modules/email.md",
+    "tags": [
+      "email",
+      "versa modules"
+    ],
+    "related": []
+  },
+  {
+    "slug": "module-filer",
+    "title": "filer Module",
+    "summary": "- `join(...parts)`",
+    "category": "Versa Modules",
+    "audience": "Service authors and operators",
+    "subsystem": "vi",
+    "source": "docs/verun/versa/modules/filer.md",
+    "tags": [
+      "filer",
+      "versa modules"
+    ],
+    "related": []
+  },
+  {
+    "slug": "module-http",
+    "title": "http Module",
+    "summary": "- `request(method, url, options={})`",
+    "category": "Versa Modules",
+    "audience": "Service authors and operators",
+    "subsystem": "vi",
+    "source": "docs/verun/versa/modules/http.md",
+    "tags": [
+      "http",
+      "versa modules"
+    ],
+    "related": []
+  },
+  {
+    "slug": "module-json_xml",
+    "title": "json_xml Module",
+    "summary": "`parse_xml(...)` returns the structured XML wrapper object (`root`, `name`, `attributes`, `children`, `text`) used by the runtime for XML-aware access.",
+    "category": "Versa Modules",
+    "audience": "Service authors and operators",
+    "subsystem": "vi",
+    "source": "docs/verun/versa/modules/json_xml.md",
+    "tags": [
+      "json_xml",
+      "versa modules"
+    ],
+    "related": []
+  },
+  {
+    "slug": "module-jwt",
+    "title": "jwt Module",
+    "summary": "- `sign(payloadObject, secret, options={})`",
+    "category": "Versa Modules",
+    "audience": "Service authors and operators",
+    "subsystem": "vi",
+    "source": "docs/verun/versa/modules/jwt.md",
+    "tags": [
+      "jwt",
+      "versa modules"
+    ],
+    "related": []
+  },
+  {
+    "slug": "module-random",
+    "title": "random Module",
+    "summary": "- `seed(value?)`",
+    "category": "Versa Modules",
+    "audience": "Service authors and operators",
+    "subsystem": "vi",
+    "source": "docs/verun/versa/modules/random.md",
+    "tags": [
+      "random",
+      "versa modules"
+    ],
+    "related": []
+  },
+  {
+    "slug": "module-time",
+    "title": "time Module",
+    "summary": "- `time()`",
+    "category": "Versa Modules",
+    "audience": "Service authors and operators",
+    "subsystem": "vi",
+    "source": "docs/verun/versa/modules/time.md",
+    "tags": [
+      "time",
+      "versa modules"
+    ],
+    "related": []
+  },
+  {
+    "slug": "module-vdb",
+    "title": "vdb Module",
+    "summary": "VDB commands are Versa-family statements. JSON is data only, never a command envelope:",
+    "category": "Versa Modules",
+    "audience": "Service authors and operators",
+    "subsystem": "vi",
+    "source": "docs/verun/versa/modules/vdb.md",
+    "tags": [
+      "vdb",
+      "versa modules"
+    ],
+    "related": []
+  },
+  {
+    "slug": "modules",
+    "title": "Versa Module Reference",
+    "summary": "This is the module index for runtime-injected Versa modules.",
+    "category": "Versa",
+    "audience": "Service authors and operators",
+    "subsystem": "vi",
+    "source": "docs/verun/versa/modules.md",
+    "tags": [
+      "modules",
+      "versa"
+    ],
+    "related": []
+  },
+  {
+    "slug": "runtime-cli-repl",
+    "title": "VI Runtime, CLI, and REPL",
+    "summary": "This page covers how the Versa runtime is launched and how its file and REPL modes behave in both direct and Liwiro-managed workflows.",
+    "category": "Versa",
+    "audience": "Service authors and operators",
+    "subsystem": "vi",
+    "source": "docs/verun/versa/runtime-cli-repl.md",
+    "tags": [
+      "runtime-cli-repl",
+      "versa"
+    ],
+    "related": []
+  },
+  {
+    "slug": "syntax-rules",
+    "title": "Versa Syntax Rules and Repair Guide",
+    "summary": "Use this document when a script fails validation or when you need the shortest path to a correct repair.",
+    "category": "Versa",
+    "audience": "Service authors and operators",
+    "subsystem": "vi",
+    "source": "docs/verun/versa/syntax-rules.md",
+    "tags": [
+      "syntax-rules",
+      "versa"
+    ],
+    "related": []
+  },
+  {
+    "slug": "syntax",
+    "title": "Versa Syntax Reference",
+    "summary": "This is the practical language reference for writing parser-valid Versa.",
+    "category": "Versa",
+    "audience": "Service authors and operators",
+    "subsystem": "vi",
+    "source": "docs/verun/versa/syntax.md",
+    "tags": [
+      "syntax",
+      "versa"
+    ],
+    "related": []
+  },
+  {
+    "slug": "vdb-module",
+    "title": "Versa `vdb` Bridge Reference",
+    "summary": "Use this document when writing Versa that talks to VDB.",
+    "category": "Versa",
+    "audience": "Service authors and operators",
+    "subsystem": "vi",
+    "source": "docs/verun/versa/vdb-module.md",
+    "tags": [
+      "vdb-module",
+      "versa"
+    ],
+    "related": []
+  },
+  {
+    "slug": "vdb-scripts-demo",
+    "title": "VI + VDB Scripts Demo",
+    "summary": "This guide shows how to store, execute, and manage Versa (`.versa`) code in VDB from:",
+    "category": "Versa",
+    "audience": "Service authors and operators",
+    "subsystem": "vi",
+    "source": "docs/verun/versa/vdb-scripts-demo.md",
+    "tags": [
+      "vdb-scripts-demo",
+      "versa"
+    ],
+    "related": []
+  }
+]

@@ -4,7 +4,7 @@
 
 Verse Chat is Liwiro's multi-agent collaboration workspace. It runs through the Liwiro backend, uses the `liwiro/verse` scaffold as the behavior spec, persists thread state durably in BSON-backed storage, and writes durable shared knowledge into `liwiro/verse/mind-share`.
 
-The product route remains `/verse-ai` for compatibility, but the product name in the UI is now **Verse Chat**.
+Open **Verse Chat** at `/verse-ai`, or use the assistant dock while working in Liwiro.
 
 ## Source of truth
 
@@ -249,18 +249,19 @@ Current providers:
 
 - Google Gemini
 - Anthropic Claude
-- OpenAI / ChatGPT API
+- OpenAI API
 
 Current config:
 
 ```env
 AI_PROVIDER=openai
+AI_USAGE_LEVEL=medium
 GOOGLE_API_KEY=change_me_google_api_key
-GOOGLE_MODEL=gemini-3-flash-preview
+GOOGLE_MODEL=gemini-3.8-flash
 ANTHROPIC_API_KEY=change_me_anthropic_api_key
-ANTHROPIC_MODEL=claude-sonnet-4-20250514
+ANTHROPIC_MODEL=claude-sonnet-5-5
 OPENAI_API_KEY=change_me_openai_api_key
-OPENAI_MODEL=gpt-5-mini
+OPENAI_MODEL=gpt-6-luna
 ```
 
 The backend default provider fallback is currently `openai`.
@@ -302,90 +303,9 @@ Ananse dataset and analysis APIs live alongside the rest of Verse under `/platfo
 - upload-backed dataset create
 - analysis refresh for a saved dataset
 
-## Google Gemini local developer setup
+## Provider Setup
 
-Use Google AI Studio as the first development path.
-
-1. Go to Google AI Studio.
-2. Sign in with a Google account.
-3. Create or view an API key.
-4. Store the key in local environment variables only.
-5. Configure Liwiro with:
-
-```env
-AI_PROVIDER=google
-GOOGLE_API_KEY=change_me_google_api_key
-GOOGLE_MODEL=gemini-3-flash-preview
-```
-
-Put those values in `liwiro/backend/.env.local` for local development. If you use the shared root local env file instead, place them in `liwiro/.env.local`.
-
-6. Start Liwiro and run a Verse Chat provider probe from the same machine as the backend:
-
-```bash
-curl -sS "http://127.0.0.1:5000/platform/verse/health?probe=1"
-```
-
-Expected behavior:
-
-- `configured: true`
-- `probe.ok: true` when the key and model are accepted
-
-Pricing note:
-
-- Gemini Developer API currently has both a free tier for testing and a paid tier with higher limits.
-
-## Anthropic Claude local developer setup
-
-Use Anthropic Claude as a paid API path.
-
-1. Go to the Anthropic Console.
-2. Sign in or create an Anthropic account.
-3. Open API key management in the Console and create a key.
-4. Add billing or prepaid usage credits in the Anthropic Console before expecting live API responses.
-5. Store the key in local environment variables only.
-6. Configure Liwiro with:
-
-```env
-AI_PROVIDER=anthropic
-ANTHROPIC_API_KEY=change_me_anthropic_api_key
-ANTHROPIC_MODEL=claude-sonnet-4-20250514
-```
-
-Put those values in `liwiro/backend/.env.local` for local development. If you use the shared root local env file instead, place them in `liwiro/.env.local`.
-
-7. Start Liwiro and run the same local Verse Chat probe:
-
-```bash
-curl -sS "http://127.0.0.1:5000/platform/verse/health?probe=1"
-```
-
-Important note:
-
-- Anthropic API usage should be treated as paid/prepaid usage.
-- Do not document or rely on a free Claude API credit path for Liwiro setup.
-
-## OpenAI / ChatGPT API setup
-
-Use OpenAI as a paid API path.
-
-1. Create an OpenAI API key.
-2. Store the key in local environment variables only.
-3. Configure Liwiro with:
-
-```env
-AI_PROVIDER=openai
-OPENAI_API_KEY=change_me_openai_api_key
-OPENAI_MODEL=gpt-5-mini
-```
-
-Put those values in `liwiro/backend/.env.local` for local development. If you use the shared root local env file instead, place them in `liwiro/.env.local`.
-
-4. Start Liwiro and run the same local Verse Chat probe:
-
-```bash
-curl -sS "http://127.0.0.1:5000/platform/verse/health?probe=1"
-```
+Use [AI Setup and Usage](ai-setup.md) for current model defaults, saved credentials, usage controls, connection tests, and troubleshooting. Configure providers from **AI Setup** as a super admin.
 
 ## Operational notes
 

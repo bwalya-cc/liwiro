@@ -5,6 +5,8 @@ from typing import Any
 
 import requests
 
+from .settings import normalize_usage_level, OUTPUT_TOKEN_FLOORS
+
 from .base import (
     AIAuthenticationError,
     AICapabilities,
@@ -19,9 +21,10 @@ from .base import (
 
 
 class AnthropicClaudeProvider(AIProvider):
-    def __init__(self, api_key: str, model: str):
+    def __init__(self, api_key: str, model: str, usage_level: str = "medium"):
+        self.usage_level = normalize_usage_level(usage_level)
         self.api_key = str(api_key or "").strip()
-        selected_model = str(model or "claude-sonnet-4-6").strip() or "claude-sonnet-4-6"
+        selected_model = str(model or "claude-sonnet-5-5").strip() or "claude-sonnet-5-5"
         self.model = {
             "claude-sonnet-4-20250514": "claude-sonnet-4-6",
             "claude-3-7-sonnet-20250219": "claude-sonnet-4-6",
@@ -74,6 +77,10 @@ class AnthropicClaudeProvider(AIProvider):
             "temperature": float(request.temperature),
             "max_tokens": int(request.max_output_tokens or 1200),
         }
+        if payload["model"].startswith(("claude-sonnet-5", "claude-opus-5", "claude-fable-5", "claude-sonnet-4-6", "claude-opus-4-6")):
+            payload.pop("temperature", None)
+            payload["output_config"] = {"effort": self.usage_level}
+            payload["max_tokens"] = max(OUTPUT_TOKEN_FLOORS[self.usage_level], payload["max_tokens"])
         response = provider_post(
             "Anthropic Claude",
             "https://api.anthropic.com/v1/messages",
@@ -90,6 +97,8 @@ class AnthropicClaudeProvider(AIProvider):
         for item in body.get("content") or []:
             if isinstance(item, dict) and item.get("type") == "text" and item.get("text"):
                 content_parts.append(str(item.get("text")))
+        if body.get("stop_reason") == "max_tokens":
+            raise AIProviderError("Anthropic response was truncated. Increase the usage level or narrow the request.")
         if not content_parts:
             raise AIProviderError("Anthropic Claude returned no text. Check model output limits or content restrictions.")
         usage = body.get("usage") or {}

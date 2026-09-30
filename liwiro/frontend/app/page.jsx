@@ -98,7 +98,7 @@ export default function HomePage() {
     () => ({
       chartType: "donut",
       title: "Service status mix",
-      description: "Running versus stopped services in the current control plane snapshot.",
+      description: "See which services are running and which are stopped.",
       data: [
         { label: "Running", value: runningServices.length },
         { label: "Stopped", value: Math.max(stoppedServices, 0) },
@@ -289,7 +289,7 @@ export default function HomePage() {
         <CardHeader>
           <CardTitle>Runtime Overview</CardTitle>
           <p className="text-sm text-slate-400">
-            A condensed operational snapshot across generated services and platform modules.
+            Check your services, database connection, and scripting runtime at a glance.
           </p>
         </CardHeader>
         <CardContent className="space-y-5">
@@ -322,7 +322,7 @@ export default function HomePage() {
               <div className="grid gap-4 xl:grid-cols-[minmax(16rem,0.8fr)_minmax(0,1.2fr)] xl:items-center">
                 <div>
                   <p className="app-stat-label">Recent Service Creation</p>
-                  <p className="mt-1 text-sm text-slate-400">Creation volume across the visible time window.</p>
+                  <p className="mt-1 text-sm text-slate-400">See how many services you created each day.</p>
                 </div>
                 <AnanseChartView chart={serviceTrendChart} compact tablePreview={serviceTrendChart.data} />
               </div>
@@ -333,7 +333,7 @@ export default function HomePage() {
             <div className="rounded-[1.2rem] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4">
               <p className="app-stat-label">System Logs</p>
               <div className="mt-3 min-w-0 space-y-2 font-mono text-xs text-slate-300">
-                <p className="break-all">{loading ? "[loading] refreshing dashboard state" : `[services] ${services.length} records loaded from backend`}</p>
+                <p className="break-all">{loading ? "[loading] refreshing dashboard state" : `[services] ${services.length} services loaded`}</p>
                 <p className="break-all">{vdbConnection?.liwiro_db ? `[vdb] connected to ${vdbConnection.liwiro_domain || "domain"}/${vdbConnection.liwiro_db}` : "[vdb] connection status unavailable"}</p>
                 <p className="break-all">{viConnection?.source_dir ? `[vi] source dir ${viConnection.source_dir}` : "[vi] portal connection status unavailable"}</p>
                 <p className="break-all">{me?.username ? `[auth] session active for ${me.username}` : "[auth] session context unavailable"}</p>
@@ -377,7 +377,7 @@ export default function HomePage() {
           <Card>
             <CardHeader>
               <CardTitle>Quick Create</CardTitle>
-              <p className="text-sm text-slate-400">Start a new service definition or open an existing runtime entry.</p>
+              <p className="text-sm text-slate-400">Create a service or open one you already manage.</p>
             </CardHeader>
             <CardContent className="space-y-3">
               <Link href="/service-builder" className="block">
@@ -427,7 +427,7 @@ export default function HomePage() {
         <Card>
           <CardHeader>
             <CardTitle>Verse Specialists</CardTitle>
-            <p className="text-sm text-slate-400">Load specialist profiles only when needed to keep dashboard startup lighter.</p>
+            <p className="text-sm text-slate-400">Meet the Verse specialists and choose who can help with your work.</p>
           </CardHeader>
           <CardContent>
             {agents.length > 0 ? (
@@ -439,7 +439,7 @@ export default function HomePage() {
             ) : (
               <div className="rounded-[1.2rem] border border-white/10 bg-[rgba(255,255,255,0.03)] p-4">
                 <p className="text-sm text-slate-300">
-                  Specialist metadata stays out of the initial dashboard boot path now.
+                  Explore specialists for service design, data analysis, reliability, compliance, and documentation.
                 </p>
                 {agentsLoadError ? (
                   <p className="mt-2 text-sm text-amber-300">{agentsLoadError}</p>
@@ -466,9 +466,9 @@ export default function HomePage() {
       title="Developer control plane"
       description="Monitor generated services, check platform runtime health, and jump directly into builder, runtime, database, and scripting workflows."
       systemTitle="Overview"
-      systemDescription="Live summaries for services, database connectivity, and session context."
+      systemDescription="Check your services, database connection, and signed-in account."
       editorTitle="Details"
-      editorDescription="Operational widgets tuned for day-to-day platform work."
+      editorDescription="Track service status, open your tools, and find specialist help."
       topActions={
         <>
           <Link href="/service-builder">

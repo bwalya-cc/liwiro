@@ -1270,7 +1270,7 @@ export default function ServicesPage() {
         <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
           <div>
             <p className="app-eyebrow">Service Runtime</p>
-            <h1 className="app-title mt-4">Operate generated services from one live control surface</h1>
+            <h1 className="app-title mt-4">Manage your services from one workspace</h1>
             <p className="app-copy mt-3">Start, stop, inspect, batch-generate, and open service docs without leaving the management view.</p>
           </div>
           <Link href="/service-builder">

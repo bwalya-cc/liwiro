@@ -12,7 +12,6 @@ import VerseUsageMeter from "@/components/verse/verse-usage-meter"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { useDocumentVisible } from "@/hooks/use-document-visible"
-import { OperationStatusPanel } from "@/components/ui/operation-status-panel"
 import { authHeaders } from "@/lib/auth"
 import { computeJitteredDelayMs, createFailureCircuit } from "@/lib/request-circuit"
 import { fetchVerseBootstrap } from "@/lib/verse-bootstrap"
@@ -102,6 +101,7 @@ export default function VerseAssistantDock({ pathname = "/" }) {
   const [selectedProfileAgentId, setSelectedProfileAgentId] = useState("")
   const [thread, setThread] = useState(null)
   const [composer, setComposer] = useState("")
+  const [pendingUserMessage, setPendingUserMessage] = useState(null)
   const [unreadNotifications, setUnreadNotifications] = useState(0)
   const [selectedProvider, setSelectedProvider] = useState("")
   const [sendStatus, setSendStatus] = useState("")
@@ -353,7 +353,20 @@ export default function VerseAssistantDock({ pathname = "/" }) {
     const pendingSeed = consumePendingVerseAssistantSeed(pathname)
     if (pendingSeed?.message?.content) {
       setOpen(true)
+      setComposer(String(pendingSeed.message.content))
     }
+  }, [pathname])
+  useEffect(() => {
+    const receiveAssistantSeed = (event) => {
+      const seed = event?.detail || {}
+      if (String(seed.pathname || "").trim() && String(seed.pathname).trim() !== pathname) return
+      const content = String(seed?.message?.content || "").trim()
+      if (!content) return
+      setOpen(seed.open !== false)
+      setComposer(content)
+    }
+    window.addEventListener("liwiro:verse-assistant-seed", receiveAssistantSeed)
+    return () => window.removeEventListener("liwiro:verse-assistant-seed", receiveAssistantSeed)
   }, [pathname])
   useEffect(() => {
     if (pathname === "/verse-ai" || !open || !bootstrapped) return undefined
@@ -451,7 +464,10 @@ export default function VerseAssistantDock({ pathname = "/" }) {
     const content = String(composer || "").trim()
     if (!content) return
     const respondingAgentName = addressedAgentName(content, agents)
+    const optimistic = { id: `user-${Date.now()}`, role: "user", content, userDisplayName: viewerUsername || "" }
     setSendStatus(sendingLabel(content, respondingAgentName, pathname))
+    setComposer("")
+    setPendingUserMessage(optimistic)
     if (showVerseProgress) {
       startOperation({
         title: "Sending page chat message",
@@ -463,7 +479,6 @@ export default function VerseAssistantDock({ pathname = "/" }) {
       const activeThread = await ensureThread()
       if (!activeThread?.id) throw new Error("Failed to create a new Verse chat")
       const pageContext = await requestPageContext()
-      const optimistic = { id: `user-${Date.now()}`, role: "user", content, userDisplayName: viewerUsername || "" }
       setThread((current) => {
         const baseThread = current?.id ? current : activeThread
         if (!baseThread) return current
@@ -472,7 +487,7 @@ export default function VerseAssistantDock({ pathname = "/" }) {
           messages: [...(Array.isArray(baseThread.messages) ? baseThread.messages : []), optimistic],
         }
       })
-      setComposer("")
+      setPendingUserMessage(null)
       const res = await fetch(`${backend}/platform/verse/threads/${encodeURIComponent(activeThread.id)}/messages`, {
         method: "POST",
         headers: { "Content-Type": "application/json", ...authHeaders() },
@@ -517,7 +532,7 @@ export default function VerseAssistantDock({ pathname = "/" }) {
           throw retryError
         }
         setThread(retryData?.thread || null)
-        setComposer("")
+        setPendingUserMessage(null)
         if (showVerseProgress) {
           succeedOperation({
             title: "Verse reply received",
@@ -526,6 +541,8 @@ export default function VerseAssistantDock({ pathname = "/" }) {
         }
         return
       }
+      setPendingUserMessage(null)
+      setComposer((current) => current || content)
       if (showVerseProgress) {
         failOperation({
           title: "Failed to get Verse assistance",
@@ -670,12 +687,6 @@ export default function VerseAssistantDock({ pathname = "/" }) {
             </div>
           </div>
 
-          {showVerseProgress && verseOperationStatus?.visible ? (
-            <div className="px-4 pt-3">
-              <OperationStatusPanel status={verseOperationStatus} />
-            </div>
-          ) : null}
-
           {controlsOpen ? (
             <div className="flex min-h-0 flex-1 flex-col px-4 py-4">
               <div className="flex items-center justify-between gap-3">
@@ -758,9 +769,9 @@ export default function VerseAssistantDock({ pathname = "/" }) {
           ) : (
             <>
               <div ref={messagesRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-4">
-                {messages.length === 0 ? (
+                {messages.length === 0 && !pendingUserMessage ? (
                   <div className="rounded-2xl border border-dashed border-white/10 px-4 py-6 text-sm text-slate-400">
-                    Start a conversation and replies will appear here.
+                    Ask Verse anything.
                   </div>
                 ) : (
                   <>
@@ -777,6 +788,9 @@ export default function VerseAssistantDock({ pathname = "/" }) {
                         userDisplayName={viewerUsername}
                       />
                     ))}
+                    {pendingUserMessage ? (
+                      <VerseMessageCard message={pendingUserMessage} userDisplayName={viewerUsername} />
+                    ) : null}
                     {actionState.mode ? (
                       <VerseTypingIndicator label={String(actionMessage?.agentDisplayName || "").trim() ? `${String(actionMessage?.agentDisplayName || "").trim()} is working…` : "Collaborating…"} />
                     ) : sending ? (
@@ -786,26 +800,23 @@ export default function VerseAssistantDock({ pathname = "/" }) {
                 )}
               </div>
 
-              <div className="border-t border-white/10 px-4 py-4">
-                <div className="flex items-center justify-between gap-3">
-                  <p className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Chat controls</p>
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setControlsOpen((value) => !value)} aria-label="Show controls">
-                    <ChevronUp className="h-4 w-4" />
-                  </Button>
-                </div>
+              <div className="flex justify-end border-t border-white/10 px-4 py-1.5">
+                <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-white" onClick={() => setControlsOpen((value) => !value)} aria-label="Show chat settings">
+                  <ChevronUp className="h-4 w-4" />
+                </Button>
               </div>
             </>
           )}
           {!controlsOpen ? (
-            <div className="border-t border-white/10 px-4 py-4">
+            <div className="border-t border-white/10 px-4 py-3">
               <div className="relative">
                 <Textarea
                   ref={composerRef}
                   value={composer}
                   onChange={(event) => setComposer(event.target.value)}
                   onKeyDown={handleComposerKeyDown}
-                  placeholder="Chat with verse agents"
-                  className="min-h-[6rem] rounded-[1.1rem] pr-12"
+                  placeholder="Message Verse"
+                  className="min-h-[4.25rem] rounded-[1.1rem] pr-12"
                 />
                 <Button
                   size="icon"

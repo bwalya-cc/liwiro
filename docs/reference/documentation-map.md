@@ -22,6 +22,9 @@ This page is the quickest route through the repository documentation after the r
 - `docs/integration/liwiro-platform.md`
 - `docs/integration/liwiro-cli.md`
 - `docs/liwiro/verse-chat.md`
+- `docs/liwiro/ai-setup.md`
+- `docs/liwiro/ananse.md`
+- `docs/liwiro/settings-and-access.md`
 - `docs/integration/lapis-examples.md`
 
 ### Verun
@@ -65,14 +68,6 @@ This page is the quickest route through the repository documentation after the r
 - `docs/legal/third-party-licenses.md`
 - `docs/legal/license-and-commercial-policy.md`
 - `docs/legal/acknowledgements-and-credits.md`
-
-### Historical Material
-
-- `docs/archive/system-audit-2026-03-07.md`
-- `docs/archive/verun-audit-2026-03-07.md`
-- `docs/archive/research-notes.md`
-- `docs/archive/verun-next-steps.md`
-- `docs/archive/verun-roadmap.md`
 
 ## Reader Paths
 

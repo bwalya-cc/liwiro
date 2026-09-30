@@ -67,6 +67,26 @@ class VdbNumericTypePreservationTest {
         assertInstanceOf(Double.class, updatedItems.get(1));
     }
 
+    @Test
+    void deletedUniqueValueCanBeCreatedAgain() {
+        User superAdmin = VdbTestSupport.ensureBootstrappedSuperAdmin();
+        String domain = uniqueName("unique_reuse_domain");
+        String collection = uniqueName("unique_reuse_docs");
+
+        VDB.setCurrentUser(superAdmin);
+        VDB.defineDomain(domain, "main", true);
+        VDB.setDomain(domain);
+        VDB.useDatabase("main");
+        VDB.createCollection(collection, Map.of(
+                "sku", Map.of("type", "string", "required", true, "unique", true)));
+
+        VDB.insert(collection, Map.of("sku", "SKU-VALIDATION-9001"));
+        assertEquals("Deleted 1 documents", VDB.delete(collection, Map.of("sku", "SKU-VALIDATION-9001")));
+        VDB.insert(collection, Map.of("sku", "SKU-VALIDATION-9001"));
+
+        assertEquals(1, VDB.findAll(collection).size());
+    }
+
     private static Map<String, Object> readOnlyStoredDocument(String domain, String collection) throws IOException {
         Path dataPath = DirectoryUtil.getCollectionDataPath(domain, "main", collection);
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(dataPath, "*" + BsonStorage.DOCUMENT_EXTENSION)) {

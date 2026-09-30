@@ -5,6 +5,8 @@ from typing import Any
 
 import requests
 
+from .settings import normalize_usage_level, OUTPUT_TOKEN_FLOORS
+
 from .base import (
     AIAuthenticationError,
     AICapabilities,
@@ -19,9 +21,10 @@ from .base import (
 
 
 class GoogleGeminiProvider(AIProvider):
-    def __init__(self, api_key: str, model: str):
+    def __init__(self, api_key: str, model: str, usage_level: str = "medium"):
+        self.usage_level = normalize_usage_level(usage_level)
         self.api_key = str(api_key or "").strip()
-        self.model = str(model or "gemini-3-flash-preview").strip() or "gemini-3-flash-preview"
+        self.model = str(model or "gemini-3.8-flash").strip() or "gemini-3.8-flash"
         if not self.api_key:
             raise AIConfigurationError("GOOGLE_API_KEY is required when AI_PROVIDER=google")
 
@@ -70,6 +73,13 @@ class GoogleGeminiProvider(AIProvider):
                 "maxOutputTokens": int(request.max_output_tokens or 1200),
             },
         }
+        selected_model = str(request.model or self.model)
+        if selected_model.startswith(("gemini-3.8-flash", "gemini-3-flash")):
+            payload["generationConfig"].pop("temperature", None)
+            payload["generationConfig"]["thinkingConfig"] = {"thinkingLevel": self.usage_level.upper()}
+            payload["generationConfig"]["maxOutputTokens"] = max(
+                OUTPUT_TOKEN_FLOORS[self.usage_level], payload["generationConfig"]["maxOutputTokens"]
+            )
         response = provider_post(
             "Google Gemini",
             self._endpoint(request.model),
@@ -85,8 +95,10 @@ class GoogleGeminiProvider(AIProvider):
             finish_reason = str(candidates[0].get("finishReason") or "")
             for part in (((candidates[0].get("content") or {}).get("parts")) or []):
                 text = part.get("text")
-                if text:
+                if text and not part.get("thought"):
                     parts.append(str(text))
+        if finish_reason == "MAX_TOKENS":
+            raise AIProviderError("Google Gemini response was truncated. Increase the usage level or narrow the request.")
         if not parts:
             raise AIProviderError("Google Gemini returned no text. Check model output limits or content restrictions.")
         usage = body.get("usageMetadata") or {}

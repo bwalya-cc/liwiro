@@ -170,7 +170,7 @@ function SidebarContents({
           {expanded ? (
             <div className="min-w-0">
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">Workspace</p>
-              <p className="truncate text-sm text-slate-100">Structured + raw control surfaces</p>
+              <p className="truncate text-sm text-slate-100">Forms, editors, and consoles</p>
             </div>
           ) : null}
         </div>

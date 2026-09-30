@@ -167,6 +167,25 @@ class VerseApiTests(unittest.TestCase):
         self.assertIn("configured", me_response.get_json()["aiConfig"])
         self.assertNotIn("providers", me_response.get_json()["aiConfig"])
 
+    def test_ai_usage_level_is_saved_validated_and_used_in_draft_tests(self):
+        app, _, token = self._build_app()
+        headers = {"Authorization": f"Bearer {token}"}
+        client = app.test_client()
+        with patch("app.main._runtime_cfg", side_effect=lambda key: app.config.get(key)), patch("app.main._persist_ai_env_values") as persist:
+            response = client.put("/platform/ai/config", headers=headers, json={"usageLevel": "high"})
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.get_json()["usageLevel"], "high")
+            persist.assert_called_once_with({"AI_USAGE_LEVEL": "high"})
+            for invalid in ("unlimited", ["high"], {"level": "low"}):
+                rejected = client.put("/platform/ai/config", headers=headers, json={"usageLevel": invalid})
+                self.assertEqual(rejected.status_code, 400)
+            self.assertEqual(persist.call_count, 1)
+            with patch("app.main.build_ai_provider", return_value=_ApiProvider()) as build:
+                tested = client.post("/platform/ai/config/test", headers=headers, json={"provider": "openai", "usageLevel": "low"})
+                self.assertEqual(tested.status_code, 200)
+                self.assertEqual(build.call_args.args[0]["AI_USAGE_LEVEL"], "low")
+                self.assertEqual(app.config["AI_USAGE_LEVEL"], "high")
+
     def test_ai_config_updates_are_super_admin_only_and_refresh_runtime(self):
         app, token, super_token = self._build_app()
         client = app.test_client()

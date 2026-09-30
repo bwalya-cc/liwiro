@@ -817,7 +817,7 @@ export default function SettingsPage() {
           <div>
             <p className="app-eyebrow">Platform Settings</p>
             <h1 className="app-title mt-4">Manage runtime defaults, access, and platform policy</h1>
-            <p className="app-copy mt-3">Configure Liwiro behavior, review the current VDB snapshot, and manage user roles from one admin surface.</p>
+            <p className="app-copy mt-3">Configure Liwiro, check VDB status, and manage user roles in one place.</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <Link href="/vdb-portal">

@@ -2,7 +2,7 @@
 
 Last updated: 2026-03-11
 
-This section explains how the repository's major parts connect at runtime.
+Use these guides to connect Liwiro services, VDB data, and Versa scripts, and to understand where each operation runs.
 
 Read this section alongside:
 
@@ -19,16 +19,14 @@ The important integration boundaries are:
 
 ## 1. Frontend to backend
 
-The frontend is intentionally thin with respect to runtime authority.
-
-It owns UX, editors, consoles, and navigation, but it does not directly own:
+Use the Liwiro workspace to edit services, run commands, and navigate your tools. The Liwiro backend manages:
 
 - VDB credentials
 - VDB sessions
 - generated-service lifecycle
 - local REPL process lifecycle
 
-Those operations always go through the backend.
+Keep the backend running while using these tools.
 
 ## 2. Backend to VDB
 
@@ -45,7 +43,7 @@ Normal local integration prefers the Unix socket path because the backend and VD
 
 ## 3. Backend to generated services
 
-The backend is the lifecycle owner of generated services.
+When you create or manage a service in Liwiro, the backend handles its lifecycle.
 
 It:
 

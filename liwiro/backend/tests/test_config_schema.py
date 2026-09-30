@@ -74,6 +74,40 @@ class ConfigSchemaTests(unittest.TestCase):
         self.assertTrue(all_mode_examples, "Expected at least one LAPIS example covering CRUD, custom VQL, and script endpoints together")
         self.assertTrue(full_crud_examples, "Expected at least one LAPIS example exposing full create/read/update/delete coverage")
 
+    def test_lapis_crud_delete_examples_target_their_create_example(self):
+        """Keep route-tester create/delete flows reusable without manual edits."""
+        example_dir = BACKEND_ROOT.parent / "data" / "lapis-examples"
+        for example_path in sorted(example_dir.glob("*.json")):
+            with self.subTest(example=example_path.name):
+                cfg = json.loads(example_path.read_text(encoding="utf-8"))
+                endpoints = list((cfg.get("endpoints") or {}).values())
+                for create_endpoint in endpoints:
+                    if (
+                        str(create_endpoint.get("operationType") or "").lower() != "crud"
+                        or str(create_endpoint.get("crudOperation") or "").lower() != "create"
+                    ):
+                        continue
+                    delete_endpoint = next(
+                        (
+                            endpoint for endpoint in endpoints
+                            if str(endpoint.get("operationType") or "").lower() == "crud"
+                            and str(endpoint.get("crudOperation") or "").lower() == "delete"
+                            and endpoint.get("linkedModel") == create_endpoint.get("linkedModel")
+                        ),
+                        None,
+                    )
+                    if not delete_endpoint:
+                        continue
+                    create_body = ((create_endpoint.get("exampleParams") or {}).get("body") or {})
+                    delete_query = ((delete_endpoint.get("exampleParams") or {}).get("query") or {})
+                    for field, value in delete_query.items():
+                        if field in create_body:
+                            self.assertEqual(
+                                value,
+                                create_body[field],
+                                f"{example_path.name} delete example must target the record created by its matching route test",
+                            )
+
     def test_auth_core_example_demo_user_roles_match_expected_hierarchy(self):
         example_path = BACKEND_ROOT.parent / "data" / "lapis-examples" / "01-auth-core-service.json"
         cfg = json.loads(example_path.read_text(encoding="utf-8"))
