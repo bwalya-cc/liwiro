@@ -234,9 +234,9 @@ Best when the route still fits a query shape but needs more control than generic
 
 Typical behavior:
 
-- a configured strict flat-action JSON `vqlQuery` is parsed
+- a configured native VDB command string in `vqlQuery` is parsed
 - request `query`, `args`, or `data` can be merged in where supported
-- the combined flat-action JSON command is executed against VDB
+- the native command text is parsed and executed against VDB
 
 ### Versa
 
@@ -409,10 +409,9 @@ The convenience script for this path is:
 
 That script:
 
-- resolves a socket path
-- starts `VDBUnixSocket` if needed
-- starts the backend on `127.0.0.1:5000`
-- starts the frontend on `127.0.0.1:3000`
+- selects the platform IPC transport and starts VDB, with local HTTP fallback when IPC fails
+- starts the backend and frontend on available local ports
+- prints the selected addresses
 - waits for health checks before declaring success
 
 ## 9. Operational fault boundaries
@@ -436,4 +435,4 @@ Use this page as the top-level mental model, then move into the implementation v
 2. `docs/integration/component-map.md`
 3. `docs/integration/runtime-flows.md`
 4. `docs/integration/liwiro-platform.md`
-5. subsystem docs under `docs/vdb` and `docs/vi`
+5. subsystem docs under `docs/verun/vdb` and `docs/verun/versa`

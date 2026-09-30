@@ -32,6 +32,10 @@
     {
       "path": "liwiro/frontend/lib/wiki-content.ts",
       "purpose": "Operator-facing manual language and workflow framing for builder, manager, VDB, and VI surfaces"
+    },
+    {
+      "path": "docs/liwiro/ai-setup.md",
+      "purpose": "Provider and usage setup"
     }
   ],
   "coverage": {
@@ -53,7 +57,8 @@
       "/platform/actions",
       "/platform/verse",
       "/platform/vdb",
-      "/platform/vi"
+      "/platform/vi",
+      "/platform/ai/config"
     ],
     "artifactKinds": [
       "service-builder-lapis",
@@ -240,6 +245,19 @@
           "auth-and-runtime-boundaries",
           "liwiro-control-plane-boundary"
         ]
+      },
+      {
+        "name": "ai-configuration",
+        "matchAny": [
+          "ai setup",
+          "provider model",
+          "usage level",
+          "reasoning effort",
+          "AI_USAGE_LEVEL"
+        ],
+        "sectionIds": [
+          "ai-provider-configuration"
+        ]
       }
     ]
   },
@@ -248,9 +266,27 @@
       "id": "liwiro-control-plane-boundary",
       "title": "Liwiro Control Plane And Runtime Boundaries",
       "summary": "Liwiro is the control plane and operator workspace. It owns setup, sign-in, service authoring, service generation, lifecycle management, portal proxying, settings, and platform-facing Verse orchestration. It does not make the browser the owner of VDB sessions, VI execution, or generated-service processes.",
-      "tags": ["liwiro", "platform", "control plane", "ownership", "boundaries"],
-      "constructs": ["frontend", "backend", "generated services", "vi", "vdb", "verse"],
-      "queryHints": ["what Liwiro owns", "control plane boundary", "browser versus backend authority", "generated service ownership"],
+      "tags": [
+        "liwiro",
+        "platform",
+        "control plane",
+        "ownership",
+        "boundaries"
+      ],
+      "constructs": [
+        "frontend",
+        "backend",
+        "generated services",
+        "vi",
+        "vdb",
+        "verse"
+      ],
+      "queryHints": [
+        "what Liwiro owns",
+        "control plane boundary",
+        "browser versus backend authority",
+        "generated service ownership"
+      ],
       "rules": [
         "The frontend collects input and renders state, but it does not own VDB sessions, generated-service lifecycle, or direct provider/runtime authority.",
         "The Liwiro backend is the primary integration layer for auth, VDB transport, LAPIS validation, service generation, and Verse orchestration.",
@@ -260,12 +296,32 @@
       "tables": [
         {
           "title": "Layer ownership",
-          "columns": ["Layer", "Owns", "Does not own"],
+          "columns": [
+            "Layer",
+            "Owns",
+            "Does not own"
+          ],
           "rows": [
-            ["frontend", "UX, editors, navigation, rendered results", "raw VDB credentials, VDB sessions, provider execution, process lifecycle"],
-            ["backend", "auth, transport resolution, LAPIS validation, generation, lifecycle control, Verse orchestration", "direct browser UI state"],
-            ["generated services", "runtime route handling and service-local VDB behavior", "Liwiro control-plane session state"],
-            ["VI/VDB", "script execution, data/query/session/RBAC runtime behavior", "Liwiro workspace UX or control-plane policy"]
+            [
+              "frontend",
+              "UX, editors, navigation, rendered results",
+              "raw VDB credentials, VDB sessions, provider execution, process lifecycle"
+            ],
+            [
+              "backend",
+              "auth, transport resolution, LAPIS validation, generation, lifecycle control, Verse orchestration",
+              "direct browser UI state"
+            ],
+            [
+              "generated services",
+              "runtime route handling and service-local VDB behavior",
+              "Liwiro control-plane session state"
+            ],
+            [
+              "VI/VDB",
+              "script execution, data/query/session/RBAC runtime behavior",
+              "Liwiro workspace UX or control-plane policy"
+            ]
           ]
         }
       ],
@@ -287,9 +343,29 @@
       "id": "backend-route-families",
       "title": "Liwiro Backend Route Families",
       "summary": "The backend exposes stable route families for generation, service management, LAPIS validation, Verse, VDB portal, VI portal, and platform capabilities/actions. These families are the backend API surfaces Verse should reason about.",
-      "tags": ["routes", "api", "backend", "service manager", "platform"],
-      "constructs": ["/generate", "/services", "/platform/lapis/validate", "/platform/verse", "/platform/vdb", "/platform/vi", "/platform/actions"],
-      "queryHints": ["Liwiro API routes", "service routes", "Verse routes", "VDB portal routes", "VI portal routes"],
+      "tags": [
+        "routes",
+        "api",
+        "backend",
+        "service manager",
+        "platform"
+      ],
+      "constructs": [
+        "/generate",
+        "/services",
+        "/platform/lapis/validate",
+        "/platform/verse",
+        "/platform/vdb",
+        "/platform/vi",
+        "/platform/actions"
+      ],
+      "queryHints": [
+        "Liwiro API routes",
+        "service routes",
+        "Verse routes",
+        "VDB portal routes",
+        "VI portal routes"
+      ],
       "rules": [
         "Use route families as stable capability groupings, not as permission to invent undocumented endpoints.",
         "The capability registry sits above subsystem routes and should be preferred when Verse is mapping actions to artifacts.",
@@ -298,15 +374,47 @@
       "tables": [
         {
           "title": "Primary backend API families",
-          "columns": ["Family", "Key routes", "Purpose"],
+          "columns": [
+            "Family",
+            "Key routes",
+            "Purpose"
+          ],
           "rows": [
-            ["generation", "POST /generate", "validate, generate, start, and persist a LAPIS-backed service"],
-            ["service manager", "GET/PUT /services/<id>, POST /services/<id>/start|stop, DELETE /services/<id>/delete", "inspect and operate existing generated services"],
-            ["LAPIS validation", "POST /platform/lapis/validate", "schema, semantic, and script-endpoint validation"],
-            ["platform actions", "GET /platform/capabilities, GET /platform/actions/catalog, POST /platform/actions/preview|execute", "stable capability ids and staged action flow"],
-            ["Verse", "GET/POST /platform/verse/threads..., POST /platform/verse/assist, POST /platform/verse/actions/preview|execute", "thread orchestration, assist flows, and Verse compatibility action routes"],
-            ["VDB portal", "GET/POST /platform/vdb/connection|session|query plus RBAC routes", "backend-owned VDB session and query proxying"],
-            ["VI portal", "GET/POST /platform/vi/files|run|validate plus terminal and repl routes", "backend-owned VI workspace, validation, file execution, and interactive sessions"]
+            [
+              "generation",
+              "POST /generate",
+              "validate, generate, start, and persist a LAPIS-backed service"
+            ],
+            [
+              "service manager",
+              "GET/PUT /services/<id>, POST /services/<id>/start|stop, DELETE /services/<id>/delete",
+              "inspect and operate existing generated services"
+            ],
+            [
+              "LAPIS validation",
+              "POST /platform/lapis/validate",
+              "schema, semantic, and script-endpoint validation"
+            ],
+            [
+              "platform actions",
+              "GET /platform/capabilities, GET /platform/actions/catalog, POST /platform/actions/preview|execute",
+              "stable capability ids and staged action flow"
+            ],
+            [
+              "Verse",
+              "GET/POST /platform/verse/threads..., POST /platform/verse/assist, POST /platform/verse/actions/preview|execute",
+              "thread orchestration, assist flows, and Verse compatibility action routes"
+            ],
+            [
+              "VDB portal",
+              "GET/POST /platform/vdb/connection|session|query plus RBAC routes",
+              "backend-owned VDB session and query proxying"
+            ],
+            [
+              "VI portal",
+              "GET/POST /platform/vi/files|run|validate plus terminal and repl routes",
+              "backend-owned VI workspace, validation, file execution, and interactive sessions"
+            ]
           ]
         }
       ]
@@ -315,9 +423,29 @@
       "id": "capability-and-action-flow",
       "title": "Capability Registry And Staged Action Flow",
       "summary": "Liwiro exposes a platform-wide capability registry and generic action routes so Verse and CLI clients can reason about platform actions using stable capability ids instead of ad hoc UI assumptions.",
-      "tags": ["capabilities", "actions", "preview", "execute", "artifact mapping"],
-      "constructs": ["capabilityId", "stageSupport", "move", "inspect", "prepare", "execute", "artifactKind"],
-      "queryHints": ["platform capabilities", "action preview", "action execute", "artifact capability id", "stage support"],
+      "tags": [
+        "capabilities",
+        "actions",
+        "preview",
+        "execute",
+        "artifact mapping"
+      ],
+      "constructs": [
+        "capabilityId",
+        "stageSupport",
+        "move",
+        "inspect",
+        "prepare",
+        "execute",
+        "artifactKind"
+      ],
+      "queryHints": [
+        "platform capabilities",
+        "action preview",
+        "action execute",
+        "artifact capability id",
+        "stage support"
+      ],
       "rules": [
         "Capabilities describe what the platform can do, where it should happen, and whether it runs on the page or server.",
         "Verse should map artifacts to capability ids rather than treating target pages as the only contract.",
@@ -327,23 +455,67 @@
       "tables": [
         {
           "title": "Stage semantics",
-          "columns": ["Stage", "Meaning", "Common use"],
+          "columns": [
+            "Stage",
+            "Meaning",
+            "Common use"
+          ],
           "rows": [
-            ["move", "navigate or change surface before the next stage", "open Service Builder, Service Manager, VI, VDB, or docs"],
-            ["inspect", "load or inspect current platform state", "list capabilities, open service details, inspect session state"],
-            ["prepare", "stage a draft or confirmable action", "prepare service draft, stop action, query payload, or script draft"],
-            ["execute", "run the page or server action", "generate a service, stop a service, run a query, run a script"]
+            [
+              "move",
+              "navigate or change surface before the next stage",
+              "open Service Builder, Service Manager, VI, VDB, or docs"
+            ],
+            [
+              "inspect",
+              "load or inspect current platform state",
+              "list capabilities, open service details, inspect session state"
+            ],
+            [
+              "prepare",
+              "stage a draft or confirmable action",
+              "prepare service draft, stop action, query payload, or script draft"
+            ],
+            [
+              "execute",
+              "run the page or server action",
+              "generate a service, stop a service, run a query, run a script"
+            ]
           ]
         },
         {
           "title": "Artifact to capability mapping",
-          "columns": ["Artifact kind", "Capability family", "Typical target"],
+          "columns": [
+            "Artifact kind",
+            "Capability family",
+            "Typical target"
+          ],
           "rows": [
-            ["service-builder-lapis", "service.builder.generate", "/service-builder"],
-            ["service-manager-action", "service.manager.start|stop|delete", "/services"],
-            ["vi-script", "vi.script.draft", "/vi-portal"],
-            ["vdb-query", "vdb.query.run", "/vdb-portal"],
-            ["ananse-analysis", "ananse.analysis.open", "/ananse-workbench"]
+            [
+              "service-builder-lapis",
+              "service.builder.generate",
+              "/service-builder"
+            ],
+            [
+              "service-manager-action",
+              "service.manager.start|stop|delete",
+              "/services"
+            ],
+            [
+              "vi-script",
+              "vi.script.draft",
+              "/vi-portal"
+            ],
+            [
+              "vdb-query",
+              "vdb.query.run",
+              "/vdb-portal"
+            ],
+            [
+              "ananse-analysis",
+              "ananse.analysis.open",
+              "/ananse-workbench"
+            ]
           ]
         }
       ],
@@ -363,9 +535,28 @@
       "id": "lapis-contract-core",
       "title": "LAPIS Contract Core",
       "summary": "LAPIS is the declarative contract format used by Liwiro to define generated services. Builder-ready drafts must satisfy the backend contract, not only a loose JSON shape.",
-      "tags": ["lapis", "service contract", "builder", "metadata", "models", "endpoints"],
-      "constructs": ["metadata", "auth", "models", "endpoints", "sharedModules", "modules"],
-      "queryHints": ["LAPIS structure", "required LAPIS sections", "service builder contract", "metadata apiName basePath version"],
+      "tags": [
+        "lapis",
+        "service contract",
+        "builder",
+        "metadata",
+        "models",
+        "endpoints"
+      ],
+      "constructs": [
+        "metadata",
+        "auth",
+        "models",
+        "endpoints",
+        "sharedModules",
+        "modules"
+      ],
+      "queryHints": [
+        "LAPIS structure",
+        "required LAPIS sections",
+        "service builder contract",
+        "metadata apiName basePath version"
+      ],
       "rules": [
         "The top-level contract should include metadata, auth, models, and endpoints for a concrete service draft.",
         "metadata.apiName, metadata.basePath, metadata.version, and metadata.rateLimiting are required.",
@@ -378,13 +569,37 @@
       "tables": [
         {
           "title": "High-value LAPIS sections",
-          "columns": ["Section", "Purpose", "Key requirements"],
+          "columns": [
+            "Section",
+            "Purpose",
+            "Key requirements"
+          ],
           "rows": [
-            ["metadata", "service identity and runtime metadata", "apiName, basePath, version, rateLimiting are required"],
-            ["auth", "service auth behavior", "enabled, isAuthService, keyManagement, customEndpoints must be valid"],
-            ["models", "runtime data shape and collection mapping", "model name, collection, and field definitions are required"],
-            ["endpoints", "generated route behavior", "method, path, and operationType are required"],
-            ["sharedModules/modules", "supporting module metadata", "used for shared and service-local module wiring when present"]
+            [
+              "metadata",
+              "service identity and runtime metadata",
+              "apiName, basePath, version, rateLimiting are required"
+            ],
+            [
+              "auth",
+              "service auth behavior",
+              "enabled, isAuthService, keyManagement, customEndpoints must be valid"
+            ],
+            [
+              "models",
+              "runtime data shape and collection mapping",
+              "model name, collection, and field definitions are required"
+            ],
+            [
+              "endpoints",
+              "generated route behavior",
+              "method, path, and operationType are required"
+            ],
+            [
+              "sharedModules/modules",
+              "supporting module metadata",
+              "used for shared and service-local module wiring when present"
+            ]
           ]
         }
       ]
@@ -393,9 +608,31 @@
       "id": "lapis-endpoint-operation-types",
       "title": "LAPIS Endpoint Operation Types",
       "summary": "Each LAPIS endpoint declares an operation type that determines which fields are required and how the generated runtime behaves.",
-      "tags": ["lapis", "endpoint", "crud", "custom", "script", "operationType"],
-      "constructs": ["operationType", "crudOperation", "linkedModel", "vqlQuery", "versaScript"],
-      "queryHints": ["crud endpoint", "custom endpoint", "script endpoint", "linked model", "crudOperation", "operationType", "vqlQuery", "versaScript"],
+      "tags": [
+        "lapis",
+        "endpoint",
+        "crud",
+        "custom",
+        "script",
+        "operationType"
+      ],
+      "constructs": [
+        "operationType",
+        "crudOperation",
+        "linkedModel",
+        "vqlQuery",
+        "versaScript"
+      ],
+      "queryHints": [
+        "crud endpoint",
+        "custom endpoint",
+        "script endpoint",
+        "linked model",
+        "crudOperation",
+        "operationType",
+        "vqlQuery",
+        "versaScript"
+      ],
       "rules": [
         "CRUD endpoints require crudOperation and linkedModel.",
         "Custom endpoints require a readable VDB command string in vqlQuery.",
@@ -406,12 +643,32 @@
       "tables": [
         {
           "title": "Operation types",
-          "columns": ["operationType", "Required fields", "Runtime behavior"],
+          "columns": [
+            "operationType",
+            "Required fields",
+            "Runtime behavior"
+          ],
           "rows": [
-            ["crud", "crudOperation, linkedModel", "maps into generated CRUD handlers and VDB-backed model operations"],
-            ["custom", "vqlQuery", "runs a custom readable VDB command against VDB through the generated service runtime"],
-            ["custom lifecycle", "vqlQuery: status domain engineering", "supports domain_status, domain_suspend, and domain_resume with ownership checks"],
-            ["script", "versaScript", "runs Versa-backed route logic through the generated service runtime and must pass script validation"]
+            [
+              "crud",
+              "crudOperation, linkedModel",
+              "maps into generated CRUD handlers and VDB-backed model operations"
+            ],
+            [
+              "custom",
+              "vqlQuery",
+              "runs a custom readable VDB command against VDB through the generated service runtime"
+            ],
+            [
+              "custom lifecycle",
+              "vqlQuery: status domain engineering",
+              "supports domain_status, domain_suspend, and domain_resume with ownership checks"
+            ],
+            [
+              "script",
+              "versaScript",
+              "runs Versa-backed route logic through the generated service runtime and must pass script validation"
+            ]
           ]
         }
       ],
@@ -431,9 +688,25 @@
       "id": "lapis-validation-and-script-gate",
       "title": "LAPIS Validation And Script Endpoint Gate",
       "summary": "LAPIS validation is layered: normalization, schema validation, endpoint semantic validation, and script-endpoint Versa validation. Verse should treat this gate as the authority for draft readiness.",
-      "tags": ["lapis", "validation", "schema", "semantic validation", "script gate", "versaIssues"],
-      "constructs": ["normalize_lapis_config_contract", "validate_lapis_config_detailed", "versaIssues"],
-      "queryHints": ["LAPIS validation", "platform/lapis/validate", "versa issues in service config", "schema versus semantic validation"],
+      "tags": [
+        "lapis",
+        "validation",
+        "schema",
+        "semantic validation",
+        "script gate",
+        "versaIssues"
+      ],
+      "constructs": [
+        "normalize_lapis_config_contract",
+        "validate_lapis_config_detailed",
+        "versaIssues"
+      ],
+      "queryHints": [
+        "LAPIS validation",
+        "platform/lapis/validate",
+        "versa issues in service config",
+        "schema versus semantic validation"
+      ],
       "rules": [
         "Normalization happens before schema validation.",
         "Schema-valid does not guarantee endpoint-semantic-valid.",
@@ -443,12 +716,32 @@
       "tables": [
         {
           "title": "Validation path",
-          "columns": ["Step", "Authority", "Failure shape"],
+          "columns": [
+            "Step",
+            "Authority",
+            "Failure shape"
+          ],
           "rows": [
-            ["normalize contract", "normalize_lapis_config_contract", "operation tokens and structure normalized before deeper checks"],
-            ["schema validation", "Config.LAPIS_SCHEMA", "returns error text and no normalized payload when schema fails"],
-            ["endpoint semantics", "Config._validate_endpoint_semantics", "returns endpoint-specific requirement errors"],
-            ["script validation", "validate_lapis_versa_scripts", "returns versaIssues with endpointId, path, and parser error"]
+            [
+              "normalize contract",
+              "normalize_lapis_config_contract",
+              "operation tokens and structure normalized before deeper checks"
+            ],
+            [
+              "schema validation",
+              "Config.LAPIS_SCHEMA",
+              "returns error text and no normalized payload when schema fails"
+            ],
+            [
+              "endpoint semantics",
+              "Config._validate_endpoint_semantics",
+              "returns endpoint-specific requirement errors"
+            ],
+            [
+              "script validation",
+              "validate_lapis_versa_scripts",
+              "returns versaIssues with endpointId, path, and parser error"
+            ]
           ]
         }
       ]
@@ -457,9 +750,26 @@
       "id": "service-generation-and-manager-lifecycle",
       "title": "Service Generation And Manager Lifecycle",
       "summary": "Builder and Manager are linked but distinct. Builder authors and generates a service from LAPIS, while Manager inspects and operates an existing generated service and its saved testing state.",
-      "tags": ["service generation", "service manager", "process manager", "manager state", "lifecycle"],
-      "constructs": ["POST /generate", "/services/<id>", "ProcessManager", "manager_state", "lapis_config"],
-      "queryHints": ["service generation flow", "service manager lifecycle", "manager state", "restart generated service"],
+      "tags": [
+        "service generation",
+        "service manager",
+        "process manager",
+        "manager state",
+        "lifecycle"
+      ],
+      "constructs": [
+        "POST /generate",
+        "/services/<id>",
+        "ProcessManager",
+        "manager_state",
+        "lapis_config"
+      ],
+      "queryHints": [
+        "service generation flow",
+        "service manager lifecycle",
+        "manager state",
+        "restart generated service"
+      ],
       "rules": [
         "POST /generate is the generation path for a new or freshly generated LAPIS-backed service.",
         "ProcessManager owns generated-service child-process lifecycle.",
@@ -469,14 +779,42 @@
       "tables": [
         {
           "title": "Generation and lifecycle path",
-          "columns": ["Step", "Owner", "Notes"],
+          "columns": [
+            "Step",
+            "Owner",
+            "Notes"
+          ],
           "rows": [
-            ["author draft", "Service Builder", "compose LAPIS in structured or raw form"],
-            ["validate contract", "backend config validation", "schema, semantic, and script-endpoint checks"],
-            ["generate runtime", "generate_api_service plus backend startup", "produces a runnable Flask service"],
-            ["start process", "ProcessManager", "reserves a port, injects env, starts child process"],
-            ["persist registry", "backend via VDB", "stores service metadata and contract state"],
-            ["operate existing service", "Service Manager", "inspect config, save manager state, start, stop, delete, or test"]
+            [
+              "author draft",
+              "Service Builder",
+              "compose LAPIS in structured or raw form"
+            ],
+            [
+              "validate contract",
+              "backend config validation",
+              "schema, semantic, and script-endpoint checks"
+            ],
+            [
+              "generate runtime",
+              "generate_api_service plus backend startup",
+              "produces a runnable Flask service"
+            ],
+            [
+              "start process",
+              "ProcessManager",
+              "reserves a port, injects env, starts child process"
+            ],
+            [
+              "persist registry",
+              "backend via VDB",
+              "stores service metadata and contract state"
+            ],
+            [
+              "operate existing service",
+              "Service Manager",
+              "inspect config, save manager state, start, stop, delete, or test"
+            ]
           ]
         }
       ]
@@ -485,9 +823,28 @@
       "id": "portal-proxy-surfaces",
       "title": "VDB And VI Portal Proxy Surfaces",
       "summary": "The VDB and VI portals look interactive in the browser, but they remain backend-proxied integration surfaces. Verse should describe them as backend-mediated, not as direct browser-to-runtime clients.",
-      "tags": ["vdb portal", "vi portal", "proxy", "backend mediation", "session ownership"],
-      "constructs": ["/platform/vdb/session", "/platform/vdb/query", "/platform/vi/files", "/platform/vi/validate", "/platform/vi/terminal", "/platform/vi/repl"],
-      "queryHints": ["VDB portal flow", "VI portal flow", "backend proxy", "who owns the session", "run file route"],
+      "tags": [
+        "vdb portal",
+        "vi portal",
+        "proxy",
+        "backend mediation",
+        "session ownership"
+      ],
+      "constructs": [
+        "/platform/vdb/session",
+        "/platform/vdb/query",
+        "/platform/vi/files",
+        "/platform/vi/validate",
+        "/platform/vi/terminal",
+        "/platform/vi/repl"
+      ],
+      "queryHints": [
+        "VDB portal flow",
+        "VI portal flow",
+        "backend proxy",
+        "who owns the session",
+        "run file route"
+      ],
       "rules": [
         "VDB portal session creation, auth, transport choice, and query forwarding stay on the backend.",
         "VI portal file operations, validation, terminal sessions, and REPL sessions stay on the backend.",
@@ -496,11 +853,27 @@
       "tables": [
         {
           "title": "Portal responsibilities",
-          "columns": ["Surface", "Representative routes", "Meaning"],
+          "columns": [
+            "Surface",
+            "Representative routes",
+            "Meaning"
+          ],
           "rows": [
-            ["VDB portal", "GET /platform/vdb/connection, POST /platform/vdb/session, POST /platform/vdb/query", "backend-owned transport, auth, context, and query dispatch"],
-            ["VI files and validation", "GET/POST/PUT /platform/vi/files, POST /platform/vi/validate", "backend-owned workspace file and parser validation surface"],
-            ["VI execution", "POST /platform/vi/files/<path>/run, terminal and repl routes", "backend-owned file execution and interactive session control"]
+            [
+              "VDB portal",
+              "GET /platform/vdb/connection, POST /platform/vdb/session, POST /platform/vdb/query",
+              "backend-owned transport, auth, context, and query dispatch"
+            ],
+            [
+              "VI files and validation",
+              "GET/POST/PUT /platform/vi/files, POST /platform/vi/validate",
+              "backend-owned workspace file and parser validation surface"
+            ],
+            [
+              "VI execution",
+              "POST /platform/vi/files/<path>/run, terminal and repl routes",
+              "backend-owned file execution and interactive session control"
+            ]
           ]
         }
       ]
@@ -509,9 +882,31 @@
       "id": "auth-and-runtime-boundaries",
       "title": "Auth, Credentials, And Runtime Boundaries",
       "summary": "Liwiro frontend credentials, backend platform session, VDB runtime credentials, and generated-service auth state are related but not interchangeable. Verse should keep these boundaries explicit.",
-      "tags": ["auth", "credentials", "session", "vdb transport", "permissions", "setup"],
-      "constructs": ["frontend auth", "VDB app credentials", "MANAGE_SERVICES", "VIEW_SERVICES", "unix socket", "http transport", "named pipe"],
-      "queryHints": ["VDB credentials versus login", "permissions", "setup transport", "Unix socket", "named pipe", "session ownership"],
+      "tags": [
+        "auth",
+        "credentials",
+        "session",
+        "vdb transport",
+        "permissions",
+        "setup"
+      ],
+      "constructs": [
+        "frontend auth",
+        "VDB app credentials",
+        "MANAGE_SERVICES",
+        "VIEW_SERVICES",
+        "unix socket",
+        "http transport",
+        "named pipe"
+      ],
+      "queryHints": [
+        "VDB credentials versus login",
+        "permissions",
+        "setup transport",
+        "Unix socket",
+        "named pipe",
+        "session ownership"
+      ],
       "rules": [
         "Frontend admin credentials and VDB application credentials are separate secrets.",
         "Local same-host deployments prefer Unix socket transport where available; Windows guidance uses named-pipe-compatible behavior and HTTP remains available.",
@@ -521,12 +916,32 @@
       "tables": [
         {
           "title": "Credential and boundary model",
-          "columns": ["Concern", "Owned by", "Used for"],
+          "columns": [
+            "Concern",
+            "Owned by",
+            "Used for"
+          ],
           "rows": [
-            ["frontend platform login", "Liwiro auth/session layer", "operator access to workspace and protected routes"],
-            ["backend runtime VDB credentials", "backend config and setup state", "control-plane auth to VDB for platform tasks"],
-            ["generated-service auth config", "service LAPIS contract and runtime", "service-local auth routes and token behavior"],
-            ["VDB/TUMI permissions", "VDB runtime", "data-layer and RBAC authorization beneath Liwiro"]
+            [
+              "frontend platform login",
+              "Liwiro auth/session layer",
+              "operator access to workspace and protected routes"
+            ],
+            [
+              "backend runtime VDB credentials",
+              "backend config and setup state",
+              "control-plane auth to VDB for platform tasks"
+            ],
+            [
+              "generated-service auth config",
+              "service LAPIS contract and runtime",
+              "service-local auth routes and token behavior"
+            ],
+            [
+              "VDB/TUMI permissions",
+              "VDB runtime",
+              "data-layer and RBAC authorization beneath Liwiro"
+            ]
           ]
         }
       ]
@@ -535,9 +950,45 @@
       "id": "verse-platform-integration-contract",
       "title": "Verse To Platform Integration Contract",
       "summary": "Verse runs through the Liwiro backend and should respond with the correct platform artifact or action framing for the requested surface. Prompt assembly combines bootstrap files, specialist profile, thread state, manuals, structured references, mind-share, learning, and current page context. The visible chat reply stays conversational while the technical payload and runtime trace sit in artifacts and inspect details.",
-      "tags": ["verse", "artifact", "target page", "execution contract", "inspect metadata", "prompt context", "page context"],
-      "constructs": ["service-builder-lapis", "service-manager-action", "vi-script", "vdb-query", "ananse-analysis", "capabilityId", "promptMode", "contextReport", "bootstrapFiles", "handoffChain", "synthesisParticipants", "pageKind", "selectedServiceId", "selectedServiceName", "desiredArtifactKind"],
-      "queryHints": ["Verse artifact contract", "target page", "what Verse should return", "service-builder-lapis", "service-manager-action", "promptMode", "contextReport", "bootstrapFiles", "handoffChain", "selectedServiceId", "pageKind"],
+      "tags": [
+        "verse",
+        "artifact",
+        "target page",
+        "execution contract",
+        "inspect metadata",
+        "prompt context",
+        "page context"
+      ],
+      "constructs": [
+        "service-builder-lapis",
+        "service-manager-action",
+        "vi-script",
+        "vdb-query",
+        "ananse-analysis",
+        "capabilityId",
+        "promptMode",
+        "contextReport",
+        "bootstrapFiles",
+        "handoffChain",
+        "synthesisParticipants",
+        "pageKind",
+        "selectedServiceId",
+        "selectedServiceName",
+        "desiredArtifactKind"
+      ],
+      "queryHints": [
+        "Verse artifact contract",
+        "target page",
+        "what Verse should return",
+        "service-builder-lapis",
+        "service-manager-action",
+        "promptMode",
+        "contextReport",
+        "bootstrapFiles",
+        "handoffChain",
+        "selectedServiceId",
+        "pageKind"
+      ],
       "rules": [
         "Use the correct artifact kind for the requested surface instead of forcing everything into prose.",
         "Keep raw JSON, raw LAPIS, raw Versa, and raw VDB payloads out of the visible message body.",
@@ -551,25 +1002,83 @@
       "tables": [
         {
           "title": "Verse response mapping",
-          "columns": ["User intent", "Preferred artifact", "Target surface", "Execution note"],
+          "columns": [
+            "User intent",
+            "Preferred artifact",
+            "Target surface",
+            "Execution note"
+          ],
           "rows": [
-            ["create or revise a service", "service-builder-lapis", "/service-builder", "Builder validates and applies the LAPIS draft"],
-            ["start, stop, or delete a service", "service-manager-action", "/services", "Manager or backend executes the lifecycle action"],
-            ["write or revise Versa", "vi-script", "/vi-portal", "portal or backend validates and runs the script"],
-            ["prepare a VDB command or query", "vdb-query", "/vdb-portal", "portal loads or runs the backend-mediated VDB request"],
-            ["open deeper analytics", "ananse-analysis", "/ananse-workbench", "analysis is staged for the workbench surface"]
+            [
+              "create or revise a service",
+              "service-builder-lapis",
+              "/service-builder",
+              "Builder validates and applies the LAPIS draft"
+            ],
+            [
+              "start, stop, or delete a service",
+              "service-manager-action",
+              "/services",
+              "Manager or backend executes the lifecycle action"
+            ],
+            [
+              "write or revise Versa",
+              "vi-script",
+              "/vi-portal",
+              "portal or backend validates and runs the script"
+            ],
+            [
+              "prepare a VDB command or query",
+              "vdb-query",
+              "/vdb-portal",
+              "portal loads or runs the backend-mediated VDB request"
+            ],
+            [
+              "open deeper analytics",
+              "ananse-analysis",
+              "/ananse-workbench",
+              "analysis is staged for the workbench surface"
+            ]
           ]
         },
         {
           "title": "Verse context and inspect fields",
-          "columns": ["Field", "Purpose", "Notes"],
+          "columns": [
+            "Field",
+            "Purpose",
+            "Notes"
+          ],
           "rows": [
-            ["promptMode", "shows full versus minimal prompt assembly", "full for lead turns, minimal for invited specialist follow-up"],
-            ["contextReport", "lists which context blocks shaped the run", "includes category, source, reason, chars, and truncation state"],
-            ["bootstrapFiles", "shows always-loaded Verse bootstrap files for the run", "lets operators confirm identity, tools, and startup context"],
-            ["handoffChain", "records specialist invite flow", "should preserve visible routing reasons instead of silent delegation"],
-            ["synthesisParticipants", "shows which specialists contributed to the final synthesis", "important when more than one specialist shaped the answer"],
-            ["pageKind and selected ids", "capture active Liwiro surface and target identity", "used to keep artifacts tied to the right page and object"]
+            [
+              "promptMode",
+              "shows full versus minimal prompt assembly",
+              "full for lead turns, minimal for invited specialist follow-up"
+            ],
+            [
+              "contextReport",
+              "lists which context blocks shaped the run",
+              "includes category, source, reason, chars, and truncation state"
+            ],
+            [
+              "bootstrapFiles",
+              "shows always-loaded Verse bootstrap files for the run",
+              "lets operators confirm identity, tools, and startup context"
+            ],
+            [
+              "handoffChain",
+              "records specialist invite flow",
+              "should preserve visible routing reasons instead of silent delegation"
+            ],
+            [
+              "synthesisParticipants",
+              "shows which specialists contributed to the final synthesis",
+              "important when more than one specialist shaped the answer"
+            ],
+            [
+              "pageKind and selected ids",
+              "capture active Liwiro surface and target identity",
+              "used to keep artifacts tied to the right page and object"
+            ]
           ]
         }
       ],
@@ -606,6 +1115,40 @@
           ]
         }
       ]
+    },
+    {
+      "id": "ai-provider-configuration",
+      "title": "AI Provider Configuration and Usage",
+      "summary": "Shared provider settings, model defaults, credentials, tests, and usage controls.",
+      "tags": [
+        "ai",
+        "providers",
+        "reasoning",
+        "usage",
+        "ai-setup"
+      ],
+      "constructs": [
+        "AI_USAGE_LEVEL",
+        "/platform/ai/config",
+        "/platform/ai/config/test"
+      ],
+      "queryHints": [
+        "ai setup",
+        "usage level",
+        "medium reasoning",
+        "model configuration"
+      ],
+      "rules": [
+        "GET /platform/ai/config requires platform authentication and returns no API keys.",
+        "PUT /platform/ai/config and POST /platform/ai/config/test require super admin.",
+        "usageLevel is low, medium, or high; default is medium. Saved in AI_USAGE_LEVEL.",
+        "Model defaults: OpenAI gpt-6-luna, Google gemini-3.8-flash, Anthropic claude-sonnet-5-5. Explicit model selections remain unchanged.",
+        "Usage is shared across Verse provider requests. Tests can override draft usage without persisting.",
+        "Reasoning-capable models receive provider-specific effort controls and output-token floors of 4096/8192/16384. Larger task limits are retained.",
+        "Usage level is not a monetary spending cap. Older/custom models may not support effort."
+      ],
+      "validExamples": [],
+      "tables": []
     }
   ]
 }

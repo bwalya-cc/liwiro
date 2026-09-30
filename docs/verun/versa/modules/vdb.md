@@ -54,7 +54,7 @@ Advisor telemetry is stored under `verun/vdb/__data__/sys/index_advisor/`:
 - `stats.bson`
 - `policy.bson`
 
-Structured state under `verun/vdb/__data__` is now BSON-backed internally. Export output remains JSON content packaged as a zip in the requested `out_dir`.
+Structured state under `verun/vdb/__data__` is now BSON-backed internally. Export output remains JSON content packaged as a zip in the requested export directory.
 
 Authentication failures now surface named Versa exceptions:
 - `VDBAuthenticationException` for invalid credentials, including wrong-password failures

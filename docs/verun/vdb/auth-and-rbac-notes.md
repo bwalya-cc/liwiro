@@ -1,61 +1,36 @@
-## Authentication & Authorization
+# VDB Authentication and Authorization
 
-### User Management
-1. **User Roles**:
-   - SUPER_ADMIN: Full system access
-   - ADMIN: Manage domains and databases
-   - USER: Regular database user
+VDB authentication is separate from Liwiro workspace login and generated-service bearer authentication. A VDB session identifies a database user and carries the active domain/database context.
 
-2. **Creating Users**:
-```json
-{
-    "createUser": {
-        "username": "john",
-        "password": "<PASSWORD_FROM_ENV>",
-        "email": "john@example.com",
-        "role": "ADMIN",
-        "domains": ["domain1"]
-    }
-}
-```
+## Sign in through HTTP
 
-3. **Managing Permissions**:
-```json
-{
-    "updatePermissions": {
-        "username": "john",
-        "domain": "ecommerce",
-        "db": "inventory",
-        "permission": "WRITE",
-        "grant": true
-    }
-}
-```
+Send Basic authentication to `/auth`, then use the returned `sessionId` as `X-Session-Id` on database requests:
 
-### Authentication Flow
-1. **Console Authentication**:
 ```bash
-java -cp ... verun.vdb.VDBConsole
-Username: admin
-Password: *****
+curl -X POST http://127.0.0.1:1957/auth --user username
+curl -X POST http://127.0.0.1:1957/vdb \
+  -H "X-Session-Id: $VDB_SESSION_ID" \
+  -H 'Content-Type: text/versa' \
+  --data 'whoami; context;'
 ```
 
-2. **HTTP Basic Auth**:
-```bash
-curl -H "Authorization: Basic base64(username:password)" \
-     -X POST http://localhost:1957/vdb -H 'Content-Type: text/versa' --data 'read permissions;'
-```
+The first command prompts for the password. Set `VDB_SESSION_ID` to the returned value locally. Replace the default address with the configured VDB address. Do not send Basic credentials directly to `/vdb` as a substitute for the session header.
 
-3. **Permission Checks**:
-- All operations check permissions via:
-  ```java
-  currentUser.hasPermission(domain, db, operation)
-  ```
-- Operations are validated against user's role and permissions
+## Console and scripts
 
-### Key Security Features
-- BCrypt password hashing
-- Role-based access control (RBAC)
-- Granular database/domain permissions
-- Audit logging via VDBLogger
-- Persistent user storage in `__data__/sys/users/`
+Start the console with `cd verun/vdb && ./scripts/convo.sh` and complete its authentication prompts. In Versa, import `vdb`, authenticate, and select the intended domain and database before data operations. See [the VDB module guide](../versa/vdb-module.md).
+
+## Authorization
+
+Built-in roles include `SUPER_ADMIN`, `ADMIN`, and `APPLICATION`. Domain ownership and scoped permissions determine which data a user can access. `READ`, `WRITE`, and `DATA_ACCESS` are common permission values; their scope may include a domain, database, or collection.
+
+Use [TUMI and RBAC](tumi-rbac.md) for current commands. Old `createUser` and `updatePermissions` JSON envelopes are not accepted by the native command endpoint.
+
+## Credential storage and troubleshooting
+
+VDB stores user records in its BSON-backed system data under `verun/vdb/__data__/sys/`. Password handling uses BCrypt. Treat this directory as sensitive application data.
+
+- Missing or expired session: authenticate again and use the new session ID.
+- Wrong context: run `context;`, then select the intended domain/database.
+- Permission denied: review the user's role, ownership, and scope grants.
+- Service auth failure: determine whether it is a VDB account failure or a generated-service bearer-token failure before changing credentials.

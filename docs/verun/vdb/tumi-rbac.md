@@ -1,131 +1,66 @@
 # TUMI and RBAC
 
-Last updated: 2026-03-01
+TUMI manages VDB users, roles, ownership, and scoped permissions. Authenticate before using these commands. Use command text through the console or `/vdb`; TUMI is not a separate JSON endpoint.
 
-TUMI is VDB's user/role/permission command namespace. It is not a separate standalone module folder in this repository.
+## Built-in roles and privileges
 
-Implementation:
+Built-in roles are `SUPER_ADMIN`, `ADMIN`, and `APPLICATION`. Super-admin setup is part of initial VDB bootstrap. Ordinary user creation does not create another super admin. User and role administration requires super-admin authority; domain owners can delegate access within their managed domain subject to TUMI checks.
 
-- `verun/vdb/src/main/java/verun/vdb/Tumi.java`
-
-## Role Model
-
-Built-in user roles:
-
-- `SUPER_ADMIN`
-- `ADMIN`
-- `APPLICATION`
-
-Role levels are defined in `User` and used for authorization hierarchy.
-
-## Ownership and Permission Scopes
-
-RBAC scope model:
-
-- domain ownership
-- database-level permissions
-- collection-level permissions
-
-Permission strings commonly used:
-
-- `READ`
-- `WRITE`
-- `DATA_ACCESS`
-
-## Command Families
-
-Top-level TUMI commands:
-
-- `create`
-- `delete`
-- `grant`
-- `revoke`
-- `transfer`
-- `list`
-
-## Privilege Rules
-
-### SUPER_ADMIN only
-
-- create users/roles
-- delete users/roles
-- full visibility across domains
-
-### Domain owner or SUPER_ADMIN
-
-- grant/revoke permissions within managed domain
-- transfer domain ownership access
-
-## Create User
+## Create and update users
 
 ```text
-create user username "liwiro" email "liwiro@local.com" password "<strong-password>" role "APP"
+create user bot = {email: "bot@example.com", password: "<strong-password>", role: "APPLICATION"};
+read users;
+read user bot;
+update user bot = {email: "ops@example.com"};
 ```
 
-Constraints:
-
-- cannot create additional `SUPER_ADMIN`
-- allowed new roles are `ADMIN` and `APPLICATION`
-
-## Grant Permissions
-
-### Domain ownership grant
+Replace the password placeholder locally. Use `ADMIN` or `APPLICATION` for newly created accounts. Deleting a user is explicit:
 
 ```text
-grant username "john" domain "hr"
+delete user bot;
 ```
 
-### Database scope grant
+## Grant scoped access
 
 ```text
-grant username "john" domain "hr" db "employee_data" permissions ["READ","WRITE"]
+grant ["READ", "WRITE"] on engineering.main to bot;
+grant ["READ"] on engineering.main.orders to bot;
+read permissions for bot;
+revoke ["WRITE"] on engineering.main from bot;
 ```
 
-### Collection scope grant
+A scope is `domain`, `domain.database`, or `domain.database.collection`. Check the target before changing it. Broader grants can make a narrower restriction ineffective; inspect all access that applies to the user.
+
+## Domain ownership
 
 ```text
-grant username "john" domain "hr" db "employee_data" collection "payroll" permissions ["READ"]
+grant ownership engineering to bot;
+transfer domain engineering to bot;
 ```
 
-Default permission fallback when omitted for scoped grant/revoke is `DATA_ACCESS`.
+`transfer domain engineering to bot relinquish;` requests relinquishing the caller's ownership in the supported non-super-admin flow. Ownership is broader authority than permission to read a single collection.
 
-## Revoke Permissions
-
-Patterns mirror grant, using `revoke`.
+## Custom roles
 
 ```text
-revoke username "john" domain "hr" db "employee_data" collection "payroll" permissions ["READ"]
+create role report_viewer = {name: "report_viewer", scope: {domain: "engineering", db: "main"}, permissions: ["READ"]};
+read roles;
+grant role report_viewer to bot;
+revoke role report_viewer from bot;
+delete role report_viewer;
 ```
 
-## Transfer Domain Access
+The role definition includes its `name`. Creating a role and assigning it are separate operations. Inspect the role and resulting user permissions before relying on it for service access.
+
+## Inspect access
 
 ```text
-transfer username "jane" domain "marketing"
+whoami;
+read domains;
+read domains with owners;
+read owned domains;
+read permissions;
 ```
 
-Optional `relinquish` behavior is available for non-super-admin transfer flows.
-
-## List Commands
-
-- `read domains`
-- `read domains with owners`
-- `read users`
-- `read roles`
-- `read permissions`
-- `read permissions username alice`
-
-## Who Can Inspect Permissions
-
-- SUPER_ADMIN: can inspect any user
-- Non-super-admin: only own permissions
-
-## TUMI via VI
-
-VI bridge call:
-
-```versa
-let res = vdb.tumi("read permissions;");
-print(res);
-```
-
-Result is wrapped in VI standard VDB response envelope (`ok`, `status`, `operation`, `message`, `data`, `error`, `context`).
+Results depend on the calling user's authority. A successful login does not imply access to every domain. Liwiro workspace roles and generated-service user roles remain separate from VDB TUMI roles.

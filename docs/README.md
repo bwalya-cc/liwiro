@@ -38,3 +38,9 @@ Generated services can expose their own API reference at `/liwiro/docs` and `/li
 - `legal/`: licenses, third-party credits, and commercial-policy notes
 - `compliance/`: operational guidance for license acceptance
 - `assets/`: screenshots and shared documentation images
+
+## Keeping the Wiki in Sync
+
+The public wiki uses the Markdown pages listed in `docs/wiki/catalog.json`. After editing a listed guide or its catalog entry, run `python scripts/build_wiki.py` from the repository root. Use `python scripts/build_wiki.py --check` to verify that the published wiki matches its sources.
+
+The Versa and combined Versa/VDB references are rebuilt with `python verun/vi/versa-wiki/build_reference.py`. Update the source guides and generator together when changing documented syntax.

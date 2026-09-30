@@ -127,7 +127,7 @@ Serve an actual API request using a generated service.
 
 #### Custom VQL
 
-- uses a configured strict flat-action JSON `vqlQuery`
+- uses a configured native VDB command string in `vqlQuery`
 - can merge request `query`, `args`, or `data`
 
 #### Versa

@@ -1,6 +1,6 @@
 {
   "title": "Versa Reference",
-  "version": "2026-09-09",
+  "version": "2026-09-30",
   "schemaVersion": "3.0",
   "canonicalPath": "verun/vi/versa-wiki/versa-reference.json",
   "htmlPath": "verun/vi/versa-wiki/index.html",
@@ -301,438 +301,6 @@
         "sectionIds": [
           "paths-and-script-shapes",
           "validation-and-repair-workflow"
-        ]
-      },
-      {
-        "name": "portal-execution-and-agent-operations",
-        "matchAny": [
-          "vi portal",
-          "vdb portal",
-          "run query",
-          "save and run",
-          "location change",
-          "change location",
-          "verse agent",
-          "run"
-        ],
-        "sectionIds": [
-          "agent-and-portal-operation-reference"
-        ]
-      },
-      {
-        "name": "portal-execution-and-agent-operations",
-        "matchAny": [
-          "vi portal",
-          "vdb portal",
-          "run query",
-          "save and run",
-          "location change",
-          "change location",
-          "verse agent",
-          "run"
-        ],
-        "sectionIds": [
-          "agent-and-portal-operation-reference"
-        ]
-      },
-      {
-        "name": "portal-execution-and-agent-operations",
-        "matchAny": [
-          "vi portal",
-          "vdb portal",
-          "run query",
-          "save and run",
-          "location change",
-          "change location",
-          "verse agent",
-          "run"
-        ],
-        "sectionIds": [
-          "agent-and-portal-operation-reference"
-        ]
-      },
-      {
-        "name": "portal-execution-and-agent-operations",
-        "matchAny": [
-          "vi portal",
-          "vdb portal",
-          "run query",
-          "save and run",
-          "location change",
-          "change location",
-          "verse agent",
-          "run"
-        ],
-        "sectionIds": [
-          "agent-and-portal-operation-reference"
-        ]
-      },
-      {
-        "name": "portal-execution-and-agent-operations",
-        "matchAny": [
-          "vi portal",
-          "vdb portal",
-          "run query",
-          "save and run",
-          "location change",
-          "change location",
-          "verse agent",
-          "run"
-        ],
-        "sectionIds": [
-          "agent-and-portal-operation-reference"
-        ]
-      },
-      {
-        "name": "portal-execution-and-agent-operations",
-        "matchAny": [
-          "vi portal",
-          "vdb portal",
-          "run query",
-          "save and run",
-          "location change",
-          "change location",
-          "verse agent",
-          "run"
-        ],
-        "sectionIds": [
-          "agent-and-portal-operation-reference"
-        ]
-      },
-      {
-        "name": "portal-execution-and-agent-operations",
-        "matchAny": [
-          "vi portal",
-          "vdb portal",
-          "run query",
-          "save and run",
-          "location change",
-          "change location",
-          "verse agent",
-          "run"
-        ],
-        "sectionIds": [
-          "agent-and-portal-operation-reference"
-        ]
-      },
-      {
-        "name": "portal-execution-and-agent-operations",
-        "matchAny": [
-          "vi portal",
-          "vdb portal",
-          "run query",
-          "save and run",
-          "location change",
-          "change location",
-          "verse agent",
-          "run"
-        ],
-        "sectionIds": [
-          "agent-and-portal-operation-reference"
-        ]
-      },
-      {
-        "name": "portal-execution-and-agent-operations",
-        "matchAny": [
-          "vi portal",
-          "vdb portal",
-          "run query",
-          "save and run",
-          "location change",
-          "change location",
-          "verse agent",
-          "run"
-        ],
-        "sectionIds": [
-          "agent-and-portal-operation-reference"
-        ]
-      },
-      {
-        "name": "portal-execution-and-agent-operations",
-        "matchAny": [
-          "vi portal",
-          "vdb portal",
-          "run query",
-          "save and run",
-          "location change",
-          "change location",
-          "verse agent",
-          "run"
-        ],
-        "sectionIds": [
-          "agent-and-portal-operation-reference"
-        ]
-      },
-      {
-        "name": "portal-execution-and-agent-operations",
-        "matchAny": [
-          "vi portal",
-          "vdb portal",
-          "run query",
-          "save and run",
-          "location change",
-          "change location",
-          "verse agent",
-          "run"
-        ],
-        "sectionIds": [
-          "agent-and-portal-operation-reference"
-        ]
-      },
-      {
-        "name": "portal-execution-and-agent-operations",
-        "matchAny": [
-          "vi portal",
-          "vdb portal",
-          "run query",
-          "save and run",
-          "location change",
-          "change location",
-          "verse agent",
-          "run"
-        ],
-        "sectionIds": [
-          "agent-and-portal-operation-reference"
-        ]
-      },
-      {
-        "name": "portal-execution-and-agent-operations",
-        "matchAny": [
-          "vi portal",
-          "vdb portal",
-          "run query",
-          "save and run",
-          "location change",
-          "change location",
-          "verse agent",
-          "run"
-        ],
-        "sectionIds": [
-          "agent-and-portal-operation-reference"
-        ]
-      },
-      {
-        "name": "portal-execution-and-agent-operations",
-        "matchAny": [
-          "vi portal",
-          "vdb portal",
-          "run query",
-          "save and run",
-          "location change",
-          "change location",
-          "verse agent",
-          "run"
-        ],
-        "sectionIds": [
-          "agent-and-portal-operation-reference"
-        ]
-      },
-      {
-        "name": "portal-execution-and-agent-operations",
-        "matchAny": [
-          "vi portal",
-          "vdb portal",
-          "run query",
-          "save and run",
-          "location change",
-          "change location",
-          "verse agent",
-          "run"
-        ],
-        "sectionIds": [
-          "agent-and-portal-operation-reference"
-        ]
-      },
-      {
-        "name": "portal-execution-and-agent-operations",
-        "matchAny": [
-          "vi portal",
-          "vdb portal",
-          "run query",
-          "save and run",
-          "location change",
-          "change location",
-          "verse agent",
-          "run"
-        ],
-        "sectionIds": [
-          "agent-and-portal-operation-reference"
-        ]
-      },
-      {
-        "name": "portal-execution-and-agent-operations",
-        "matchAny": [
-          "vi portal",
-          "vdb portal",
-          "run query",
-          "save and run",
-          "location change",
-          "change location",
-          "verse agent",
-          "run"
-        ],
-        "sectionIds": [
-          "agent-and-portal-operation-reference"
-        ]
-      },
-      {
-        "name": "portal-execution-and-agent-operations",
-        "matchAny": [
-          "vi portal",
-          "vdb portal",
-          "run query",
-          "save and run",
-          "location change",
-          "change location",
-          "verse agent",
-          "run"
-        ],
-        "sectionIds": [
-          "agent-and-portal-operation-reference"
-        ]
-      },
-      {
-        "name": "portal-execution-and-agent-operations",
-        "matchAny": [
-          "vi portal",
-          "vdb portal",
-          "run query",
-          "save and run",
-          "location change",
-          "change location",
-          "verse agent",
-          "run"
-        ],
-        "sectionIds": [
-          "agent-and-portal-operation-reference"
-        ]
-      },
-      {
-        "name": "portal-execution-and-agent-operations",
-        "matchAny": [
-          "vi portal",
-          "vdb portal",
-          "run query",
-          "save and run",
-          "location change",
-          "change location",
-          "verse agent",
-          "run"
-        ],
-        "sectionIds": [
-          "agent-and-portal-operation-reference"
-        ]
-      },
-      {
-        "name": "portal-execution-and-agent-operations",
-        "matchAny": [
-          "vi portal",
-          "vdb portal",
-          "run query",
-          "save and run",
-          "location change",
-          "change location",
-          "verse agent",
-          "run"
-        ],
-        "sectionIds": [
-          "agent-and-portal-operation-reference"
-        ]
-      },
-      {
-        "name": "portal-execution-and-agent-operations",
-        "matchAny": [
-          "vi portal",
-          "vdb portal",
-          "run query",
-          "save and run",
-          "location change",
-          "change location",
-          "verse agent",
-          "run"
-        ],
-        "sectionIds": [
-          "agent-and-portal-operation-reference"
-        ]
-      },
-      {
-        "name": "portal-execution-and-agent-operations",
-        "matchAny": [
-          "vi portal",
-          "vdb portal",
-          "run query",
-          "save and run",
-          "location change",
-          "change location",
-          "verse agent",
-          "run"
-        ],
-        "sectionIds": [
-          "agent-and-portal-operation-reference"
-        ]
-      },
-      {
-        "name": "portal-execution-and-agent-operations",
-        "matchAny": [
-          "vi portal",
-          "vdb portal",
-          "run query",
-          "save and run",
-          "location change",
-          "change location",
-          "verse agent",
-          "run"
-        ],
-        "sectionIds": [
-          "agent-and-portal-operation-reference"
-        ]
-      },
-      {
-        "name": "portal-execution-and-agent-operations",
-        "matchAny": [
-          "vi portal",
-          "vdb portal",
-          "run query",
-          "save and run",
-          "location change",
-          "change location",
-          "verse agent",
-          "run"
-        ],
-        "sectionIds": [
-          "agent-and-portal-operation-reference"
-        ]
-      },
-      {
-        "name": "portal-execution-and-agent-operations",
-        "matchAny": [
-          "vi portal",
-          "vdb portal",
-          "run query",
-          "save and run",
-          "location change",
-          "change location",
-          "verse agent",
-          "run"
-        ],
-        "sectionIds": [
-          "agent-and-portal-operation-reference"
-        ]
-      },
-      {
-        "name": "portal-execution-and-agent-operations",
-        "matchAny": [
-          "vi portal",
-          "vdb portal",
-          "run query",
-          "save and run",
-          "location change",
-          "change location",
-          "verse agent",
-          "run"
-        ],
-        "sectionIds": [
-          "agent-and-portal-operation-reference"
         ]
       },
       {
@@ -4510,6 +4078,49 @@
             "let letters = {x: x for x in \"ab\"};"
           ],
           "notes": []
+        }
+      ]
+    },
+    {
+      "id": "mediacloud-custom-module-reference",
+      "title": "MediaCloud and Custom Modules",
+      "summary": "Bundled custom Cloudinary adapter and reusable module setup.",
+      "tags": [
+        "mediacloud",
+        "custom modules",
+        "cloudinary"
+      ],
+      "constructs": [
+        "mediacloud.status",
+        "mediacloud.providers",
+        "mediacloud.upload",
+        "module_config",
+        "module_meta"
+      ],
+      "queryHints": [
+        "media upload",
+        "cloudinary",
+        "custom module"
+      ],
+      "rules": [
+        "# MediaCloud and Custom Modules\n\nMediaCloud is a bundled custom Versa module for Cloudinary uploads. Liwiro provides its source through the custom module registry; it is not a native Java module. Use VI Portal's module tools to inspect available modules and their domain assignments.\n\n## Import and check readiness\n\n```versa\nmediacloud import *;\nprint(mediacloud.status({}));\n```\n\n`status(config)` returns the selected provider and provider readiness. `providers(config)` returns provider details. The bundled adapter supports Cloudinary. A readiness result checks for configured values; it does not make an upload or prove that the credentials are accepted.\n\n## Configure Cloudinary\n\nUse these local environment values:\n\n```env\nCLOUDINARY_CLOUD_NAME=your-cloud-name\nCLOUDINARY_API_KEY=your-api-key\nCLOUDINARY_API_SECRET=your-api-secret\nCLOUDINARY_FOLDER=optional-folder\nMEDIA_DEFAULT_PROVIDER=cloudinary\n```\n\nThe module resolves values from the call's config, module configuration, and runtime environment. Config keys include `cloudName`, `apiKey`, `apiSecret`, `folder`, and `defaultProvider`. Generated-service scripts receive environment settings from their service configuration; standalone files need their own environment.\n\n## Upload\n\n`mediacloud.upload(payload)` accepts a body directly or under `body`. Supply one of `sourceUrl`, `dataUri`, `dataBase64`, or `textBody`. Optional values include `mimeType`, `filename`, `folder`, `publicId`, `provider`, and `config`.\n\nThe adapter chooses the file content in this order: data URI, base64 data, text body, then source URL. It sends the upload using the HTTP module. An upload is an external side effect; use a test folder and inspect the provider result before applying the workflow to real data.\n\nResults include `ok`, `statusCode`, and `provider`. A successful result can include `providerAssetId`, `storagePath`, `publicUrl`, `secureUrl`, `sizeBytes`, and `providerResponse`. Missing credentials produce an error result; missing file content and unsupported providers also produce explicit error results.\n\nUse `liwiro/data/lapis-examples/15-media-storage-bridge-service.json` for a complete service example. Its status routes can be inspected before supplying live credentials.\n\n## Your own modules\n\nUse **VI Portal \u2192 Modules** to inspect or edit reusable Versa modules, configuration, and domain availability. Service Builder supports shared module definitions and module configuration in a LAPIS contract. Keep imports at the top of module source and validate the complete service before generating it.\n\nModule contexts can expose `module_config` and `module_meta`. Service context and VDB access depend on where the module runs. Do not assume that a helper loaded in a standalone file has authenticated database access or the request parameters of a service endpoint.\n"
+      ],
+      "validExamples": [
+        {
+          "title": "Check readiness without uploading",
+          "code": [
+            "mediacloud import *;",
+            "print(mediacloud.status({}));"
+          ],
+          "notes": [
+            "Readiness checks configured values, not credential validity."
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "path": "docs/verun/versa/modules/mediacloud.md",
+          "purpose": "Custom module usage"
         }
       ]
     }

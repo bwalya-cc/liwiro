@@ -1,43 +1,17 @@
 # VDB Echo Command
 
-The `echo` command in VDB allows you to output messages in the console or add a note object to the result in the http server interface.
-
-## Usage
-
-The basic syntax is:
+Use `echo` to return a literal value and print it to the VDB process output. It can help confirm that a command reaches the expected runtime.
 
 ```text
-echo value "Your message here"
+echo "Moni, Dziko!";
+echo "Mwapoleni, Icalo!";
+echo "Hello, World!";
 ```
 
-## Example
+`echo value "hello";` is also accepted. A single HTTP command returns the normal success response with the echoed value as `data`:
 
-Here's a simple example of using the `echo` command:
-
-```text
-echo value "Moni, Dziko!"
-echo value "Mwapoleni, Icalo!"
-echo value "Hello, World!"
-```
-
-Output (console):
-```
-Moni, Dziko!
-Mwapoleni, Icalo!
-Hello, World!
-```
-
-or 
-
-Output (http server interface):
 ```json
-{
-    ":>": "Moni, Dziko!"
-}
-{
-    ":>": "Mwapoleni, Icalo!"
-}
-{
-    ":>": "Hello, World!"
-}
+{"status":"success","data":"Hello, World!"}
 ```
+
+A multi-command batch returns individual command results in its result list. Echo does not create a database document. Authenticate before submitting it through the native command endpoint.

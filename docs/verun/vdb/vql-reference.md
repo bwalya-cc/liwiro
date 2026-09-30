@@ -1,222 +1,186 @@
 # VQL Reference
 
-Last updated: 2026-09-09
+VDB accepts Versa-family command text in the console, VDB Portal, and `POST /vdb`. JSON is used for data and responses, not as a command envelope. The parser rejects legacy `{ "action": ... }` requests and JSON query objects after `where`.
 
-This document is the narrative companion to the runtime help catalog. The catalog is the exhaustive command list and supplies syntax plus examples for every entry; this page highlights common workflows you can submit via the console, the canonical `/vdb` HTTP endpoint, or automation scripts.
+## Syntax and help
 
-## Navigate runtime help
-
-Console help is intentionally returned in small pieces:
+End statements with semicolons. Names may be bare identifiers or quoted strings. Object literals contain key/value pairs; lists use square brackets. Commands operate in the authenticated session's selected domain and database.
 
 ```text
-help
-help 2
-help documents
-help documents 2
-help find
-help Documents.find
-help all 2
-```
-
-The readable VDB form supports explicit paging:
-
-```text
-help topic "Documents" page 2 page_size 2
-help topic "Documents.find"
-```
-
-HTTP clients can make the equivalent request with `GET /help?topic=Documents&page=2&page_size=2`. Page size is capped at five.
-
-## General commands
-
-Use these when you only need context, identity, or echo behavior before issuing data commands.
-
-### `context`
-
-```text
-context
-```
-
-### `whoami`
-
-```text
-whoami
-```
-
-### `echo`
-
-```text
-echo value "hello"
-```
-
-### Transactional command batch
-
-```text
+help;
+help documents;
+help documents 2;
+help all 2;
 context;
-read collections
+whoami;
+echo "hello";
 ```
 
-Separate statements with semicolons or newlines. A failed entry aborts the batch.
+HTTP help supports `GET /help?topic=Documents&page=2&page_size=2` with the session header. Use the runtime help for focused lookups, and the examples below for current command syntax.
 
-## Domain and database operations
-
-### Define a domain
+## Domains and databases
 
 ```text
-create domain "engineering"
+create domain engineering = {database: "main"};
+use domain engineering;
+use database main;
+context;
+create database reporting;
+read domains;
+read databases;
+read domains with owners;
+status domain engineering;
 ```
 
-### Define a domain+database together
+Select a domain before creating an additional database. `use engineering.main;` selects both. Creating a domain with a `database` definition sets up that database; it does not replace checking your session context.
 
 ```text
-create domain engineering = { database: main };
+suspend domain engineering;
+resume domain engineering;
+drop database reporting;
+drop domain engineering;
 ```
 
-### Use a specific domain or database context
+Suspending or dropping a domain affects other users and services. Check ownership and the target before running these commands. Dropping a resource is destructive.
+
+## Collections and schemas
 
 ```text
-use domain "engineering"
-use db "main"
+create collection events;
+create collection orders = {orderId: string @required @unique, total: number, status: string = "draft"};
+read collections;
+describe collection orders;
+read models;
+read model orders;
 ```
 
-### List domains/databases
+The schema follows `=` and uses typed field declarations. Do not use the old `schema {"field":{"type":...}}` form. A field can include `?` for nullable values, a default literal, and annotations. Validate the types and constraints against your data before importing it.
 
 ```text
-read domains
-read dbs
-read domains with owners
+drop model orders;
+drop collection events;
 ```
 
-### Drop domain or database
+Dropping a model removes model metadata; dropping a collection removes the collection. These are distinct operations.
+
+## Create documents
 
 ```text
-drop domain "engineering"
-drop db "main"
+create in orders = {orderId: "o-001", total: 42, status: "draft"};
+insert into orders = [{orderId: "o-002", total: 18}, {orderId: "o-003", total: 27}];
 ```
 
-### Inspect or change domain lifecycle state
+Create the collection and any schema first. An object inserts one document; a list supplies multiple documents. Inspect the response for validation or uniqueness failures.
+
+## Read and count
 
 ```text
-status domain "engineering"
-suspend domain "engineering"
-resume domain "engineering"
+read collection orders where total >= 20 && status == "draft" select [orderId, total] order by total desc offset 0 limit 10;
+read one from orders where orderId == "o-001";
+count collection orders where status == "draft";
 ```
 
-Domain lifecycle mutations require domain ownership or super-admin privileges. Suspended domains cannot be selected by ordinary users.
+Read clauses support `where`, `select`, `order by`, `offset`, and `limit`. Ordinary reads default to a limit of 100. Limits must be positive; offsets must be zero or greater. Predicates use expression operators such as `==`, `!=`, `<`, `<=`, `>`, `>=`, `&&`, `||`, `!`, `in`, and `!in`. Use parentheses to make grouping clear. Projection uses a list of field names, not a JSON projection object.
 
-## Collections and models
-
-### List collections or models
+## Update and delete
 
 ```text
-read collections
-read models
+update collection orders where orderId == "o-001" { total += 5; status = "confirmed"; unset temporaryNote; };
+delete from orders where status == "cancelled";
 ```
 
-### Create a schema-aware collection
+Updates use a block containing assignments, increments, decrements, or `unset`. An update without `where` can affect every document in the collection. Document deletion requires either a predicate or the explicit `all` marker:
 
 ```text
-create collection "orders" schema {"orderId":{"type":"string","required":true},"total":{"type":"number"},"placedAt":{"type":"date"}}
+delete from orders all;
 ```
 
-Create the collection first, then seed a document with a separate flat `insert` action. The schema fields use the same type keywords referenced by the Versa `vdb.create` helper, so you can move between console queries and scripted workflows easily.
+## Indexes
 
 ```text
-create collection "reports" schema {"reportId":{"type":"string","required":true},"status":{"type":"string","default":"draft"}}
-create in reports = { reportId: "r-001", status: "draft" };
+create index orders.orderId @unique;
+read indexes on orders;
+rebuild indexes on orders;
+rebuild index orders.orderId;
+drop index orders.orderId;
 ```
 
-See `verun/vi/demo/vdb/vdb_collection_schema_demo.versa` for a Versa script that pairs this command with `vdb.create(...)` and schema-aware collection handling.
+Index targets use `collection.field`. Review existing values before adding a unique index.
 
-### Create a schemaless collection (or seed data)
+## Aggregation
+
+Aggregation uses a block of named aggregate expressions, with optional filtering, grouping, ordering, and limiting. It does not accept a MongoDB pipeline as the native command.
 
 ```text
-create in events = { name: "demo", status: "start" };
+aggregate collection orders by status { count: count(); total: sum(total); };
 ```
 
-### Inspect or drop models
+See the runtime aggregation help for supported aggregate functions. Check output against a small known dataset before relying on a report.
+
+## Stored scripts
 
 ```text
-read model model "orders"
-delete model model "orders"
-drop collection "events"
+create script greet = { print("hello"); };
+read script greet;
+read scripts;
+run script greet;
+run script greet with {username: "alice"};
+delete script greet;
 ```
 
-### Manage indexes
+Script bodies contain Versa code. Import modules before using their namespaces. Script execution permissions and VDB context still apply.
+
+## Batches and transactions
+
+A semicolon-separated batch executes in order and stops at the first failed command. Earlier successful commands are not automatically rolled back. Inspect each result; a batch response can contain a failed item.
+
+Use an explicit transaction when a group of data changes must succeed together:
 
 ```text
-create index collection "orders" field "orderId" unique true
-list indexes collection "orders"
-rebuild indexes collection "orders"
-drop index collection "orders" field "orderId"
+transaction {
+  create in orders = {orderId: "o-004", total: 10};
+  update collection orders where orderId == "o-004" { status = "confirmed"; };
+};
 ```
 
-## Document CRUD commands
-
-### Create documents
+Manual transaction control is also available:
 
 ```text
-create in users = { name: "Alice", role: "admin" };
+begin transaction;
+commit transaction;
+rollback transaction;
 ```
 
-### Read documents
+`abort transaction;` is an alias for rollback. Keep manual transaction operations in the same session. A database transaction does not undo external effects such as email or HTTP calls made by scripts.
+
+## Users, roles, and permissions
 
 ```text
-read collection users where role == "admin" select [name, email] limit 10;
+create user bot = {email: "bot@example.com", password: "<strong-password>", role: "APPLICATION"};
+read users;
+read roles;
+read permissions;
+grant ["READ", "WRITE"] on engineering.main.orders to bot;
+revoke ["WRITE"] on engineering.main.orders from bot;
 ```
 
-### Update documents
-
-```text
-update collection users where name == "Alice" { active = true; logins += 1; };
-```
-
-### Delete documents
-
-```text
-delete from users where active == false;
-```
-
-### Aggregate documents
-
-```text
-aggregate collection "events" pipeline [{"$match":{"kind":"audit"}},{"$sort":{"created_at":-1}},{"$limit":10}]
-```
-
-## Scripts
-
-```text
-create script name "greet" code "print('hello');"
-read script name "greet"
-run script name "greet" params {"username":"alice"}
-read scripts
-delete script name "greet"
-```
-
-## Transactions
-
-```text
-begin transaction
-commit transaction
-abort transaction
-```
+See [TUMI and RBAC](tumi-rbac.md) for role definitions, ownership, and privilege requirements.
 
 ## Export
 
 ```text
-export domains ["engineering"] out_dir "/tmp/vdb-exports"
-export domains "*" package "all" out_dir "/tmp/vdb-exports"
+export domain engineering to "/tmp/vdb-exports" as "engineering-backup";
+export domains ["engineering", "analytics"] to "/tmp/vdb-exports";
+export all domains to "/tmp/vdb-exports" as "all-domains";
 ```
 
-## TUMI
+Paths refer to the VDB server's filesystem. Ensure the server account can write to the destination and the calling user can access the exported domains.
 
-```text
-create user username "bot" email "bot@example.com" password "<strong-password>" role "APPLICATION"
-grant username "alex" role "REPORT_VIEWER"
-read roles
-read permissions
-```
+## Errors and recovery
 
-## Security and RBAC
+Responses identify success or failure and include result data or an error. Fix syntax errors before retrying. For access errors, check the authenticated user, selected context, and scope permissions. For data errors, inspect schema and uniqueness constraints. Do not automatically retry writes when you cannot tell whether they already succeeded.
 
-Always pair `tumi` commands with the `RBAC` model referenced in the `help.json` “Security” section so you can see the allowed scopes (domain, db, collection) for each grant before running the command.
+- `VDB_LEGACY_JSON_COMMAND`: replace the JSON command envelope with command text.
+- `VDB_LEGACY_JSON_QUERY`: replace a JSON filter with a `where` expression.
+- `VDB_LEGACY_UPDATE`: replace `set`/`inc` clauses with an update block.
+- `DELETE_REQUIRES_WHERE_OR_ALL`: specify the rows to delete or explicitly use `all`.

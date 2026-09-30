@@ -3,7 +3,14 @@
     "slug": "platform-foundations",
     "title": "Liwiro Platform Foundations",
     "summary": "The system map for Liwiro, Verun, Verse, VI, generated services, and the data/runtime boundaries between them.",
-    "tags": ["liwiro", "platform", "architecture", "routes", "system-map", "agents"],
+    "tags": [
+      "liwiro",
+      "platform",
+      "architecture",
+      "routes",
+      "system-map",
+      "agents"
+    ],
     "subsystem": "platform",
     "order": 10,
     "audience": "Verse agents, platform operators, service authors",
@@ -47,13 +54,25 @@
       "Auth-layer confusion causes agents to call VDB or protected services without valid credentials.",
       "Missing system boundaries leads to incorrect LAPIS, Versa, or VQL advice."
     ],
-    "cross_links": ["auth-and-access", "lapis-service-lifecycle", "vdb-runtime-reference", "verse-agents-reference"]
+    "cross_links": [
+      "auth-and-access",
+      "lapis-service-lifecycle",
+      "vdb-runtime-reference",
+      "verse-agents-reference"
+    ]
   },
   {
     "slug": "auth-and-access",
     "title": "Authentication and Access Boundaries",
     "summary": "The required distinctions between Liwiro platform auth, service bearer auth, and VDB runtime authentication.",
-    "tags": ["auth", "security", "rbac", "vdb-auth", "bearer", "setup"],
+    "tags": [
+      "auth",
+      "security",
+      "rbac",
+      "vdb-auth",
+      "bearer",
+      "setup"
+    ],
     "subsystem": "security",
     "order": 20,
     "audience": "Verse agents, platform admins, generated-service authors",
@@ -97,13 +116,25 @@
       "Bearer-protected endpoints return 401 when tokens are absent or invalid.",
       "Auth confusion leads to incorrect troubleshooting and invalid generated code."
     ],
-    "cross_links": ["platform-foundations", "vdb-runtime-reference", "dry-run-validation", "lapis-service-lifecycle"]
+    "cross_links": [
+      "platform-foundations",
+      "vdb-runtime-reference",
+      "dry-run-validation",
+      "lapis-service-lifecycle"
+    ]
   },
   {
     "slug": "lapis-service-lifecycle",
     "title": "LAPIS and Generated Service Lifecycle",
     "summary": "How LAPIS contracts are normalized, validated, generated, operated, and repaired inside Liwiro.",
-    "tags": ["lapis", "service-builder", "service-manager", "generation", "metadata", "endpoints"],
+    "tags": [
+      "lapis",
+      "service-builder",
+      "service-manager",
+      "generation",
+      "metadata",
+      "endpoints"
+    ],
     "subsystem": "services",
     "order": 30,
     "audience": "Verse agents and service authors",
@@ -148,13 +179,25 @@
       "Versa parse/runtime issues block script endpoints.",
       "Dry-run execution failures expose hidden startup, auth, and side-effect problems."
     ],
-    "cross_links": ["lapis-reference", "dry-run-validation", "vql-reference", "versa-reference"]
+    "cross_links": [
+      "lapis-reference",
+      "dry-run-validation",
+      "vql-reference",
+      "versa-reference"
+    ]
   },
   {
     "slug": "lapis-reference",
     "title": "LAPIS Reference",
     "summary": "The contract rules for metadata, auth, models, modules, and endpoint definitions used by Liwiro generation.",
-    "tags": ["lapis", "schema", "crud", "custom", "script", "validation"],
+    "tags": [
+      "lapis",
+      "schema",
+      "crud",
+      "custom",
+      "script",
+      "validation"
+    ],
     "subsystem": "services",
     "order": 40,
     "audience": "Verse agents writing or repairing LAPIS",
@@ -170,13 +213,13 @@
     ],
     "requiredWorkflows": [
       "Use `crud` for generated collection-backed behavior.",
-      "Use `custom` only when you need a portal-style flat action VQL object.",
+      "Use `custom` only when you need a native VDB command string in vqlQuery.",
       "Use `script` only when CRUD/custom cannot express the behavior and the Versa runtime assumptions are known."
     ],
     "guardrails": [
       "Keep `basePath` rooted with `/`.",
       "Keep `version` semantic, such as `1.0.0`.",
-      "Do not mix VQL text syntax into `vqlQuery`; it must decode to a flat action object."
+      "Use native command text in `vqlQuery`; reject JSON action envelopes."
     ],
     "antiPatterns": [
       "Inventing unsupported `operationType` values.",
@@ -198,13 +241,24 @@
       "Bad endpoint semantics stop the service before runtime generation.",
       "Weak docs/auth configuration produces confusing or inaccessible runtime behavior."
     ],
-    "cross_links": ["lapis-service-lifecycle", "auth-and-access", "dry-run-validation"]
+    "cross_links": [
+      "lapis-service-lifecycle",
+      "auth-and-access",
+      "dry-run-validation"
+    ]
   },
   {
     "slug": "versa-reference",
     "title": "Versa Runtime Reference",
     "summary": "Agent-facing guidance for writing flawless Versa code in Liwiro and VI, including imports, runtime objects, and VDB prerequisites.",
-    "tags": ["versa", "vi", "script", "imports", "runtime", "repair"],
+    "tags": [
+      "versa",
+      "vi",
+      "script",
+      "imports",
+      "runtime",
+      "repair"
+    ],
     "subsystem": "versa",
     "order": 50,
     "audience": "Verse agents generating Versa or fixing script endpoints",
@@ -248,13 +302,25 @@
       "Bad syntax or unsupported constructs fail parser validation.",
       "VDB auth/context errors fail script execution before business logic runs."
     ],
-    "cross_links": ["vi-portal-runtime", "vdb-runtime-reference", "dry-run-validation", "vql-reference"]
+    "cross_links": [
+      "vi-portal-runtime",
+      "vdb-runtime-reference",
+      "dry-run-validation",
+      "vql-reference"
+    ]
   },
   {
     "slug": "vi-portal-runtime",
     "title": "Versa Console and Versa Execution Runtime",
     "summary": "How VI files, REPL work, and service-inline Versa execution differ, and what runtime assumptions agents must preserve.",
-    "tags": ["vi", "portal", "repl", "versa", "runtime", "files"],
+    "tags": [
+      "vi",
+      "portal",
+      "repl",
+      "versa",
+      "runtime",
+      "files"
+    ],
     "subsystem": "vi",
     "order": 60,
     "audience": "Verse agents and operators working in VI or script-backed services",
@@ -298,13 +364,25 @@
       "Wrong file/runtime assumptions produce confusing repair loops.",
       "Agents recommend commands that belong to the wrong execution surface."
     ],
-    "cross_links": ["versa-reference", "platform-foundations", "dry-run-validation"]
+    "cross_links": [
+      "versa-reference",
+      "platform-foundations",
+      "dry-run-validation"
+    ]
   },
   {
     "slug": "vdb-runtime-reference",
     "title": "VDB Runtime Reference",
     "summary": "The operational model for VDB authentication, sessions, domains, databases, collections, scripts, exports, RBAC, and TUMI.",
-    "tags": ["vdb", "runtime", "auth", "domains", "databases", "rbac", "tumi"],
+    "tags": [
+      "vdb",
+      "runtime",
+      "auth",
+      "domains",
+      "databases",
+      "rbac",
+      "tumi"
+    ],
     "subsystem": "vdb",
     "order": 70,
     "audience": "Verse agents writing VDB or guiding portal operations",
@@ -348,66 +426,84 @@
       "Wrong workspace context produces missing-collection or wrong-data behavior.",
       "Admin actions without proper permissions fail and may be unsafe to retry blindly."
     ],
-    "cross_links": ["auth-and-access", "vql-reference", "versa-reference", "dry-run-validation"]
+    "cross_links": [
+      "auth-and-access",
+      "vql-reference",
+      "versa-reference",
+      "dry-run-validation"
+    ]
   },
   {
     "slug": "vql-reference",
     "title": "VQL Reference",
     "summary": "The readable command syntax and query semantics used by VDB Console, custom LAPIS endpoints, and VDB-backed runtime work.",
-    "tags": ["vql", "vdb", "query", "json", "custom-endpoints", "commands"],
+    "tags": [
+      "vql",
+      "vdb",
+      "query",
+      "json",
+      "custom-endpoints",
+      "commands"
+    ],
     "subsystem": "vql",
     "order": 80,
     "audience": "Verse agents generating VQL payloads",
     "agentGoals": [
-      "Produce portal-ready and LAPIS-ready readable VDB commands.",
-      "Distinguish read, create, update, delete, define, use, list, script, export, index, and domain lifecycle actions.",
-      "Avoid JSON command envelopes."
+      "Produce native VDB command text for the console, portal, and custom LAPIS endpoints.",
+      "Use the current VQL reference for CRUD, context, scripts, export, indexes, transactions, and permissions."
     ],
     "prerequisites": [
-      "VQL payloads used by Liwiro custom endpoints must decode to readable VDB command strings.",
-      "Collection-level operations depend on VDB auth and active workspace context.",
-      "Args, query, and data sections should be explicit when needed.",
-      "Domain lifecycle actions use `domain_status`, `domain_suspend`, or `domain_resume` with an explicit `domain` field."
+      "Authenticate to VDB and select the intended domain/database.",
+      "Use command text in vqlQuery. JSON is for data literals and responses."
     ],
     "requiredWorkflows": [
-      "Represent VQL as a readable command string, when used in Liwiro.",
-      "Keep query filters and data updates in the correct sections.",
-      "Use the smallest safe action family that matches the task."
+      "Check whoami and context before mutations.",
+      "Use where expressions for predicates and update blocks for assignments.",
+      "Use transaction { ... } when database changes must be atomic. Ordinary batches stop on error without rolling back earlier successes."
     ],
     "guardrails": [
-      "Do not place raw command strings into `vqlQuery`.",
-      "Do not mix unrelated action families in one payload unless the runtime explicitly supports it.",
-      "Do not describe destructive commands as examples without a warning.",
-      "Treat suspend and resume as ownership-controlled domain operations; do not omit the domain or imply they are collection commands."
+      "Reject legacy JSON command envelopes.",
+      "Document deletion requires where or explicit all.",
+      "Check scope and permissions before writes, exports, or ownership changes."
     ],
     "antiPatterns": [
-      "Using a shell-like VQL string where JSON is required.",
-      "Putting update data in a find query.",
-      "Leaving the target collection/domain ambiguous."
+      "Using a JSON action object in vqlQuery.",
+      "Using schema JSON after create collection instead of a typed declaration after =.",
+      "Treating a multi-command batch as an atomic transaction."
     ],
     "examples_good": [
-      "A read payload uses `action: find`, `collection`, `where`, and optional `limit` fields.",
-      "An update payload uses `action: update`, `collection`, `where`, and `set` fields.",
-      "A custom LAPIS endpoint stores a parsed flat action object in `vqlQuery`.",
-      "A domain status check uses `{action: domain_status, domain: \"example\"}`; suspend/resume use the same flat shape with the corresponding action."
+      "read collection orders where total >= 20 select [orderId, total] limit 10;",
+      "update collection orders where orderId == \"o-001\" { status = \"confirmed\"; };",
+      "status domain engineering;",
+      "export domain engineering to \"/tmp/vdb-exports\";"
     ],
     "examples_bad": [
-      "A custom endpoint with `vqlQuery: \"read users where ...\"`.",
-      "A create payload that omits the target collection.",
-      "A destructive command presented without caution or auth assumptions."
+      "{\"action\":\"find\",\"collection\":\"orders\"}",
+      "delete from orders;",
+      "grant username \"bot\" domain \"engineering\""
     ],
     "failure_modes": [
-      "Malformed objects fail validation or VDB execution.",
-      "Wrong query/data placement causes incorrect runtime semantics.",
-      "Ambiguous workspace assumptions break otherwise valid payloads."
+      "Legacy syntax is rejected by VDBCommandLanguage.",
+      "Missing authentication, wrong context, or insufficient scope permissions prevents operations."
     ],
-    "cross_links": ["vdb-runtime-reference", "lapis-reference", "dry-run-validation"]
+    "cross_links": [
+      "vdb-runtime-reference",
+      "lapis-reference",
+      "dry-run-validation"
+    ]
   },
   {
     "slug": "verse-agents-reference",
     "title": "Verse Agents and Retrieval Reference",
     "summary": "How Verse routes work, how capability/manual context is selected, and how agents should ground answers in the shared corpus.",
-    "tags": ["verse", "agents", "retrieval", "routing", "skills", "capabilities"],
+    "tags": [
+      "verse",
+      "agents",
+      "retrieval",
+      "routing",
+      "skills",
+      "capabilities"
+    ],
     "subsystem": "verse",
     "order": 90,
     "audience": "Verse agent maintainers and advanced operators",
@@ -451,13 +547,26 @@
       "Missing prerequisites produce unsafe recommendations.",
       "Capability links drift if they are not kept aligned with shared-corpus slugs."
     ],
-    "cross_links": ["platform-foundations", "auth-and-access", "dry-run-validation", "versa-reference", "vdb-runtime-reference"]
+    "cross_links": [
+      "platform-foundations",
+      "auth-and-access",
+      "dry-run-validation",
+      "versa-reference",
+      "vdb-runtime-reference"
+    ]
   },
   {
     "slug": "dry-run-validation",
     "title": "Dry-Run Validation Contract",
     "summary": "The required behavior of Liwiro validation when it performs real runtime execution with strict live VDB auth and side-effect suppression.",
-    "tags": ["validation", "dry-run", "vdb-auth", "runtime", "safety", "service-builder"],
+    "tags": [
+      "validation",
+      "dry-run",
+      "vdb-auth",
+      "runtime",
+      "safety",
+      "service-builder"
+    ],
     "subsystem": "validation",
     "order": 100,
     "audience": "Verse agents, service authors, and backend maintainers",
@@ -501,6 +610,57 @@
       "Suppressed side effects surface as dry-run execution errors or notices.",
       "Endpoint-specific runtime errors drive the repair loop for LAPIS and Versa."
     ],
-    "cross_links": ["lapis-service-lifecycle", "auth-and-access", "versa-reference", "vdb-runtime-reference", "vql-reference"]
+    "cross_links": [
+      "lapis-service-lifecycle",
+      "auth-and-access",
+      "versa-reference",
+      "vdb-runtime-reference",
+      "vql-reference"
+    ]
+  },
+  {
+    "slug": "ai-setup",
+    "title": "AI Setup and Usage",
+    "summary": "Configure provider credentials, current model suggestions, and shared reasoning usage.",
+    "tags": [
+      "ai",
+      "providers",
+      "models",
+      "usage"
+    ],
+    "subsystem": "verse",
+    "order": 150,
+    "audience": "Verse agents and platform admins",
+    "agentGoals": [
+      "Explain shared AI settings without revealing keys."
+    ],
+    "prerequisites": [
+      "Super-admin access to save or test provider settings."
+    ],
+    "requiredWorkflows": [
+      "Open /ai-setup; choose a provider, model, and Low, Medium, or High usage level.",
+      "Default usage is medium; explicitly saved model choices are preserved.",
+      "Test drafts without saving, or save and then inspect each connection result."
+    ],
+    "guardrails": [
+      "Connection tests make billable generation requests.",
+      "Usage level is not a spending cap.",
+      "Do not expose API keys in replies or artifacts."
+    ],
+    "antiPatterns": [
+      "Claiming a saved key is verified before a successful probe."
+    ],
+    "examples_good": [
+      "Use Medium for routine debugging; choose High for difficult analysis."
+    ],
+    "examples_bad": [
+      "High guarantees an accurate answer."
+    ],
+    "failure_modes": [
+      "Invalid key, unavailable model, quota, network failure, or truncated output."
+    ],
+    "cross_links": [
+      "verse-agents-reference"
+    ]
   }
 ]

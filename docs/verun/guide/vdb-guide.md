@@ -1,57 +1,33 @@
 # VDB Guided Path
 
-Walk through VDB setup, runtime operations, and advanced data/security workflows in three stages?with links to the companion reference files.
+Learn VDB in a disposable workspace before applying the same commands to service data.
 
-## Overview
+## 1. Start and sign in
 
-- **Stage order:** Beginner ? Intermediate ? Pro
-- **Purpose:** Provide actionable steps before diving into dense reference chapters.
+Start the local stack with `./liwiro/scripts/start_all.sh`, or use the direct launchers in [setup and operations](../vdb/setup-and-operations.md). Open VDB Portal or the console, authenticate, and inspect `whoami;` and `context;`.
 
----
+For HTTP access, follow [authentication and authorization](../vdb/auth-and-rbac-notes.md). Use the returned session ID for subsequent requests.
 
-## Stage 1 ? Beginner: getting VDB running
+## 2. Create and query data
 
-- **Objective:** Start VDB locally, explore the console, and understand the CLI/portal entry points.
-- **Checklist:**
-  - [ ] Run `./liwiro.sh local start vdb --vdb-transport unixsocket` (or `./liwiro/scripts/start_all.sh`) and verify health via `vdb status` commands; see `docs/verun/vdb/setup-and-operations.md#startup` for prereqs.
-  - [ ] Launch the console (`verun/vdb/scripts/convo.sh`) or portal (`/vdb-portal`) to observe domains, users, and logs.
-  - [ ] Inspect `verun/vdb/__data__/` to confirm the filesystem structure described under `docs/verun/vdb/README.md#persistence` and ensure the placeholder data is initialized.
-- **Next read:** `docs/verun/vdb/setup-and-operations.md` for transport modes, sockets, and runtime diagnostics.
+Follow [the usage guide](../vdb/usage-guide.md) to create a domain, select a database, declare a collection, and insert documents. Practice a filtered read, a projected read, an update with a predicate, and a selected-document delete.
 
----
+Use [the VQL reference](../vdb/vql-reference.md) for exact syntax. Native commands are text; old JSON action envelopes are rejected. Keep JSON data literals separate from command syntax.
 
-## Stage 2 ? Intermediate: documents, scripts, and day-to-day commands
+## 3. Add transactions and access control
 
-- **Objective:** Manage collections, documents, and stored scripts using VQL; learn the usage guide for common tasks.
-- **Checklist:**
-  - [ ] Follow `docs/verun/vdb/usage-guide.md` to create a domain/database, define a collection model, and insert documents.
-  - [ ] Run sample VQL commands (`list`, `read`, `update`, `transaction`, `export`); keep `docs/verun/vdb/vql-reference.md` handy for argument shapes and examples.
-  - [ ] Use `docs/verun/vdb/usage-guide.md#scripts` plus `verun/vdb/scripts/run_query.sh` to execute stored script jobs or ad-hoc queries.
-  - [ ] Practice `tumi` commands via `docs/verun/vdb/tumi-rbac.md` to grant read/write scopes?observe how TUMI roles map to `VDB` sessions.
-- **Next read:** `docs/verun/vdb/vql-reference.md` for command families and `docs/verun/vdb/usage-guide.md#operations` for concurrency/exports.
+Group related data changes with `transaction { ... }`. Compare this with a normal multi-command batch: a batch stops at an error without automatically undoing earlier successes.
 
----
+Create an application account, grant access to the intended database or collection, and verify that account's reads and writes. Follow [TUMI and RBAC](../vdb/tumi-rbac.md) for commands and privilege requirements.
 
-## Stage 3 ? Pro: integration, auth, and persistence mastery
+## 4. Connect services and scripts
 
-- **Objective:** Understand how Liwiro services and Versa scripts rely on VDB, plus the auth/transport tradeoffs.
-- **Checklist:**
-  - [ ] Read `docs/verun/vdb/tumi-rbac.md` and `docs/verun/vdb/auth-and-rbac-notes.md` to capture multi-tenant auth flows, TUMI role creation, and portal permission paths.
-  - [ ] Inspect `liwiro/backend/app/vdb_transport.py` to see how transports (unix socket, HTTP, named pipe) are normalized for generated services.
-  - [ ] Dive into persistence details via `docs/verun/architecture.md#state-ownership` and `docs/verun/vdb/README.md#persistence`; experiment with service restarts to observe state durability.
-  - [ ] Pair VQL advanced commands (`model`, `tumi`) with stored scripts from `verun/vdb/scripts/` to see how services and VI portal rely on the same VDB engine.
-- **Fallback:** When verifying service integrations, refer back to `docs/integration/architecture.md#backend---vdb` for transport context.
+Use the [Versa VDB bridge](../versa/vdb-module.md) for script access. Generated services use their own runtime credentials and context; Liwiro workspace login and service bearer tokens do not replace VDB authentication.
 
----
+Review [Liwiro runtime flows](../../integration/runtime-flows.md) when tracing a request through the platform. Inspect service logs and VDB responses to identify which layer rejected an operation.
 
-## Deep dive references
+## 5. Operate the workspace
 
-| Topic | Doc |
-| --- | --- |
-| Setup & operational scripts | `docs/verun/vdb/setup-and-operations.md` |
-| Usage patterns & tasks | `docs/verun/vdb/usage-guide.md` |
-| VQL command catalog | `docs/verun/vdb/vql-reference.md` |
-| TUMI and RBAC | `docs/verun/vdb/tumi-rbac.md` |
-| Auth notes | `docs/verun/vdb/auth-and-rbac-notes.md` |
+Export a test domain to a directory writable by the VDB host. Inspect the result and preserve it outside runtime-reset directories. Review the [persistence guidance](../vdb/README.md#persistence) before moving, backing up, or resetting data.
 
-Link back to `docs/verun/README.md` to see the complementary Versa guide.
+Use [Verun architecture](../architecture.md) to understand the runtime components, and return to the command reference whenever an operation's scope or syntax is unclear.

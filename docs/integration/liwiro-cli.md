@@ -244,7 +244,7 @@ Create a portal session first:
 Run queries:
 
 ```bash
-./liwiro.sh vdb query '{"action":"whoami"}'
+./liwiro.sh vdb query 'whoami;'
 ./liwiro.sh vdb query ./tmp/query.json
 ./liwiro.sh vdb query --stdin
 ./liwiro.sh vdb query --edit

@@ -341,7 +341,7 @@
   {
     "slug": "vdb-guide",
     "title": "VDB Guided Path",
-    "summary": "Walk through VDB setup, runtime operations, and advanced data/security workflows in three stages?with links to the companion reference files.",
+    "summary": "A step-by-step learning path with runnable examples and links to the detailed reference.",
     "category": "Learning Paths",
     "audience": "Service authors and operators",
     "subsystem": "platform",
@@ -355,7 +355,7 @@
   {
     "slug": "versa-guide",
     "title": "Versa Guided Path",
-    "summary": "Build Versa fluency through three stages and keep the deeper references handy alongside each checkpoint.",
+    "summary": "A step-by-step learning path with runnable examples and links to the detailed reference.",
     "category": "Learning Paths",
     "audience": "Service authors and operators",
     "subsystem": "platform",
@@ -382,8 +382,8 @@
   },
   {
     "slug": "auth-and-rbac-notes",
-    "title": "Authentication & Authorization",
-    "summary": "1. **User Roles**:",
+    "title": "VDB Authentication and Authorization",
+    "summary": "Authenticate to VDB, select context, and diagnose access failures.",
     "category": "VDB",
     "audience": "Service authors and operators",
     "subsystem": "vdb",
@@ -425,7 +425,7 @@
   {
     "slug": "tumi-rbac",
     "title": "TUMI and RBAC",
-    "summary": "TUMI is VDB's user/role/permission command namespace. It is not a separate standalone module folder in this repository.",
+    "summary": "Manage VDB users, roles, ownership, and scoped permissions.",
     "category": "VDB",
     "audience": "Service authors and operators",
     "subsystem": "vdb",
@@ -438,7 +438,7 @@
   },
   {
     "slug": "usage-guide",
-    "title": "VersaDB (VDB) Usage Guide",
+    "title": "VDB Usage Guide",
     "summary": "Use this guide to recall the most common command shapes, command sequence, and runtime methods that are referenced in both the interactive help and the public docs.",
     "category": "VDB",
     "audience": "Service authors and operators",
@@ -701,5 +701,23 @@
       "versa"
     ],
     "related": []
+  },
+  {
+    "slug": "module-mediacloud",
+    "title": "MediaCloud and Custom Modules",
+    "summary": "Configure the bundled Cloudinary adapter and manage reusable Versa modules.",
+    "category": "Versa Modules",
+    "audience": "Service authors",
+    "subsystem": "vi",
+    "source": "docs/verun/versa/modules/mediacloud.md",
+    "tags": [
+      "media",
+      "cloudinary",
+      "modules"
+    ],
+    "related": [
+      "service-builder",
+      "versa"
+    ]
   }
 ]

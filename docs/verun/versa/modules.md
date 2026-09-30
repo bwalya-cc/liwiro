@@ -210,3 +210,7 @@ The `vdb` bridge is documented separately in `docs/verun/versa/vdb-module.md` be
 - placing imports after executable code
 - assuming module functions return plain strings when they actually return structured objects
 - using `vdb` behavior without reading the dedicated bridge reference first
+
+## Custom modules
+
+Liwiro also provides a custom module registry, including the bundled [MediaCloud adapter](modules/mediacloud.md). Manage module source, configuration, and domain availability from VI Portal.

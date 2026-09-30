@@ -1,99 +1,51 @@
 # Verun Type System
 
-This document explains the data types supported in the **Verun ecosystem**, including:
+Versa values, VDB schema declarations, and BSON storage are related but distinct. Use this guide when moving data between scripts, generated services, and VDB.
 
-1. **Versa (VI)** - The scripting language/runtime
-2. **VersaDB (VDB)** - The document database
-3. **Type Conversion Rules** between systems
+## Versa values
 
----
+| Value | Common type name | Example |
+| --- | --- | --- |
+| Integer | `int` | `42` |
+| Floating-point number | `float` | `3.14` |
+| Boolean | `bool` | `true` |
+| String | `str` | `"hello"` |
+| List | `list` | `[1, "a", true]` |
+| Dictionary | `dict` | `{name: "Alice", age: 30}` |
+| Null | `null` | `null` |
 
-## 1. Versa (VI) Types
+Integer literals are parsed with Java `Integer.parseInt`, so do not assume arbitrary precision or 64-bit integer literals. Floating literals use Java doubles. Operations, casts, and values returned from modules can have different numeric representations; verify boundary cases when precision matters.
 
-| Type             | Keyword    | Description                          | Example                     |
-|------------------|------------|--------------------------------------|-----------------------------|
-| Integer          | `int`      | 64-bit signed integer                | `42`, `-15`                 |
-| Float            | `float`    | 64-bit floating point                | `3.14`, `-0.5e10`           |
-| Boolean          | `bool`     | Logical true/false                   | `true`, `false`             |
-| String           | `str`      | UTF-8 character sequence             | `"hello"`, `'world'`        |
-| List             | `list`     | Ordered collection                   | `[1, "a", true]`            |
-| Dictionary       | `dict`     | Key-value pairs                      | `{"name": "Alice", "age": 30}` |
-| Null             | `null`     | Explicit absence of value            | `null`                      |
+Runtime aliases include `integer`, `double`/`number`, `string`, `boolean`, `array`, and `map`/`object`. See [Versa syntax](versa/syntax.md) for type checks, casts, classes, collections, and operator behavior.
 
-Accepted runtime aliases also include:
+## VDB schemas
 
-- `integer` -> `int`
-- `double` / `number` -> `float`
-- `string` -> `str`
-- `boolean` -> `bool`
-- `array` -> `list`
-- `map` / `object` -> `dict`
-- `any` -> flexible match
+Native VDB collection declarations describe fields with types and optional annotations:
 
----
-
-## 2. VersaDB (VDB) Storage Types
-
-VDB stores structured internal state under `verun/vdb/__data__` using BSON-backed records and logs. External APIs and export artifacts remain JSON-shaped where appropriate.
-
-| Type       | BSON Type    | Description                  | Example                     |
-|------------|--------------|------------------------------|-----------------------------|
-| Number     | Double/Int32 | Auto-detected numeric type   | `42`, `3.1415`              |
-| Boolean    | Boolean      | Logical value                | `true`, `false`             |
-| String     | String       | UTF-8 string                 | `"hello world"`             |
-| Array      | Array        | Ordered list                 | `[1, "a", true]`            |
-| Object     | Document     | Key-value collection         | `{"_id": "abc", "count": 5}`|
-| Null       | Null         | Empty value                  | `null`                      |
-| Date       | DateTime     | ISO date                     | `ISODate("2023-09-15")`     |
-| Binary     | BinData      | Raw binary data              | `<Hex representation>`      |
-
----
-
-## 3. Type Conversion Rules
-
-### VI → VDB Conversion
-
-**Conversion Table**
-
-| VI Type      | VDB Storage          | Conversion Logic                          |
-|---------------|----------------------|-------------------------------------------|
-| `int`         | Number (Int32)       | Direct mapping                            |
-| `float`       | Number (Double)      | Direct mapping                            |
-| Other types   | Direct equivalent    | 1:1 mapping (bool, list, dict, etc.)      |
-
-### VDB → VI Conversion
-
-**Key Conversion Classes**
-```java
-// Core conversion component
-vdb/src/main/java/verun/vdb/TypeConverter.java
+```text
+create collection products = {sku: string @required @unique, price: number, active: bool = true};
 ```
 
----
+Use model validation to enforce the required data shape. A type name in a schema does not imply that every input string is automatically converted to that type. Test the request shape your application actually sends.
 
-## 4. Best Practices
+## Storage and transport
 
-1. **For Cross-Platform Data**
-   ```verun
-   // Prefer portable types
-   let data = {
-     id: 123,                 // int → Number
-     name: "Widget",          // str → String
-     prices: [4.99, 9.99],    // list → Array
-     meta: {                  // dict → Document
-       in_stock: true
-     }
-   }
-   ```
+VDB stores structured state in BSON. `BsonStorage` recursively normalizes maps and lists, retaining numbers, booleans, strings, and null values. JSON conversion at API boundaries is handled by `verun/vdb/src/main/java/verun/common/JsonValueConverter.java`.
 
-2. **Type Checking**
-   ```verun
-   // Use built-in type checks
-   if (typeof value == 'int') {
-     // Handle integer logic
-   }
-   ```
+| Application value | Storage or transport consideration |
+| --- | --- |
+| Integer or floating-point number | Preserve its numeric value; do not assume every JSON number has the same Java subtype |
+| Boolean, string, null | Keep the value's type rather than encoding it in a string |
+| List | Normalize each element recursively |
+| Object/map | Normalize each field recursively |
+| Date or binary data | Choose an explicit application representation; BSON support alone does not introduce an `ISODate(...)` literal into VQL |
 
----
+HTTP responses and export data remain JSON-shaped. JSON clients may lose precision for large integers; test round trips with the clients used by your service.
 
-*Document version 2.2 - Updated 2026-03-22*
+## Practical rules
+
+- Keep identifiers as strings when arithmetic is not intended.
+- Use documented Versa syntax, including `#` comments and imports before module calls.
+- Check nulls and missing fields before arithmetic or member access.
+- Validate schema changes against existing documents before changing service models.
+- Test numeric boundaries and serialization round trips when integrating VI, VDB, and JSON clients.

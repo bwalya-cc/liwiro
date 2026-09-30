@@ -63,6 +63,7 @@ That consistency matters because it means a script can usually move between loca
 - [datetime](./datetime.md)
 - [random](./random.md)
 - [email](./email.md)
+- [MediaCloud and custom modules](./mediacloud.md)
 
 ## 5. Related docs
 

@@ -1,168 +1,73 @@
-# VersaDB (VDB) Usage Guide
+# VDB Usage Guide
 
-Use this guide to recall the most common command shapes, command sequence, and runtime methods that are referenced in both the interactive help and the public docs.
+Use VDB for domains, databases, collections, and documents. Start with a disposable workspace while learning, and check `whoami;` and `context;` before changing data.
 
-## Setup & entry points
-
-1. **Console mode**
+## Start and authenticate
 
 ```bash
 cd verun/vdb
 ./scripts/convo.sh
 ```
 
-   - paginated interactive help (`help`, `help <topic> [page]`, `help <command>`)
-   - direct context switching via `use` and `define`
+Complete the console prompts. For HTTP access, start `./scripts/serve.sh`, authenticate at `/auth`, and send command text to `/vdb` with `Content-Type: text/versa` and `X-Session-Id`. The default HTTP address is `127.0.0.1:1957`; managed startup may choose another free port.
 
-2. **HTTP mode**
+For platform IPC use the launcher appropriate to your host. Liwiro prefers Unix sockets on Unix-like systems and named pipes on Windows, with HTTP fallback when managed IPC startup fails.
 
-```bash
-cd verun/vdb
-./scripts/serve.sh
-```
-
-   - bind: `127.0.0.1:1957`
-   - endpoints: `/auth`, `/vdb` (with `/vql` as a temporary deprecated alias), `/help`, `/health`, `/license`
-   - call `/vdb` with a Versa command body, `Content-Type: text/versa`, and `X-Session-Id`
-
-3. **Unix socket mode**
-
-```bash
-cd verun/vdb
-./scripts/socket.sh
-```
-
-   - preferred for Liwiro backend (Unix socket or named pipe on Windows)
-   - uses length-prefixed JSON frames over the socket
-
-## General helpers
-
-| Command | Purpose |
-| --- | --- |
-| `help [page]` | Lists a bounded page of available sections |
-| `help <section> [page]` | Shows up to three command entries from that section |
-| `help <command>` | Shows one focused command entry with parameters and examples |
-| `help <section>.<command>` | Selects an exact command when a name has multiple matches |
-| `help all [page]` | Walks the complete command catalog a page at a time |
-| `clear` / `cls` | Clears the console viewport and supported terminal scrollback |
-| `context` | Shows the current domain and database |
-| `whoami` | Returns the authenticated user and roles |
-| `echo` | Returns the supplied string |
-
-HTTP clients use the same model with `/help?topic=Documents&page=2&page_size=2`. Page size is capped at five so clients cannot accidentally request an endless help payload. Console/VQL help also caps each RBAC visibility preview at five names and reports its full count plus whether the preview was truncated.
-
-## Domain and database commands
-
-### Create or switch scope
+## Create a workspace
 
 ```text
-create domain "analytics"
-create database sales;
-use domain "analytics"
-use db "sales"
+create domain tutorial = {database: "main"};
+use tutorial.main;
+context;
+create collection products = {sku: string @required @unique, name: string, price: number, active: bool = true};
 ```
 
-### Inspect or remove
+Run this as a user permitted to create a domain. Domain/database selection is session state: another session must select its own context.
+
+## Add and query data
 
 ```text
-read domains
-read dbs
-drop domain "analytics"
-drop db "sales"
-status domain "analytics"
-suspend domain "analytics"
-resume domain "analytics"
+create in products = {sku: "P001", name: "Notebook", price: 12.5, active: true};
+read collection products where active == true select [sku, name, price] order by price asc limit 20;
+count collection products;
 ```
 
-`domain_status` is read-only; suspend and resume require domain ownership or super-admin privileges.
+A read has a default limit of 100. Use explicit pagination for larger collections. Verify field names and types against `describe collection products;` when a query returns unexpected results.
 
-## Collection management
-
-Two main flows:
-
-- **Schema-aware creation** (use the `schema` block to enumerate typed fields)
-- **Schemaless creation** (pass `data` to establish an empty collection without a schema)
-
-### Schema-aware collection
+## Change data
 
 ```text
-create collection "orders" schema {"orderId":{"type":"string","required":true},"total":{"type":"number"},"status":{"type":"string","default":"draft"}}
+update collection products where sku == "P001" { price += 2; };
+read one from products where sku == "P001";
 ```
 
-The same schema definitions can be expressed from Versa via `vdb.create("collection", ClassRef)`—see `verun/vi/demo/vdb/vdb_collection_schema_demo.versa` for a full script that creates both schema-aware and schemaless collections before running CRUD commands.
-
-### Schemaless collection
+Use an explicit predicate for routine updates. To remove selected documents:
 
 ```text
-create in events = { name: "deploy", level: "info" };
+delete from products where sku == "P001";
 ```
 
-### Inspect and drop
+`delete from products all;` removes all documents. `drop collection products;` removes the collection itself. These operations have different scope.
+
+## Group related writes
 
 ```text
-read collections
-drop collection "events"
-read model model "orders"
-delete model model "orders"
+transaction {
+  create in products = {sku: "P002", name: "Pen", price: 3};
+  create in products = {sku: "P003", name: "Pencil", price: 2};
+};
 ```
 
-## Document CRUD commands
+An ordinary multi-command batch is not an atomic transaction. Inspect results before retrying a failed write.
+
+## Share access
+
+Create application users and grant only the needed scope through [TUMI](tumi-rbac.md). Liwiro login does not substitute for VDB credentials, and changing generated-service bearer authentication does not change VDB ownership.
+
+## Export and operate
 
 ```text
-create in users = { name: "Alice", role: "admin" };
+export domain tutorial to "/tmp/vdb-exports" as "tutorial-backup";
 ```
 
-```text
-read collection users where role == "admin" select [name, email] limit 5;
-```
-
-```text
-update collection users where email == "alice@example.com" { active = true; logins += 1; };
-```
-
-```text
-delete from users where active == false;
-```
-
-### Notes
-
-- Use normal Versa expressions in `where`, `select`, `order by`, `offset`, and `limit` clauses.
-- Updates are assignment blocks; JSON query/update envelopes are rejected.
-- Document commands respect the authenticated user’s RBAC scope.
-
-## Scripts, export, and TUMI
-
-### Stored scripts
-
-```text
-create script name "greet" code "print('hello');"
-run script name "greet" params {"username":"alice"}
-delete script name "greet"
-```
-
-### Export
-
-```text
-export domains ["engineering"] out_dir "/tmp/vdb-exports"
-export domains "*" package "all" out_dir "/tmp/vdb-exports"
-```
-
-### TUMI
-
-```text
-create user username "bot" role "APPLICATION" email "bot@example.com" password "BotPass0!"
-grant username "alex" role "report_viewer" domain "engineering"
-read permissions
-```
-
-## Response shape
-
-```
-{
-  "status":"success",
-  "result":{...},
-  "metadata":{"durationMs":45}
-}
-```
-
-When an error occurs, `status` flips to `error` and `result` contains the failure details along with `code` and optional `validation` data.
+The destination is on the VDB host. Preserve exported packages outside directories scheduled for runtime reset. See [setup and operations](setup-and-operations.md) for storage, transports, and resets, and [VQL reference](vql-reference.md) for scripts, indexes, aggregation, permissions, and command syntax.

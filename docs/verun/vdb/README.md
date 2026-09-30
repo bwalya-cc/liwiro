@@ -42,22 +42,22 @@ VDB is the platform data layer. Use it to manage:
 
 Read `vql-reference.md` for full syntax. High-value families are:
 
-- `define`
+- `create`
 - `use`
-- `list`
+- `read`
 - `create`
 - `read`
 - `update`
 - `delete`
 - `drop`
-- `model`
-- `script`
+- `read model`
+- `run script`
 - `transaction`
 - `export`
 - `context`
 - `whoami`
 - `help`
-- `tumi`
+- `grant` / `revoke`
 
 ## Runtime surfaces
 

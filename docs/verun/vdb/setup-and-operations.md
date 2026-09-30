@@ -276,16 +276,16 @@ read collections
 ## 10.4 Export data
 
 ```text
-export domains ["engineering"] out_dir "/tmp/vdb-exports" package "nightly-backup"
+export domains ["engineering"] to "/tmp/vdb-exports" as "nightly-backup";
 ```
 
 ## 10.5 Inspect help
 
 ```text
-help topic "export"
-help topic "tumi"
-help topic "documents" page 2 page_size 2
-help topic "documents.find"
+help export;
+help tumi;
+help documents 2;
+help documents.find;
 ```
 
 The equivalent HTTP request is:

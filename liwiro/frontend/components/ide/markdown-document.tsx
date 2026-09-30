@@ -59,6 +59,7 @@ function renderInline(text: string, keyBase: string) {
 type ParsedBlock =
   | { type: "heading"; level: number; text: string; id: string }
   | { type: "paragraph"; text: string }
+  | { type: "table"; headers: string[]; rows: string[][] }
   | { type: "list"; ordered: boolean; items: string[] }
   | { type: "code"; language: string; content: string }
 
@@ -99,6 +100,19 @@ function parseMarkdown(content: string): ParsedBlock[] {
       }
       if (index < lines.length) index += 1
       blocks.push({ type: "code", language, content: codeLines.join("\n") })
+      continue
+    }
+
+    if (trimmed.startsWith("|") && /^\|?[\s:|-]+\|$/.test((lines[index + 1] || "").trim())) {
+      const cells = (row: string) => row.trim().replace(/^\||\|$/g, "").split(/(?<!\\)\|/).map((cell) => cell.trim().replace(/\\\|/g, "|"))
+      const headers = cells(trimmed)
+      const rows: string[][] = []
+      index += 2
+      while (index < lines.length && lines[index].trim().startsWith("|")) {
+        rows.push(cells(lines[index]))
+        index += 1
+      }
+      blocks.push({ type: "table", headers, rows })
       continue
     }
 
@@ -169,6 +183,17 @@ export function MarkdownDocument({ content, className = "", idPrefix = "" }: { c
             return <h2 key={`${headingId}-${index}`} id={headingId}>{block.text}</h2>
           }
           return <h3 key={`${headingId}-${index}`} id={headingId}>{block.text}</h3>
+        }
+
+        if (block.type === "table") {
+          return (
+            <div key={`table-${index}`} className="my-4 overflow-x-auto">
+              <table className="w-full border-collapse text-left text-sm">
+                <thead><tr>{block.headers.map((cell, column) => <th key={column} scope="col" className="border border-white/15 p-3">{renderInline(cell, `th-${index}-${column}`)}</th>)}</tr></thead>
+                <tbody>{block.rows.map((row, rowIndex) => <tr key={rowIndex}>{block.headers.map((_, column) => <td key={column} className="border border-white/15 p-3 align-top">{renderInline(row[column] || "", `td-${index}-${rowIndex}-${column}`)}</td>)}</tr>)}</tbody>
+              </table>
+            </div>
+          )
         }
 
         if (block.type === "paragraph") {

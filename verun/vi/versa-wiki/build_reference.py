@@ -1122,7 +1122,7 @@ def augment_reference() -> dict:
     base["agentUsage"] = agent_usage
 
     retrieval = base.get("retrieval") if isinstance(base.get("retrieval"), dict) else {}
-    construct_rules = list(retrieval.get("constructRules") or [])
+    construct_rules = [rule for rule in retrieval.get("constructRules", []) if rule.get("name") != "portal-execution-and-agent-operations"]
     construct_rules.append(
         {
             "name": "portal-execution-and-agent-operations",
@@ -1145,6 +1145,17 @@ def augment_reference() -> dict:
     sections = list(base.get("sections") or [])
     for section in build_sections():
         replace_or_append_section(sections, section)
+    media_source = "docs/verun/versa/modules/mediacloud.md"
+    replace_or_append_section(sections, {
+        "id": "mediacloud-custom-module-reference", "title": "MediaCloud and Custom Modules",
+        "summary": "Bundled custom Cloudinary adapter and reusable module setup.",
+        "tags": ["mediacloud", "custom modules", "cloudinary"],
+        "constructs": ["mediacloud.status", "mediacloud.providers", "mediacloud.upload", "module_config", "module_meta"],
+        "queryHints": ["media upload", "cloudinary", "custom module"],
+        "rules": [read_text(ROOT / media_source)],
+        "validExamples": [{"title": "Check readiness without uploading", "code": ["mediacloud import *;", "print(mediacloud.status({}));"], "notes": ["Readiness checks configured values, not credential validity."]}],
+        "sources": [{"path": media_source, "purpose": "Custom module usage"}],
+    })
     quickstart = get_section(sections, "quickstart")
     if isinstance(quickstart, dict):
         rules = list(quickstart.get("rules") or [])
@@ -1206,715 +1217,37 @@ def classify_reference_section(section_id: str) -> tuple[list[str], str]:
 
 
 def build_vdb_sections() -> list[dict]:
-    return [
-        {
-            "id": "vdb-runtime-surfaces-and-transport",
-            "title": "VDB Runtime Surfaces and Transport Modes",
-            "summary": "Canonical overview of how VDB is reached from the console, localhost HTTP, Unix sockets, and platform tooling, including the default port and transport-specific expectations.",
-            "domains": ["vdb"],
-            "group": "vdb",
-            "tags": ["vdb", "transport", "runtime", "http", "socket"],
-            "constructs": [
-                "./scripts/convo.sh",
-                "./scripts/serve.sh",
-                "./scripts/socket.sh",
-                "POST /auth",
-                "POST /vql",
-                "GET /help",
-            ],
-            "queryHints": [
-                "vdb http server",
-                "vdb unix socket",
-                "vdb localhost port",
-                "vdb /auth",
-                "vdb /vql",
-            ],
-            "syntaxPatterns": [
-                "cd verun/vdb && ./scripts/convo.sh",
-                "cd verun/vdb && ./scripts/serve.sh",
-                "curl -X POST http://127.0.0.1:1957/auth --user username:password",
-            ],
-            "rules": [
-                "Use the console when you want an interactive local session without transport headers.",
-                "Use POST /auth first for HTTP access, then carry the returned X-Session-Id into later POST /vql and GET /help calls.",
-                "The default HTTP port is 1957.",
-                "Unix sockets are the local same-host transport on Unix-like systems; the transport guide notes that Windows should prefer named pipes instead of raw Unix sockets.",
-                "Treat localhost HTTP, Unix socket, and portal tooling as transport variants over the same VQL command model rather than different query languages.",
-            ],
-            "tables": [
-                {
-                    "title": "Primary VDB runtime surfaces",
-                    "columns": ["Surface", "Entry point", "Use when", "Notes"],
-                    "rows": [
-                        ["Console", "./scripts/convo.sh", "You want an interactive shell on the local machine.", "No HTTP headers or session-copy steps are needed inside the console flow."],
-                        ["HTTP server", "./scripts/serve.sh", "A local app, curl, or UI needs localhost HTTP access.", "Exposes /auth, /vql, and /help on port 1957 by default."],
-                        ["Unix socket server", "./scripts/socket.sh", "Local tooling should avoid TCP and stay on a host-local IPC channel.", "Useful for same-machine automation on Unix-like systems."],
-                        ["Portal/tooling", "Liwiro VDB surfaces", "The platform is issuing VQL or opening prepared queries for the user.", "Still uses the same VDB command model underneath."],
-                    ],
-                },
-                {
-                    "title": "HTTP endpoints",
-                    "columns": ["Endpoint", "Method", "Auth expectation", "Purpose"],
-                    "rows": [
-                        ["/auth", "POST", "HTTP Basic auth", "Authenticate and obtain a sessionId."],
-                        ["/vql", "POST", "X-Session-Id header", "Execute one VQL request or a request batch."],
-                        ["/help", "GET", "X-Session-Id header", "Return help content filtered by RBAC and current scope."],
-                    ],
-                },
-                {
-                    "title": "Transport selection guidance",
-                    "columns": ["Environment", "Preferred transport", "Why"],
-                    "rows": [
-                        ["Interactive local debugging", "Console", "Fastest feedback and direct runtime prompts."],
-                        ["Local app or UI integration", "HTTP localhost", "Simplest transport for browser-like and service tooling."],
-                        ["Unix-like automation on one host", "Unix socket", "Avoids a localhost TCP hop and keeps the channel host-local."],
-                        ["Windows host-local automation", "Named pipe", "The transport guide documents named pipes as the Windows-local IPC path."],
-                    ],
-                },
-            ],
-            "validExamples": [
-                {
-                    "title": "Authenticate then execute over HTTP",
-                    "code": [
-                        "curl -X POST http://127.0.0.1:1957/auth --user username:password",
-                        "",
-                        "curl -X POST http://127.0.0.1:1957/vql \\",
-                        "  -H 'X-Session-Id: <SESSION_ID>' \\",
-                        "  -H 'Content-Type: application/json' \\",
-                        "  -H 'Content-Type: text/plain' --data 'echo \"hello\"'",
-                    ],
-                    "notes": [
-                        "The second call reuses the session returned by /auth.",
-                    ],
-                }
-            ],
-        },
-        {
-            "id": "vdb-auth-sessions-and-context",
-            "title": "VDB Authentication, Sessions, and Context",
-            "summary": "How users authenticate, how session state is created and refreshed, and how current domain and database context travel with later requests.",
-            "domains": ["vdb"],
-            "group": "vdb",
-            "tags": ["vdb", "auth", "sessions", "context", "whoami"],
-            "constructs": [
-                "POST /auth",
-                "X-Session-Id",
-                "context",
-                "whoami",
-                "use domain \"...\" db \"...\"",
-            ],
-            "queryHints": [
-                "vdb session timeout",
-                "vdb context command",
-                "vdb whoami",
-                "vdb active domain",
-                "vdb auth flow",
-            ],
-            "syntaxPatterns": [
-                "context",
-                "whoami",
-                "use domain \"engineering\" db \"main\"",
-            ],
-            "rules": [
-                "HTTP authentication is a two-step flow: POST /auth with Basic credentials, then reuse the returned sessionId in X-Session-Id.",
-                "Session state carries the current domain and database, and VQLProcessor updates that session context when use/domain changes occur.",
-                "SessionManager validates and refreshes active sessions; the runtime timeout is 30 minutes of inactivity.",
-                "Use context and whoami as diagnostics before assuming a query bug when scope-sensitive commands behave unexpectedly.",
-                "Re-authenticate to obtain a fresh sessionId when the server reports Invalid or expired session.",
-            ],
-            "tables": [
-                {
-                    "title": "Authentication and session lifecycle",
-                    "columns": ["Step", "Input", "Output", "Notes"],
-                    "rows": [
-                        ["Authenticate", "POST /auth with Basic credentials", "sessionId", "Required before HTTP /vql or /help calls."],
-                        ["Use session", "X-Session-Id: <sessionId>", "Scoped request execution", "The same session holds user, domain, and db context."],
-                        ["Refresh", "Any validated request", "Updated last-access time", "Active sessions are refreshed on validation."],
-                        ["Expire", "No activity for 30 minutes", "401 invalid/expired session", "Re-authenticate and retry with the new sessionId."],
-                    ],
-                },
-                {
-                    "title": "Context-oriented commands",
-                    "columns": ["Command", "Primary purpose", "What it returns"],
-                    "rows": [
-                        ["context", "Inspect current runtime scope", "Active domain, active db, and session/runtime context."],
-                        ["whoami", "Inspect authenticated identity", "Current user and role/scope context."],
-                        ["use domain \"...\" db \"...\"", "Switch active scope", "Updated context bound to the session."],
-                    ],
-                },
-            ],
-            "validExamples": [
-                {
-                    "title": "Check current scope before a privileged command",
-                    "code": [
-                        "whoami",
-                        "context",
-                        "use domain \"liwiro\" db \"main\"",
-                        "context",
-                    ],
-                    "notes": [
-                        "This sequence confirms identity, current scope, and post-switch scope using only low-risk diagnostics.",
-                    ],
-                }
-            ],
-            "invalidExamples": [
-                {
-                    "title": "Calling /vql without a session header",
-                    "code": [
-                        "curl -X POST http://127.0.0.1:1957/vql -H 'Content-Type: text/plain' --data 'read domains'",
-                    ],
-                    "notes": [
-                        "Authenticate first and send X-Session-Id with the returned sessionId.",
-                    ],
-                }
-            ],
-        },
-        {
-            "id": "vdb-domain-database-and-collection-lifecycle",
-            "title": "VDB Domain, Database, and Collection Lifecycle",
-            "summary": "How VDB creates and selects domains and databases, inspects available scopes, manages models, and creates or drops collections.",
-            "domains": ["vdb"],
-            "group": "vdb",
-            "tags": ["vdb", "domain", "database", "collection", "model"],
-            "constructs": [
-                "create domain \"engineering\"",
-                "create domain \"engineering\" db \"main\"",
-                "use domain \"engineering\" db \"main\"",
-                "create collection \"users\" schema {\"name\":{\"type\":\"string\"}}",
-                "read model model \"users\"",
-                "status domain \"engineering\"",
-            ],
-            "queryHints": [
-                "vdb define domain",
-                "vdb define db",
-                "vdb list collections",
-                "vdb model get",
-                "vdb drop collection",
-                "vdb domain status",
-            ],
-            "syntaxPatterns": [
-                "read domains",
-                "read dbs",
-                "create collection \"users\" schema {\"name\":{\"type\":\"string\"},\"age\":{\"type\":\"int\"}}",
-                "drop collection \"users\"",
-                "suspend domain \"engineering\"",
-                "resume domain \"engineering\"",
-            ],
-            "rules": [
-                "Use define to create scope metadata and use to activate it for later commands.",
-                "list is the low-risk way to discover domains, databases, collections, and models before mutation.",
-                "Model metadata and collection data are related but not identical: model operations manage schema metadata while collection commands affect the data surface.",
-                "drop commands are destructive and scope-sensitive.",
-                "domain_status is a read-only lifecycle check; domain_suspend and domain_resume are ownership-sensitive mutations and suspended domains cannot be selected by ordinary users.",
-                "Prefer explicit domain/db activation before model, CRUD, export, or TUMI work so permission checks resolve against the intended scope.",
-            ],
-            "tables": [
-                {
-                    "title": "Domain and database commands",
-                    "columns": ["Command", "Purpose", "Notes"],
-                    "rows": [
-                        ["create domain \"engineering\"", "Create a domain", "Creates a domain metadata root."],
-                        ["create domain \"engineering\" db \"main\"", "Create a domain and db", "Useful during initial scope setup."],
-                        ["use domain \"engineering\" db \"main\"", "Switch active scope", "Stores the chosen domain/db in the current session context."],
-                        ["read domains", "List domains", "Safe discovery command."],
-                        ["read dbs", "List databases in current domain", "Requires current domain context."],
-                        ["drop domain \"engineering\"", "Drop a domain", "Destructive; role and ownership sensitive."],
-                        ["drop db \"main\"", "Drop a database", "Destructive; applies in the current domain."],
-                    ],
-                },
-                {
-                    "title": "Collection and model commands",
-                    "columns": ["Command", "Purpose", "Notes"],
-                    "rows": [
-                        ["create collection \"users\" schema {\"name\":{\"type\":\"string\"},\"age\":{\"type\":\"int\"}}", "Create a collection and its field metadata", "The create family defines the model shape in current scope."],
-                        ["read collections", "List collections", "Reads the current db's collection inventory."],
-                        ["read models", "List models", "Reads model metadata names."],
-                        ["read model model \"users\"", "Inspect model metadata", "Useful before update, projection, or schema repair."],
-                        ["delete model model \"users\"", "Delete model metadata", "Metadata-focused deletion, distinct from dropping the whole collection."],
-                        ["drop collection \"users\"", "Drop collection data and metadata surface", "Destructive collection removal."],
-                    ],
-                },
-            ],
-            "validExamples": [
-                {
-                    "title": "Create and inspect a scoped collection",
-                    "code": [
-                        "create domain \"engineering\" db \"main\"",
-                        "use domain \"engineering\" db \"main\"",
-                        "create collection \"users\" schema {\"name\":{\"type\":\"string\"},\"age\":{\"type\":\"int\"}}",
-                        "read model model \"users\"",
-                        "read collections",
-                    ],
-                    "notes": [
-                        "The sequence creates scope, activates it, defines a collection, and verifies the result using non-destructive reads.",
-                    ],
-                }
-            ],
-        },
-        {
-            "id": "vdb-crud-query-and-projection-reference",
-            "title": "VDB CRUD, Query Operators, and Projection",
-            "summary": "Canonical request shapes for create/read/update/delete, the currently documented comparison operators, and the read-time args used for limiting and projection-like access patterns.",
-            "domains": ["vdb"],
-            "group": "vdb",
-            "tags": ["vdb", "crud", "query", "projection", "operators"],
-            "constructs": [
-                "create in users = { name: \"John\", age: 30 };",
-                "read collection users where age > 25 limit 10;",
-                "update collection users where name == \"John\" { age = 31; };",
-                "delete from users where active == false;",
-            ],
-            "queryHints": [
-                "vdb read query",
-                "vdb update payload shape",
-                "vdb delete payload shape",
-                "vdb projection",
-                "vdb query operators",
-            ],
-            "syntaxPatterns": [
-                "read collection users where age >= 18 limit 5;",
-                "update collection users where name == \"John\" { age = 31; };",
-                "delete from users where active == false;",
-            ],
-            "rules": [
-                "Every VDB command is a flat JSON object with an action field; insert uses document, find uses where, and update uses set/inc/unset.",
-                "Do not emit legacy nested operation envelopes such as {read:{...}}, {update:{...}}, or {delete:{...}}.",
-                "The documented comparison operators are $eq, $ne, $lt, $gt, $lte, $gte, $in, and $nin.",
-                "args.limit is the explicitly documented limit control in the core VQL reference.",
-                "The runtime accepts readable statements; JSON command envelopes are invalid.",
-            ],
-            "tables": [
-                {
-                    "title": "CRUD request families",
-                    "columns": ["Family", "Canonical shape", "Notes"],
-                    "rows": [
-                        ["insert", "create in users = { name: \"John\", age: 30 };", "Insert one document."],
-                        ["find", "read collection users where age > 25 limit 10;", "Find matching documents."],
-                        ["update", "update collection users where name == \"John\" { age = 31; };", "Update matching documents."],
-                        ["delete", "delete from users where active == false;", "Delete matching documents."],
-                    ],
-                },
-                {
-                    "title": "Documented query operators",
-                    "columns": ["Operator", "Meaning"],
-                    "rows": [
-                        ["$eq", "Equals"],
-                        ["$ne", "Not equal"],
-                        ["$lt", "Less than"],
-                        ["$gt", "Greater than"],
-                        ["$lte", "Less than or equal"],
-                        ["$gte", "Greater than or equal"],
-                        ["$in", "Contained in a provided list"],
-                        ["$nin", "Not contained in a provided list"],
-                    ],
-                },
-                {
-                    "title": "Read-time shaping hints from current docs/runtime",
-                    "columns": ["Input", "Where it appears", "Notes"],
-                    "rows": [
-                        ["args.limit", "Core VQL reference", "Explicitly documented limit control."],
-                        ["args.projection", "Runtime implementation", "Projection handling exists in VQLProcessor and Collection helpers."],
-                        ["sort/projection examples", "Usage guide", "Treat as advanced guidance and verify against the target runtime contract before relying on them."],
-                    ],
-                },
-            ],
-            "validExamples": [
-                {
-                    "title": "Read a bounded result set with a comparison operator",
-                    "code": [
-                        "read collection users where age >= 18 limit 5;",
-                    ],
-                    "notes": [
-                        "This keeps to the explicit request family and the documented args.limit control.",
-                    ],
-                }
-            ],
-            "invalidExamples": [
-                {
-                    "title": "Assuming update uses the read payload shape",
-                    "code": [
-                        "update collection users where name == \"John\" { age = 31; };",
-                    ],
-                    "notes": [
-                        "Use a readable update statement with where and set/inc/unset options.",
-                    ],
-                }
-            ],
-        },
-        {
-            "id": "vdb-script-transaction-and-export-reference",
-            "title": "VDB Scripts, Transactions, Export, and Batch Requests",
-            "summary": "Stored script commands, transaction boundaries, export packaging rules, and the array-based batch request form supported by VDB.",
-            "domains": ["vdb"],
-            "group": "vdb",
-            "tags": ["vdb", "scripts", "transactions", "export", "batch"],
-            "constructs": [
-                "create script name \"greet\" service \"utils\" code \"print('Hello');\"",
-                "begin transaction",
-                "export domains [\"default\"] out_dir \"/tmp/vdb-exports\"",
-                "echo value \"start\";\nread domains;\ncontext",
-            ],
-            "queryHints": [
-                "vdb stored script",
-                "vdb transaction begin",
-                "vdb export zip",
-                "vdb batch request",
-            ],
-            "syntaxPatterns": [
-                "read script name \"greet\"",
-                "commit transaction",
-                "export domains \"*\" package \"all-domains\" out_dir \"/tmp/vdb-exports\"",
-            ],
-            "rules": [
-                "Stored scripts are first-class VDB records and are distinct from the Versa-side vdb bridge helpers that call into them.",
-                "Transactions are explicit begin/commit/abort commands; keep the lifecycle visible in the request stream instead of assuming implicit batching.",
-                "Export requires out_dir and produces packaged zip output.",
-                "Export permissions are role- and scope-sensitive.",
-                "A batch request is either a JSON array of normal flat-action objects or a {commands:[...]} wrapper; it is not relaxed scripting syntax.",
-            ],
-            "tables": [
-                {
-                    "title": "Stored script commands",
-                    "columns": ["Command", "Purpose", "Notes"],
-                    "rows": [
-                        ["create script name \"greet\" service \"utils\" code \"print('Hello');\"", "Create a stored script", "Stores code plus script metadata."],
-                        ["read script name \"greet\"", "Read stored script metadata/code", "Safe inspection step before execution."],
-                        ["run script name \"greet\" params {\"username\":\"john\"}", "Execute a stored script", "Pass request parameters through params."],
-                        ["delete script name \"greet\"", "Delete a stored script", "Destructive operation."],
-                    ],
-                },
-                {
-                    "title": "Transactions, export, and batching",
-                    "columns": ["Feature", "Canonical form", "Notes"],
-                    "rows": [
-                        ["Begin transaction", "begin transaction", "Start a transaction boundary."],
-                        ["Commit transaction", "commit transaction", "Commit the active transaction."],
-                        ["Abort transaction", "abort transaction", "Abort the active transaction."],
-                        ["Export", "export domains [\"default\"] out_dir \"/tmp/vdb-exports\"", "out_dir is required; package is optional."],
-                        ["Batch request", "echo value \"start\";\nread domains;\ncontext", "Semicolon-separated readable statements."],
-                    ],
-                },
-            ],
-            "validExamples": [
-                {
-                    "title": "Create and execute a stored script",
-                    "code": [
-                        "create script name \"greet\" service \"utils\" code \"print(\\\"Hello\\\");\"",
-                        "run script name \"greet\" params {\"username\":\"john\"}",
-                    ],
-                    "notes": [
-                        "Read the script first when debugging permissions, code drift, or stale metadata.",
-                    ],
-                }
-            ],
-        },
-        {
-            "id": "vdb-help-echo-context-and-response-shapes",
-            "title": "VDB Help, Echo, Context, and Response Shapes",
-            "summary": "Low-risk command families used to inspect runtime state and the common success/error envelope that most VDB responses share.",
-            "domains": ["vdb"],
-            "group": "vdb",
-            "tags": ["vdb", "help", "echo", "context", "response"],
-            "constructs": [
-                "echo value \"hello\"",
-                "help topic \"domains\"",
-                "context",
-                "whoami",
-            ],
-            "queryHints": [
-                "vdb help command",
-                "vdb response shape",
-                "vdb echo",
-                "vdb whoami response",
-            ],
-            "syntaxPatterns": [
-                "help topic \"collections\"",
-                "help topic \"tumi\"",
-                "echo value \"hello\"",
-            ],
-            "rules": [
-                "Start with echo, help, whoami, or context when you want to validate transport and auth before attempting mutation.",
-                "Help output is filtered by RBAC and current scope, especially around security and TUMI content.",
-                "Common response fields are status, message, and data.",
-                "Error responses usually return status: error plus a human-readable message.",
-            ],
-            "tables": [
-                {
-                    "title": "Diagnostic command families",
-                    "columns": ["Command", "Purpose", "Typical output"],
-                    "rows": [
-                        ["echo value \"hello\"", "Round-trip transport check", "Echoed value."],
-                        ["help topic \"domains\"", "Discover command help", "Topic-specific help content."],
-                        ["context", "Inspect active scope", "Session/runtime context including domain/db."],
-                        ["whoami", "Inspect identity", "Current user and scope context."],
-                    ],
-                },
-                {
-                    "title": "Common response fields",
-                    "columns": ["Field", "Meaning"],
-                    "rows": [
-                        ["status", "Overall success or error state."],
-                        ["message", "Human-readable explanation of the result."],
-                        ["data", "Operation payload or returned rows/metadata."],
-                    ],
-                },
-            ],
-            "validExamples": [
-                {
-                    "title": "Diagnose auth and scope before mutation",
-                    "code": [
-                        "echo value \"transport ok\"",
-                        "whoami",
-                        "context",
-                        "help topic \"collections\"",
-                    ],
-                    "notes": [
-                        "This sequence is safe to run while debugging connectivity, auth, or scope issues.",
-                    ],
-                }
-            ],
-        },
-        {
-            "id": "vdb-tumi-rbac-and-security-reference",
-            "title": "VDB TUMI, RBAC, and Security Reference",
-            "summary": "Canonical TUMI command families, role and ownership expectations, and the security-sensitive rules that gate user, role, and permission work.",
-            "domains": ["vdb"],
-            "group": "vdb",
-            "tags": ["vdb", "tumi", "rbac", "security", "permissions"],
-            "constructs": [
-                "create user username \"liwiro\" email \"liwiro@local.com\" password \"...\" role \"APP\"",
-                "grant username \"john\" domain \"hr\" db \"employee_data\" permissions [\"READ\",\"WRITE\"]",
-                "read roles",
-                "revoke username \"john\" domain \"hr\" db \"employee_data\" collection \"payroll\" permissions [\"READ\"]",
-            ],
-            "queryHints": [
-                "vdb tumi create user",
-                "vdb tumi grant",
-                "vdb roles",
-                "vdb domain ownership",
-            ],
-            "syntaxPatterns": [
-                "create role \"REPORT_VIEWER\" scope {\"domain\":\"hr\",\"db\":\"employee_data\"} permissions [\"READ\"]",
-                "grant username \"john\" domain \"hr\" db \"employee_data\" permissions [\"READ\",\"WRITE\"]",
-            ],
-            "rules": [
-                "SUPER_ADMIN is required for user and role creation/deletion in the canonical docs.",
-                "System roles are read-only.",
-                "Grants and revokes are scope-sensitive and can target db-level or collection-level permissions.",
-                "Domain owners can manage delegated access inside domains they own, but they do not automatically gain every super-admin-only capability.",
-                "Treat TUMI as security-sensitive infrastructure, not as a convenience command family for everyday CRUD.",
-            ],
-            "tables": [
-                {
-                    "title": "TUMI command families",
-                    "columns": ["Family", "Purpose", "Notes"],
-                    "rows": [
-                        ["create", "Create users or role definitions", "Security-sensitive; user and role creation is super-admin gated in the docs."],
-                        ["read", "Inspect a user, role, or permission target", "Low-risk inspection path."],
-                        ["update", "Modify TUMI-managed entities", "Still permission-gated."],
-                        ["delete", "Delete users or roles", "Security-sensitive and destructive."],
-                        ["grant / revoke", "Assign or remove permissions/roles", "Scope-sensitive; may include collection-level targets."],
-                        ["list", "List roles, users, or delegated views", "Often the first safe discovery step."],
-                        ["transfer", "Transfer domain ownership", "Domain-ownership sensitive operation."],
-                    ],
-                },
-                {
-                    "title": "Security and permission highlights",
-                    "columns": ["Rule", "Why it matters"],
-                    "rows": [
-                        ["SUPER_ADMIN for user/role creation and deletion", "Prevents ordinary app or user sessions from provisioning privileged identities."],
-                        ["System roles are read-only", "Built-in roles are not edited through ordinary role mutation."],
-                        ["Domain ownership matters", "Owned domains unlock delegation within that domain without turning the user into a system super-admin."],
-                        ["Collection-level permission targets exist", "Grant/revoke can narrow scope below the db level."],
-                    ],
-                },
-            ],
-            "validExamples": [
-                {
-                    "title": "Grant scoped db permissions",
-                    "code": [
-                        "grant username \"john\" domain \"hr\" db \"employee_data\" permissions [\"READ\",\"WRITE\"]",
-                        "read roles",
-                    ],
-                    "notes": [
-                        "List or read commands are the safe follow-up after any grant/revoke change.",
-                    ],
-                }
-            ],
-            "invalidExamples": [
-                {
-                    "title": "Treating TUMI as an unscoped grant API",
-                    "code": [
-                        "grant username \"john\" permissions [\"READ\"]",
-                    ],
-                    "notes": [
-                        "Provide the required scope such as domain and db, and collection when narrowing further.",
-                    ],
-                }
-            ],
-        },
-        {
-            "id": "vdb-persistence-operations-and-layout",
-            "title": "VDB Persistence Layout and Operations",
-            "summary": "Where VDB stores durable state, which operational scripts and logs matter in practice, and which files operators inspect when debugging transport or persistence issues.",
-            "domains": ["vdb"],
-            "group": "vdb",
-            "tags": ["vdb", "operations", "persistence", "logs", "storage"],
-            "constructs": [
-                "verun/vdb/__data__",
-                "verun/vdb/logs",
-                "verun/vdb/__data__/sys/users",
-                "verun/vdb/__data__/sys/index_advisor",
-            ],
-            "queryHints": [
-                "vdb data directory",
-                "vdb user storage",
-                "vdb logs",
-                "vdb index advisor files",
-            ],
-            "syntaxPatterns": [
-                "cd verun/vdb && ./scripts/serve.sh",
-                "cd verun/vdb && ./scripts/socket.sh",
-                "VDB_CONSOLE_LOGS=false VDB_HTTP_TRAFFIC_LOGS=false ./scripts/serve.sh",
-            ],
-            "rules": [
-                "The durable runtime tree lives under verun/vdb/__data__ and becomes the source of truth for domains, databases, collections, users, scripts, and operational metadata.",
-                "User and permission metadata persist under __data__/sys/users.",
-                "Index advisor state persists under __data__/sys/index_advisor.",
-                "Operational logs live under verun/vdb/logs and are often the fastest way to separate transport failure from permission failure.",
-                "Turn down verbose logging with the documented environment flags when you need quieter runs rather than editing code paths.",
-            ],
-            "tables": [
-                {
-                    "title": "Operational layout",
-                    "columns": ["Path", "What it stores", "Why it matters"],
-                    "rows": [
-                        ["verun/vdb/__data__/domains", "Domain/db data and metadata", "Primary durable application data surface."],
-                        ["verun/vdb/__data__/scripts", "Stored script payloads", "Source of truth for VDB-native stored scripts."],
-                        ["verun/vdb/__data__/sys/users", "Users and permission metadata", "Security and RBAC debugging starts here."],
-                        ["verun/vdb/__data__/sys/index_advisor", "Index advisor statistics and recommendations", "Useful for performance-oriented investigations."],
-                        ["verun/vdb/logs", "Runtime logs", "Separates transport/auth issues from query-shape or permission issues."],
-                    ],
-                },
-                {
-                    "title": "Operational entrypoints and flags",
-                    "columns": ["Entrypoint or flag", "Purpose", "Notes"],
-                    "rows": [
-                        ["./scripts/convo.sh", "Interactive console", "Best for direct local command exploration."],
-                        ["./scripts/serve.sh", "HTTP server", "Default localhost transport."],
-                        ["./scripts/socket.sh", "Unix socket server", "Local IPC transport for Unix-like hosts."],
-                        ["VDB_CONSOLE_LOGS=false", "Reduce console log noise", "Documented in setup notes."],
-                        ["VDB_HTTP_TRAFFIC_LOGS=false", "Reduce HTTP traffic logging", "Useful when running the HTTP server in repetitive tests."],
-                    ],
-                },
-            ],
-            "validExamples": [
-                {
-                    "title": "Start a quieter HTTP server for local debugging",
-                    "code": [
-                        "cd verun/vdb",
-                        "VDB_CONSOLE_LOGS=false VDB_HTTP_TRAFFIC_LOGS=false ./scripts/serve.sh",
-                    ],
-                    "notes": [
-                        "This uses the documented runtime flags rather than editing any logging implementation code.",
-                    ],
-                }
-            ],
-        },
-        {
-            "id": "vdb-mistakes-and-repair-reference",
-            "title": "VDB Mistakes, Failure Modes, and Repair Workflow",
-            "summary": "High-frequency VDB failure patterns and the shortest safe recovery path for each one, covering transport, auth, scope, command syntax, and permission issues.",
-            "domains": ["vdb"],
-            "group": "vdb",
-            "tags": ["vdb", "troubleshooting", "mistakes", "repair"],
-            "constructs": [
-                "Invalid or expired session",
-                "No active domain context",
-                "No active database context",
-                "Permission denied",
-                "readable VDB syntax",
-            ],
-            "queryHints": [
-                "vdb invalid session",
-                "vdb no active domain context",
-                "vdb permission denied",
-                "vdb readable command syntax",
-            ],
-            "syntaxPatterns": [
-                "context",
-                "whoami",
-                "read domains",
-                "use domain \"liwiro\" db \"main\"",
-            ],
-            "rules": [
-                "Debug transport first, then auth, then scope, then permissions, and only then the query body itself.",
-                "A well-formed request can still fail when the authenticated user lacks the required role or scope.",
-                "Use readable VDB statements; JSON is reserved for data literals such as filters and documents.",
-                "Re-check context after any use/define step before assuming later commands are reading the same domain/db you intended.",
-            ],
-            "errors": [
-                {
-                    "errorContains": "Invalid or expired session",
-                    "meaning": "The HTTP request used a missing, stale, or timed-out sessionId.",
-                    "fix": [
-                        "POST /auth again with valid credentials.",
-                        "Retry the request with the new X-Session-Id header.",
-                    ],
-                },
-                {
-                    "errorContains": "No active domain context / No active database context",
-                    "meaning": "A scope-sensitive command ran before the session selected a usable domain or database.",
-                    "fix": [
-                        "Run a context command to confirm the current scope.",
-                        "Issue a use command with the intended domain and db, then retry.",
-                    ],
-                },
-                {
-                    "errorContains": "Permission denied",
-                    "meaning": "The authenticated identity lacks the required role, domain ownership, or scoped permission for the requested command.",
-                    "fix": [
-                        "Run whoami and context to verify the active user and scope.",
-                        "Use TUMI or a higher-privilege identity to grant the required permission when appropriate.",
-                    ],
-                },
-                {
-                    "errorContains": "Unreadable or malformed command",
-                    "meaning": "The request body did not use readable VDB command syntax.",
-                    "fix": [
-                        "Check the command against the examples returned by help.",
-                        "Use a verb and target followed by named options, such as read collection users limit 10.",
-                    ],
-                },
-            ],
-            "invalidExamples": [
-                {
-                    "title": "Sending an old JSON command envelope",
-                    "code": [
-                        "{action: find, collection: users, where: {age: {$gt: 25}}}",
-                    ],
-                    "notes": [
-                        "Rewrite the request as a readable statement; keep JSON only for data literals.",
-                    ],
-                }
-            ],
-            "validExamples": [
-                {
-                    "title": "Minimal repair pass before retrying a failed request",
-                    "code": [
-                        "echo value \"transport ok\"",
-                        "whoami",
-                        "context",
-                        "use domain \"liwiro\" db \"main\"",
-                        "read collection users where age > 25 limit 5;",
-                    ],
-                    "notes": [
-                        "This sequence narrows transport, auth, scope, and query-shape issues in a deterministic order.",
-                    ],
-                }
-            ],
-        },
+    """Build native VDB guidance from the maintained, user-facing references."""
+    import re
+    sources = [
+        ("vdb-runtime-surfaces-and-transport", "Runtime and transports", "setup-and-operations.md"),
+        ("vdb-auth-sessions-and-context", "Authentication and context", "auth-and-rbac-notes.md"),
+        ("vdb-domain-database-and-collection-lifecycle", "Domains and collections", "usage-guide.md"),
+        ("vdb-crud-query-and-projection-reference", "VQL command reference", "vql-reference.md"),
+        ("vdb-script-transaction-and-export-reference", "Scripts, transactions, and export", "vql-reference.md"),
+        ("vdb-help-echo-context-and-response-shapes", "Help and responses", "echo-command.md"),
+        ("vdb-tumi-rbac-and-security-reference", "TUMI and permissions", "tumi-rbac.md"),
+        ("vdb-persistence-operations-and-layout", "Persistence and operations", "setup-and-operations.md"),
+        ("vdb-mistakes-and-repair-reference", "Command troubleshooting", "vql-reference.md"),
     ]
+    sections = []
+    for section_id, title, filename in sources:
+        source = "docs/verun/vdb/" + filename
+        text = read_text(ROOT / source)
+        examples = []
+        for index, match in enumerate(re.finditer(r"```(\w*)\n(.*?)```", text, re.S)):
+            language, code = match.groups()
+            examples.append({"title": f"Example {index + 1}", "language": language or "text", "code": code.strip(), "notes": [f"Source: {source}"]})
+        prose = re.sub(r"```.*?```", "", text, flags=re.S)
+        rules = [part.strip() for part in prose.split("\n\n") if part.strip() and not part.startswith("#")]
+        sections.append({
+            "id": section_id, "title": title, "summary": rules[0] if rules else title,
+            "domains": ["vdb"], "group": "vdb", "tags": ["vdb", filename.removesuffix(".md")],
+            "constructs": [], "queryHints": [title], "syntaxPatterns": [],
+            "rules": rules, "tables": [], "validExamples": examples,
+            "sources": [{"path": source, "purpose": title}],
+        })
+    return sections
 
 
 def replace_or_append_construct_rule(rules: list[dict], rule: dict) -> None:
@@ -1970,23 +1303,10 @@ def build_vvr_payload(versa_payload: dict) -> dict:
     ]
     coverage["documentedSurfaces"] = ["versa", "vdb", "shared"]
     coverage["vdbCommandFamilies"] = [
-        "define",
-        "use",
-        "list",
-        "create",
-        "read",
-        "update",
-        "delete",
-        "drop",
-        "model",
-        "script",
-        "transaction",
-        "export",
-        "tumi",
-        "context",
-        "whoami",
-        "help",
-        "echo",
+        "create", "use", "read", "find", "count", "update", "delete", "drop",
+        "describe", "status", "suspend", "resume", "grant", "revoke", "transfer",
+        "run script", "begin transaction", "commit transaction", "rollback transaction",
+        "transaction", "export", "aggregate", "rebuild", "context", "whoami", "help", "echo",
     ]
     coverage["transportSurfaces"] = ["console", "http", "unix socket", "named pipe guidance", "portal/tooling"]
     payload["coverage"] = coverage
@@ -2046,7 +1366,7 @@ def build_vvr_payload(versa_payload: dict) -> dict:
         },
         {
             "name": "vdb-domain-db-model-and-collection-setup",
-            "matchAny": ["define domain", "define db", "use domain", "list collections", "model", "drop collection", "list domains", "list dbs"],
+            "matchAny": ["create domain", "create database", "use domain", "read collections", "model", "drop collection", "read domains", "read databases"],
             "sectionIds": ["vdb-domain-database-and-collection-lifecycle"],
         },
         {
@@ -2056,7 +1376,7 @@ def build_vvr_payload(versa_payload: dict) -> dict:
         },
         {
             "name": "vdb-scripts-export-and-transactions",
-            "matchAny": ["script execute", "stored script", "transaction begin", "transaction commit", "export", "batch"],
+            "matchAny": ["run script", "stored script", "begin transaction", "commit transaction", "export", "batch"],
             "sectionIds": ["vdb-script-transaction-and-export-reference"],
         },
         {

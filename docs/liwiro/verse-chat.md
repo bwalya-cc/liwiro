@@ -168,7 +168,7 @@ Current page-aware action targets:
 - Service Builder: draft LAPIS configs, open them in the builder, and generate services after confirmation
 - Service Manager: prepare start, stop, and delete actions for existing services and run them after confirmation
 - VI Portal: draft or revise Versa source, load it into the editor, and run it in the VI terminal after confirmation
-- VDB Portal: prepare VDB query JSON, load it into the console, and run it after confirmation
+- VDB Portal: prepare VDB command text, load it into the console, and run it after confirmation
 - Ananse Workbench: open richer analytics views and refresh chart-ready analysis on saved datasets
 
 On other pages, the dock still provides contextual help even if there is no direct action target.
