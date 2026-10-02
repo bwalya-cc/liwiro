@@ -1977,6 +1977,8 @@ def generate_api_service(lapis_config):
             setup_routes.append({
                 "method": "POST",
                 "path": "/liwiro/setup/reset-super-admin",
+                "toggleId": "reset-super-admin",
+                "toggleable": True,
                 "description": "Idempotently reset or create the auth service super admin from LAPIS defaults",
                 "enabled": bool(default_super.get("enabled", False)),
                 "payloadTemplate": {
@@ -2052,6 +2054,11 @@ def generate_api_service(lapis_config):
         setup_routes.append({
             "method": "POST",
             "path": "/liwiro/setup/seed-db",
+            "toggleId": "seed-db",
+            "toggleable": any(
+                isinstance(rows, list) and bool(rows)
+                for rows in (seed_cfg.get("collections") or {}).values()
+            ) if isinstance(seed_cfg.get("collections"), dict) else False,
             "description": "Seed service collections using LAPIS metadata.seedData.collections",
             "enabled": bool(seed_cfg.get("enabled", False)),
             "payloadTemplate": {
@@ -2461,10 +2468,15 @@ def generate_api_service(lapis_config):
 
         body = request.get_json(silent=True) or {}
         collections_data = body.get("collections")
-        if not isinstance(collections_data, dict):
+        if not isinstance(collections_data, dict) or not collections_data:
             collections_data = seed_cfg.get("collections", {})
         if not isinstance(collections_data, dict) or not collections_data:
-            return jsonify({"error": "No seed collections configured"}), 400
+            return jsonify({"error": "Seed data is enabled but no seed collections are configured. Add document arrays to metadata.seedData.collections and regenerate the service."}), 400
+        for source_name, documents in collections_data.items():
+            if not isinstance(documents, list) or not documents:
+                return jsonify({"error": f"Seed collection '{source_name}' must contain at least one document."}), 400
+            if any(not isinstance(document, dict) for document in documents):
+                return jsonify({"error": f"Every document in seed collection '{source_name}' must be a JSON object."}), 400
 
         if not domain_manager.ensure_workspace(api_name, service_db):
             return jsonify({"error": _workspace_failure_message(api_name, service_db)}), 500
@@ -2909,7 +2921,7 @@ def generate_api_service(lapis_config):
             payload["authContext"] = auth_context
         return jsonify(payload)
 
-    def liwiro_docs_set_endpoint_enabled(endpoint_id: str):
+    def liwiro_docs_set_endpoint_enabled(endpoint_id=None, setup_id=None):
         if _production_mode_enabled():
             return _management_route_json_unavailable()
         if not _docs_enabled():
@@ -2917,25 +2929,45 @@ def generate_api_service(lapis_config):
         if not _docs_authorized():
             return jsonify({"error": "Documentation key required"}), 401
 
-        endpoint_key = str(endpoint_id or "").strip()
-        endpoint_map = lapis_config.get("endpoints") or {}
-        endpoint_cfg = endpoint_map.get(endpoint_key)
-        if not endpoint_key or not isinstance(endpoint_cfg, dict):
-            return jsonify({"error": "Endpoint not found"}), 404
+        endpoint_key = str(setup_id if setup_id is not None else endpoint_id or "").strip()
+        if setup_id is not None:
+            if endpoint_key == "seed-db":
+                config_path = ("metadata", "seedData")
+                config_parent = metadata_cfg
+            elif endpoint_key == "reset-super-admin" and auth_cfg.get("isAuthService"):
+                config_path = ("auth", "defaultSuperAdmin")
+                config_parent = auth_cfg
+            else:
+                return jsonify({"error": "Setup endpoint not found"}), 404
+        else:
+            endpoint_cfg = (lapis_config.get("endpoints") or {}).get(endpoint_key)
+            if not endpoint_key or not isinstance(endpoint_cfg, dict):
+                return jsonify({"error": "Endpoint not found"}), 404
+            config_path = ("endpoints", endpoint_key)
+            config_parent = lapis_config["endpoints"]
 
-        body = request.get_json(silent=True) or {}
-        if not isinstance(body, dict) or "enabled" not in body:
+        body = request.get_json(silent=True)
+        if not isinstance(body, dict) or not isinstance(body.get("enabled"), bool):
             return jsonify({"error": "`enabled` boolean is required"}), 400
 
-        next_enabled = bool(body.get("enabled"))
-        endpoint_cfg["enabled"] = next_enabled
-
+        next_enabled = body["enabled"]
+        if setup_id == "seed-db" and next_enabled:
+            collections = (metadata_cfg.get("seedData") or {}).get("collections") or {}
+            if not isinstance(collections, dict) or not any(isinstance(rows, list) and rows for rows in collections.values()):
+                return jsonify({"error": "Add at least one seed collection with a document before enabling this setup route."}), 400
         next_lapis = json.loads(json.dumps(lapis_config))
-        next_endpoint_cfg = ((next_lapis.get("endpoints") or {}).get(endpoint_key) or {})
-        if not isinstance(next_endpoint_cfg, dict):
-            return jsonify({"error": "Endpoint not found"}), 404
-        next_endpoint_cfg["enabled"] = next_enabled
+        next_parent = next_lapis.get(config_path[0]) or {}
+        next_lapis[config_path[0]] = next_parent
+        next_config = next_parent.get(config_path[1]) or {}
+        next_config["enabled"] = next_enabled
+        next_parent[config_path[1]] = next_config
         persisted = _persist_service_lapis_config(next_lapis)
+        runtime_config = config_parent.get(config_path[1])
+        if not isinstance(runtime_config, dict):
+            runtime_config = {}
+            config_parent[config_path[1]] = runtime_config
+        runtime_config["enabled"] = next_enabled
+        lapis_config[config_path[0]] = config_parent
 
         return jsonify({
             "endpointId": endpoint_key,
@@ -3302,7 +3334,8 @@ def generate_api_service(lapis_config):
               </div>
               ${{ep && ep.toggleable !== false ? `
               <button
-                data-config-endpoint="${{escapeHtml(ep.id || "")}}"
+                data-config-endpoint="${{escapeHtml(ep.toggleId || ep.id || "")}}"
+                data-toggle-kind="${{ep.__setup ? "setup" : "endpoints"}}"
                 data-endpoint-root-id="${{escapeHtml(endpointRootId || "")}}"
                 data-current-enabled="${{enabled ? "true" : "false"}}"
                 class="route-toggle"
@@ -3511,7 +3544,9 @@ def generate_api_service(lapis_config):
         );
         const requiresAuth = kind === "register" || kind === "signout";
         return {{
-          id: `setup_${{idx}}`,
+          id: `setup_${{route.toggleId || idx}}`,
+          toggleId: route.toggleId,
+          toggleable: route.toggleable === true,
           method: String(route.method || "POST").toUpperCase(),
           path: String(route.path || "/"),
           operationType: "setup",
@@ -3643,11 +3678,12 @@ def generate_api_service(lapis_config):
           e.preventDefault();
           const configEndpointId = btn.getAttribute("data-config-endpoint");
           const endpointRootId = btn.getAttribute("data-endpoint-root-id");
+          const toggleKind = btn.getAttribute("data-toggle-kind") || "endpoints";
           const currentEnabled = btn.getAttribute("data-current-enabled") !== "false";
           if (!configEndpointId) return;
           setAsyncButtonState(btn, true);
           try {{
-            const toggleResponse = await fetch(`/liwiro/docs/endpoints/${{encodeURIComponent(configEndpointId)}}/enabled`, {{
+            const toggleResponse = await fetch(`/liwiro/docs/${{toggleKind}}/${{encodeURIComponent(configEndpointId)}}/enabled`, {{
               method: "POST",
               headers: {{
                 "Content-Type": "application/json",
@@ -3669,7 +3705,7 @@ def generate_api_service(lapis_config):
             }}
 
             renderDocs(docsPayload);
-            const anchor = document.getElementById(`route-${{configEndpointId}}`);
+            const anchor = document.querySelector(`[data-endpoint-root="${{endpointRootId}}"]`);
             if (anchor) {{
               anchor.scrollIntoView({{ block: "start", behavior: "smooth" }});
             }}
@@ -3945,6 +3981,14 @@ def generate_api_service(lapis_config):
         api_app.add_url_rule(
             route,
             endpoint=f"{api_name}_liwiro_docs_toggle_endpoint_{idx}",
+            view_func=liwiro_docs_set_endpoint_enabled,
+            methods=["POST"],
+        )
+
+    for idx, prefix in enumerate(dict.fromkeys(["", docs_route_prefix])):
+        api_app.add_url_rule(
+            f"{prefix}/liwiro/docs/setup/<setup_id>/enabled",
+            endpoint=f"{api_name}_liwiro_docs_toggle_setup_{idx}",
             view_func=liwiro_docs_set_endpoint_enabled,
             methods=["POST"],
         )

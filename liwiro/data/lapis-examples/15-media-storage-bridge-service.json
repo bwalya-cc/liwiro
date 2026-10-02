@@ -24,8 +24,34 @@
       "CLOUDINARY_FOLDER": "liwiro-demo"
     },
     "seedData": {
-      "enabled": false,
-      "collections": {}
+      "enabled": true,
+      "collections": {
+        "media_assets": [
+          {
+            "assetId": "asset-demo-001",
+            "provider": "cloudinary",
+            "providerAssetId": "liwiro-demo/sample",
+            "filename": "sample.jpg",
+            "mimeType": "image/jpeg",
+            "storageBucket": "liwiro-demo",
+            "storagePath": "liwiro-demo/sample.jpg",
+            "publicUrl": "https://res.cloudinary.com/demo/image/upload/sample.jpg",
+            "secureUrl": "https://res.cloudinary.com/demo/image/upload/sample.jpg",
+            "sizeBytes": 1024,
+            "status": "available",
+            "createdAt": "2026-10-01T00:00:00Z",
+            "createdBy": "demo",
+            "requestSummary": {
+              "sourceType": "example",
+              "providerRoute": "/upload"
+            },
+            "providerResponse": {
+              "status": "success",
+              "id": "liwiro-demo/sample"
+            }
+          }
+        ]
+      }
     }
   },
   "auth": {

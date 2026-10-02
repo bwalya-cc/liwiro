@@ -11,8 +11,16 @@
     "developerNotes": "Live E2E example for create-service and endpoint verification.",
     "setupApiKey": "liwiroservicepass0!",
     "seedData": {
-      "enabled": false,
-      "collections": {}
+      "enabled": true,
+      "collections": {
+        "notes": [
+          {
+            "noteId": "note-demo-001",
+            "title": "First demo note",
+            "done": false
+          }
+        ]
+      }
     },
     "rateLimiting": {
       "enabled": false,

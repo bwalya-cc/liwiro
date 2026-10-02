@@ -1581,6 +1581,22 @@ export default function ServiceBuilderPage() {
       return "Service metadata requires apiName, basePath, and version."
     }
 
+    const seedData = nextConfig?.metadata?.seedData || {}
+    const seedCollections = seedData?.collections
+    if (seedData.enabled) {
+      if (!seedCollections || typeof seedCollections !== "object" || Array.isArray(seedCollections) || Object.keys(seedCollections).length === 0) {
+        return "Enabled database seeding requires at least one seed collection. Add document arrays in Metadata → Setup Config."
+      }
+      for (const [collection, documents] of Object.entries(seedCollections)) {
+        if (!String(collection || "").trim() || !Array.isArray(documents) || documents.length === 0) {
+          return `Enabled seed collection '${collection || "(unnamed)"}' requires at least one document.`
+        }
+        if (documents.some((document) => !document || typeof document !== "object" || Array.isArray(document))) {
+          return `Every document in seed collection '${collection}' must be a JSON object.`
+        }
+      }
+    }
+
     const modelNames = new Set()
     for (const model of Object.values(nextConfig?.models || {})) {
       const modelName = String(model?.name || "").trim()

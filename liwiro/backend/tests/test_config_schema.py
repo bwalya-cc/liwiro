@@ -16,6 +16,11 @@ from app.lapis_repair import repair_lapis_config_recursively
 
 
 class ConfigSchemaTests(unittest.TestCase):
+    def test_published_lapis_schema_matches_backend_validation_schema(self):
+        schema_path = BACKEND_ROOT.parent / "data" / "LAPIS-schema.json"
+        published = json.loads(schema_path.read_text(encoding="utf-8"))
+        self.assertEqual(published, Config.LAPIS_SCHEMA)
+
     def test_all_lapis_examples_are_valid(self):
         example_dir = BACKEND_ROOT.parent / "data" / "lapis-examples"
         examples = sorted(example_dir.glob("*.json"))
@@ -35,6 +40,39 @@ class ConfigSchemaTests(unittest.TestCase):
                 result = repair_lapis_config_recursively(cfg, include_dry_run=False)
                 self.assertTrue(result.get("ok"), result.get("error"))
                 self.assertFalse(result.get("repaired"), result.get("appliedFixes"))
+
+    def test_enabled_seed_data_has_insertable_documents_for_declared_models(self):
+        example_dir = BACKEND_ROOT.parent / "data" / "lapis-examples"
+        for example_path in sorted(example_dir.glob("*.json")):
+            with self.subTest(example=example_path.name):
+                cfg = json.loads(example_path.read_text(encoding="utf-8"))
+                seed_data = (cfg.get("metadata") or {}).get("seedData") or {}
+                if not seed_data.get("enabled"):
+                    continue
+                collections = seed_data.get("collections") or {}
+                self.assertTrue(collections, "enabled seed data must have collections")
+                models = {
+                    key.casefold(): model
+                    for model in (cfg.get("models") or {}).values()
+                    for key in (model.get("name"), model.get("collection"))
+                    if key
+                }
+                for source_name, documents in collections.items():
+                    self.assertIsInstance(documents, list)
+                    self.assertTrue(documents, f"enabled seed collection {source_name} is empty")
+                    model = models.get(source_name.casefold())
+                    if model:
+                        required = [field.get("name") for field in model.get("fields", {}).values() if field.get("required")]
+                        for document in documents:
+                            self.assertIsInstance(document, dict)
+                            self.assertTrue(set(required).issubset(document), f"{source_name} seed is missing required fields")
+
+    def test_empty_enabled_seed_data_is_rejected(self):
+        cfg = json.loads((BACKEND_ROOT.parent / "data" / "lapis-examples" / "14-create-service-e2e-noauth.json").read_text(encoding="utf-8"))
+        cfg["metadata"]["seedData"] = {"enabled": True, "collections": {}}
+        ok, error = Config.validate_lapis_config(cfg)
+        self.assertFalse(ok)
+        self.assertIn("requires at least one configured seed collection", error)
 
     def test_lapis_example_catalog_covers_supported_endpoint_operation_types(self):
         example_dir = BACKEND_ROOT.parent / "data" / "lapis-examples"

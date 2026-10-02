@@ -175,20 +175,18 @@ export default function MetadataConfig({ config, updateConfig }) {
                       Enables `POST /liwiro/setup/seed-db`.
                     </p>
                   </div>
-                  {config.metadata.seedData?.enabled && (
-                    <div className="space-y-2 md:col-span-2">
-                      <Label>Seed Collections JSON</Label>
-                      <JsonTextarea
-                        value={seedCollectionsText}
-                        onChange={(e) => updateSeedCollections(e.target.value)}
-                        className="min-h-[140px] font-mono text-sm"
-                        placeholder='{"users":[{"username":"demo"}]}'
-                      />
-                      <p className="text-xs text-slate-500 dark:text-slate-300">
-                        Use model name or collection name as keys; values must be arrays of documents.
-                      </p>
-                    </div>
-                  )}
+                  <div className="space-y-2 md:col-span-2">
+                    <Label>Seed Collections JSON</Label>
+                    <JsonTextarea
+                      value={seedCollectionsText}
+                      onChange={(e) => updateSeedCollections(e.target.value)}
+                      className="min-h-[140px] font-mono text-sm"
+                      placeholder='{"users":[{"username":"demo"}]}'
+                    />
+                    <p className="text-xs text-slate-500 dark:text-slate-300">
+                      Use model or collection names as keys and non-empty arrays of JSON documents. Add documents here before enabling seeding.
+                    </p>
+                  </div>
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <Label>Service Documentation</Label>

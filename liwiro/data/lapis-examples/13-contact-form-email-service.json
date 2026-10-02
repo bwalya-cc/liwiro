@@ -27,8 +27,19 @@
       "EMAIL_TO": "replace-with-to@example.com"
     },
     "seedData": {
-      "enabled": false,
-      "collections": {}
+      "enabled": true,
+      "collections": {
+        "contact_messages": [
+          {
+            "messageId": "msg_demo_001",
+            "name": "Alex Rivera",
+            "email": "alex.rivera@example.com",
+            "subject": "Demo contact request",
+            "message": "This is sample data for testing the contact message routes.",
+            "createdAt": "2026-10-01T00:00:00Z"
+          }
+        ]
+      }
     }
   },
   "auth": {

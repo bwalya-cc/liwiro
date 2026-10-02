@@ -8,6 +8,7 @@ import json
 import hashlib
 import subprocess
 import tempfile
+import shutil
 from glob import glob
 from pathlib import Path
 from unittest.mock import patch
@@ -907,6 +908,30 @@ class ApiGeneratorTests(unittest.TestCase):
         self.assertFalse(any(isinstance(row, dict) and row.get("username") == body.get("username") for row in seeded))
 
     @patch("models.domain.DomainManager", _FakeDomainManager)
+    def test_seed_setup_rejects_empty_config_and_accepts_configured_seed_fallback(self):
+        config = json.loads((BACKEND_ROOT.parent / "data" / "lapis-examples" / "14-create-service-e2e-noauth.json").read_text(encoding="utf-8"))
+        app = generate_api_service(config)
+        client = app.test_client()
+        headers = {"X-Liwiro-Setup-Key": "liwiroservicepass0!"}
+        empty_config = json.loads(json.dumps(config))
+        empty_config["metadata"]["seedData"] = {"enabled": True, "collections": {}}
+        empty_client = generate_api_service(empty_config).test_client()
+        response = empty_client.post("/liwiro/setup/seed-db", headers=headers, json={})
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("Add document arrays", response.get_json()["error"])
+        rejected_toggle = empty_client.post(
+            "/liwiro/docs/setup/seed-db/enabled",
+            headers={"X-Docs-Key": "liwiroservicepass0!"},
+            json={"enabled": True},
+        )
+        self.assertEqual(rejected_toggle.status_code, 400)
+        toggle = client.post("/liwiro/docs/setup/seed-db/enabled", headers={"X-Docs-Key": "liwiroservicepass0!"}, json={"enabled": True})
+        self.assertEqual(toggle.status_code, 200)
+        response = client.post("/liwiro/setup/seed-db", headers=headers, json={"collections": {}})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.get_json()["summary"]["inserted"], 1)
+
+    @patch("models.domain.DomainManager", _FakeDomainManager)
     def test_auth_seed_password_is_hashed_at_generation_time(self):
         config = json.loads((BACKEND_ROOT.parent / "data" / "lapis-examples" / "01-auth-core-service.json").read_text(encoding="utf-8"))
         app = generate_api_service(config)
@@ -1147,6 +1172,8 @@ class ApiGeneratorTests(unittest.TestCase):
         client = app.test_client()
 
         with patch("generators.api_generator.load_normalized_auth_data", return_value={"settings": {"productionMode": True}}):
+            for toggle_id in ["seed-db", "reset-super-admin"]:
+                self.assertEqual(client.post(f"/liwiro/docs/setup/{toggle_id}/enabled", json={"enabled": True}).status_code, 404)
             liwiro_res = client.get("/liwiro")
             docs_json_res = client.get("/liwiro/docs.json", headers={"X-Docs-Key": "docs-secret"})
             docs_html_res = client.get("/liwiro/docs")
@@ -1208,6 +1235,120 @@ class ApiGeneratorTests(unittest.TestCase):
 
         persisted_cfg = (((domain_manager.vdb_client._collections.get("services") or [])[0]).get("lapis_config") or {})
         self.assertFalse((((persisted_cfg.get("endpoints") or {}).get("read_users") or {}).get("enabled", True)))
+
+    @unittest.skipUnless(shutil.which("node"), "Node.js is required for generated documentation interaction")
+    @patch("models.domain.DomainManager", _FakeDomainManager)
+    def test_docs_setup_buttons_send_server_supported_toggle_requests(self):
+        cfg = self._auth_service_cfg()
+        cfg["metadata"]["seedData"] = {"enabled": False, "collections": {"auth_users": [{"username": "docs-user"}]}}
+        harness = r"""
+const assert = require('node:assert/strict');
+const vm = require('node:vm');
+const input = JSON.parse(require('node:fs').readFileSync(0, 'utf8'));
+const elements = new Map();
+let buttons = [];
+function element() {
+  return {style: {}, dataset: {}, innerHTML: '', value: '',
+    classList: {add(){}, remove(){}, toggle(){}},
+    querySelectorAll(){return [];}, querySelector(){return null;},
+    addEventListener(){}, setAttribute(){}, removeAttribute(){}, scrollIntoView(){}};
+}
+const document = {
+  querySelector(){return null;},
+  getElementById(id) {if (!elements.has(id)) elements.set(id, element()); return elements.get(id);},
+  querySelectorAll(selector) {
+    if (selector !== '.route-toggle') return [];
+    buttons = [...elements.get('docsRoot').innerHTML.matchAll(/<button\b([^>]*class="route-toggle"[^>]*)>/g)].map(match => {
+      const attrs = Object.fromEntries([...match[1].matchAll(/([\w-]+)="([^"]*)"/g)].map(m => [m[1], m[2]]));
+      return {...element(), getAttribute(key){return attrs[key];}, addEventListener(event, fn){this.click = fn;}};
+    });
+    return buttons;
+  }
+};
+const calls = [];
+const toggleRequests = [];
+const context = vm.createContext({document, console, setTimeout, URLSearchParams,
+  window: {addEventListener(){}, removeEventListener(){}},
+  fetch: async (url, options) => {
+    calls.push({url, options});
+    if (options.method === 'POST') toggleRequests.push({url, body: JSON.parse(options.body)});
+    return {ok: true, json: async () => url.endsWith('docs.json') ? input.payload : {persisted: true}};
+  }
+});
+vm.runInContext(input.script, context);
+context.payload = input.payload;
+vm.runInContext('renderDocs(payload)', context);
+(async () => {
+  const setupButtons = buttons.filter(b => b.getAttribute('data-toggle-kind') === 'setup');
+  assert.deepEqual(setupButtons.map(b => b.getAttribute('data-config-endpoint')).sort(), input.expectedSetupIds);
+  for (const button of [...buttons]) {
+    await button.click({preventDefault(){}});
+    assert.notEqual(button.textContent, "Toggle Failed");
+    const request = calls.shift();
+    const kind = button.getAttribute('data-toggle-kind');
+    const id = button.getAttribute('data-config-endpoint');
+    assert.equal(request.url, `/liwiro/docs/${kind}/${encodeURIComponent(id)}/enabled`);
+    assert.equal(request.options.method, 'POST');
+    assert.equal(typeof JSON.parse(request.options.body).enabled, 'boolean');
+    assert.equal(calls.shift().url, '/liwiro/docs.json');
+  }
+  console.log(JSON.stringify(toggleRequests));
+})().catch(error => {console.error(error); process.exitCode = 1;});
+"""
+        example = json.loads((BACKEND_ROOT.parent / "data" / "lapis-examples" / "14-create-service-e2e-noauth.json").read_text())
+        for config, expected_ids in [(cfg, ["reset-super-admin", "seed-db"]), (example, ["seed-db"])]:
+            with self.subTest(service=config["metadata"]["apiName"]):
+                config["metadata"]["documentation"] = {"enabled": True, "key": "docs-secret"}
+                client = generate_api_service(config).test_client()
+                html = client.get("/liwiro/docs").get_data(as_text=True)
+                script = html.split("<script>", 1)[1].split("</script>", 1)[0]
+                payload = client.get("/liwiro/docs.json", headers={"X-Docs-Key": "docs-secret"}).get_json()
+                result = subprocess.run(["node", "-e", harness], input=json.dumps({"script": script, "payload": payload, "expectedSetupIds": expected_ids}), text=True, capture_output=True, timeout=20)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                for toggle in json.loads(result.stdout):
+                    response = client.post(toggle["url"], json=toggle["body"], headers={"X-Docs-Key": "docs-secret"})
+                    self.assertEqual(response.status_code, 200, response.get_json())
+
+    @patch("models.domain.DomainManager", _FakeDomainManager)
+    def test_docs_setup_toggles_update_runtime_docs_and_saved_config(self):
+        for setup_id, section, key, routes in [
+            ("seed-db", "metadata", "seedData", ["seed-db"]),
+            ("reset-super-admin", "auth", "defaultSuperAdmin", ["reset-super-admin", "default-super-admin"]),
+        ]:
+            with self.subTest(setup_id=setup_id):
+                cfg = self._crud_cfg()
+                cfg["metadata"]["documentation"] = {"enabled": True, "key": "docs-secret"}
+                cfg["metadata"]["setupApiKey"] = "setup-secret"
+                cfg["auth"] = {"isAuthService": True}
+                cfg["metadata"]["setupApiKey"] = "setup-secret"
+                cfg["metadata"]["seedData"] = {"enabled": False, "collections": {"users": [{"username": "seed-user"}]}}
+                app = generate_api_service(cfg)
+                mgr = _FakeDomainManager.instances[-1]
+                mgr.vdb_client._collections["services"] = [{"apiName": "authcrud", "lapis_config": json.loads(json.dumps(cfg))}]
+                client = app.test_client()
+                headers = {"X-Docs-Key": "docs-secret"}
+                url = f"/liwiro/docs/setup/{setup_id}/enabled"
+                self.assertEqual(client.post(url, json={"enabled": True}).status_code, 401)
+                for invalid in ["false", 0, None, [], {}]:
+                    self.assertEqual(client.post(url, headers=headers, json={"enabled": invalid}).status_code, 400)
+                for enabled in [True, False]:
+                    response = client.post("/api/v1" + url, headers=headers, json={"enabled": enabled})
+                    self.assertEqual(response.status_code, 200)
+                    self.assertTrue(response.get_json()["persisted"])
+                    saved = mgr.vdb_client._collections["services"][0]["lapis_config"]
+                    self.assertEqual(saved[section][key]["enabled"], enabled)
+                    docs = client.get("/liwiro/docs.json", headers=headers).get_json()
+                    entry = next(route for route in docs["setupRoutes"] if route.get("toggleId") == setup_id)
+                    self.assertTrue(entry["toggleable"])
+                    self.assertEqual(entry["enabled"], enabled)
+                    for route in routes:
+                        # An enabled setup route reaches key authorization; toggling never executes it.
+                        self.assertEqual(client.post("/liwiro/setup/" + route).status_code, 401 if enabled else 403)
+                    restored = generate_api_service(json.loads(json.dumps(saved))).test_client()
+                    self.assertEqual(restored.post("/liwiro/setup/" + routes[0]).status_code, 401 if enabled else 403)
+                self.assertEqual(client.post("/liwiro/docs/setup/authenticate/enabled", headers=headers, json={"enabled": True}).status_code, 404)
+                self.assertEqual(client.post("/liwiro/docs/endpoints/read_users/enabled", headers=headers, json={"enabled": "false"}).status_code, 400)
+                self.assertEqual(client.get("/api/v1/users").status_code, 200)
 
     @patch("models.domain.DomainManager", _FakeDomainManager)
     def test_default_super_admin_setup_uses_sha256_when_signin_script_requires_it(self):

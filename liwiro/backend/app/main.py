@@ -6988,6 +6988,7 @@ def get_api_governance_manifest():
                 "html": "/liwiro/docs",
                 "json": "/liwiro/docs.json",
                 "endpointToggle": "/liwiro/docs/endpoints/{endpointId}/enabled",
+                "setupToggle": "/liwiro/docs/setup/{setupId}/enabled",
             },
             "security": {
                 "setupCredentialsAreSecrets": True,

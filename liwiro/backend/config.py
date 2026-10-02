@@ -956,6 +956,43 @@ class Config:
             for model in model_map.values()
             if isinstance(model, dict) and str((model or {}).get("name") or "").strip()
         }
+        seed_data = ((config or {}).get("metadata") or {}).get("seedData") or {}
+        if not isinstance(seed_data, dict):
+            return False, "metadata.seedData must be an object"
+        seed_collections = seed_data.get("collections") or {}
+        if not isinstance(seed_collections, dict):
+            return False, "metadata.seedData.collections must be an object keyed by model or collection name"
+        if bool(seed_data.get("enabled", False)) and not seed_collections:
+            return False, "metadata.seedData.enabled requires at least one configured seed collection"
+        models_by_seed_key = {}
+        for model in model_map.values():
+            if not isinstance(model, dict):
+                continue
+            for key in (model.get("name"), model.get("collection")):
+                normalized_key = str(key or "").strip().casefold()
+                if normalized_key:
+                    models_by_seed_key[normalized_key] = model
+        for source_name, documents in seed_collections.items():
+            label = str(source_name or "").strip()
+            if not label:
+                return False, "metadata.seedData.collections keys must not be empty"
+            if not isinstance(documents, list):
+                return False, f"Seed collection '{label}' must be an array of documents"
+            if bool(seed_data.get("enabled", False)) and not documents:
+                return False, f"Enabled seed collection '{label}' must contain at least one document"
+            model = models_by_seed_key.get(label.casefold())
+            required_fields = [
+                str(field.get("name") or "").strip()
+                for field in ((model or {}).get("fields") or {}).values()
+                if isinstance(field, dict) and bool(field.get("required", False))
+            ]
+            for index, document in enumerate(documents):
+                if not isinstance(document, dict):
+                    return False, f"Seed collection '{label}' document #{index + 1} must be an object"
+                missing = [name for name in required_fields if name and name not in document]
+                if missing:
+                    return False, f"Seed collection '{label}' document #{index + 1} is missing required fields: {', '.join(missing)}"
+
         seen_modules = set()
 
         for index, module in enumerate(modules_list):
